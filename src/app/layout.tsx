@@ -36,13 +36,27 @@ export default function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          <header className="flex justify-end p-4">
+          <header className="flex justify-end gap-3 p-4">
             <SignedOut>
-              <SignInButton />
-              <SignUpButton />
+              <SignInButton mode="modal">
+                <button className="rounded-full px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/10">
+                  Sign In
+                </button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <button className="rounded-full bg-white px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-white/90">
+                  Sign Up
+                </button>
+              </SignUpButton>
             </SignedOut>
             <SignedIn>
-              <UserButton />
+              <UserButton
+                appearance={{
+                  elements: {
+                    avatarBox: "w-10 h-10",
+                  },
+                }}
+              />
             </SignedIn>
           </header>
           {children}
