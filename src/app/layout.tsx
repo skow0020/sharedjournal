@@ -39,12 +39,12 @@ export default function RootLayout({
           <header className="flex justify-end gap-3 p-4">
             <SignedOut>
               <SignInButton mode="modal">
-                <button className="rounded-full px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/10">
+                <button className="rounded-full border border-zinc-300 px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-zinc-100">
                   Sign In
                 </button>
               </SignInButton>
               <SignUpButton mode="modal">
-                <button className="rounded-full bg-white px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-white/90">
+                <button className="rounded-full bg-black px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800">
                   Sign Up
                 </button>
               </SignUpButton>
