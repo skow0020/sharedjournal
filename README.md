@@ -1,4 +1,6 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SharedJournal
+
+A Next.js journal application built with the App Router, featuring user authentication and database integration.
 
 ## Getting Started
 
@@ -6,45 +8,54 @@ First, run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+You can start editing the page by modifying `src/app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## Clerk Authentication
+## Setup
 
-This project integrates [Clerk](https://clerk.com/) for user authentication using the Next.js App Router.
+### Environment Variables
 
-### Setup
+Create a `.env.local` file in the root of your project with the following variables:
+
+```bash
+# Clerk Authentication
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
+
+# Database (Neon/PostgreSQL)
+DATABASE_URL=postgresql://user:password@host:port/database
+```
+
+### Clerk Authentication
 
 1. Create a Clerk account at [clerk.com](https://clerk.com/)
 2. Get your API keys from the [Clerk Dashboard](https://dashboard.clerk.com/last-active?path=api-keys)
-3. Add your keys to `.env.local`:
+3. Add your keys to `.env.local`
 
-```bash
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
-CLERK_SECRET_KEY=sk_test_...
-```
+### Database Setup
+
+1. Create a Neon account at [neon.tech](https://neon.tech/)
+2. Create a new project and copy your connection string
+3. Add the `DATABASE_URL` to `.env.local`
 
 ### Implementation Details
 
 - **Middleware**: `src/proxy.ts` uses `clerkMiddleware()` from `@clerk/nextjs/server`
 - **Provider**: The app is wrapped with `<ClerkProvider>` in `src/app/layout.tsx`
 - **Components**: Uses `<SignInButton>`, `<SignUpButton>`, `<UserButton>`, `<SignedIn>`, and `<SignedOut>` for auth UI
+- **Database**: Uses Drizzle ORM with Neon PostgreSQL for data persistence
 
 ### Documentation
 
 - [Clerk Next.js Quickstart](https://clerk.com/docs/nextjs/getting-started/quickstart)
 - [Clerk Documentation](https://clerk.com/docs)
+- [Drizzle ORM Documentation](https://orm.drizzle.team/)
+- [Neon Documentation](https://neon.tech/docs)
 
 ## Learn More
 
@@ -60,31 +71,6 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-## Clerk Authentication
-
-This project integrates [Clerk](https://clerk.com/) for authentication using the Next.js App Router.
-
-### Setup
-
-1. Install Clerk keys in `.env.local`:
-   ```bash
-   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=YOUR_PUBLISHABLE_KEY
-   CLERK_SECRET_KEY=YOUR_SECRET_KEY
-   ```
-
-2. Get your keys from the [Clerk Dashboard](https://dashboard.clerk.com/last-active?path=api-keys).
-
-### Implementation Details
-
-- `src/proxy.ts` - Middleware using `clerkMiddleware()` for route protection
-- `src/app/layout.tsx` - App wrapped with `<ClerkProvider>` and auth UI components
-- Components: `<SignInButton>`, `<SignUpButton>`, `<UserButton>`, `<SignedIn>`, `<SignedOut>`
-
-### Documentation
-
-- [Clerk Next.js Quickstart](https://clerk.com/docs/nextjs/getting-started/quickstart)
-- [Clerk Documentation](https://clerk.com/docs)
 
 ## Ollama Integration
 
