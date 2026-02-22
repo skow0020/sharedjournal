@@ -42,6 +42,11 @@ DATABASE_URL=postgresql://user:password@host:port/database
 1. Create a Neon account at [neon.tech](https://neon.tech/)
 2. Create a new project and copy your connection string
 3. Add the `DATABASE_URL` to `.env.local`
+4. Seed sample data (optional):
+
+```bash
+npm run db:seed
+```
 
 ### Implementation Details
 
@@ -83,7 +88,7 @@ Ollama is a platform that allows you to run large language models locally on you
 ### Launch Claude via Ollama
 
 ```bash
-claude --model Qwen2.5-Coder:7b
+ollama claude --model Qwen2.5-Coder:7b
 ```
 
 Or use the default Claude model:
@@ -92,15 +97,67 @@ Or use the default Claude model:
 ollama launch claude
 ```
 
-### Available Models
 
-You can use various models with Ollama, including:
-- Qwen2.5-Coder:7b (optimized for coding tasks)
-- Claude models (when available)
-- Other open-source models
+### Installing Neon MCP Server
+
+The Neon Model Context Protocol (MCP) server allows you to interact with your Neon PostgreSQL databases using natural language through AI assistants like Claude Code.
+
+#### Quick Setup (Recommended)
+
+Run the automated setup command:
+
+```bash
+npx neonctl@latest init
+```
+
+This will:
+- Authenticate via OAuth
+- Create a Neon API key automatically
+- Configure your MCP client (Claude Code, VS Code, Cursor)
+
+#### Manual Setup with Ollama
+
+1. **Configure Claude Code MCP servers**:
+   ```bash
+   ollama launch claude --config
+   ```
+   This will open an interactive configuration menu.
+
+2. **Add Neon MCP to your MCP configuration**:
+   
+   After configuring Ollama, you'll need to add Neon to your MCP servers configuration file. The easiest way is using the remote hosted server:
+   
+   ```bash
+   npx add-mcp https://mcp.neon.tech/mcp
+   ```
+
+3. **Alternative: Manual MCP Configuration**:
+   
+   Create or edit your MCP configuration file (location varies by tool):
+   
+   **Remote MCP Server (OAuth - No API Key Needed)**:
+   ```json
+   {
+     "mcpServers": {
+       "Neon": {
+         "type": "http",
+         "url": "https://mcp.neon.tech/mcp"
+       }
+     }
+   }
+   ```
+
+#### Using Neon MCP
+
+Once configured, you can use natural language commands like:
+- "Create a new Postgres database called 'my-database'"
+- "Show me all my Neon projects"
+- "Run a migration on my project to add a created_at column"
 
 ### Documentation
 
 For more information, visit:
+- [Neon MCP Server Guide](https://neon.tech/docs/ai/neon-mcp-server)
+- [Neon MCP GitHub](https://github.com/neondatabase/mcp-server-neon)
 - [Ollama Documentation](https://docs.ollama.com)
-- [Claude Code Integration](https://docs.ollama.com/integrations/claude-code)
+- [Model Context Protocol](https://modelcontextprotocol.io)
