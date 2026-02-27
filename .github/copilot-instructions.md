@@ -2,6 +2,7 @@
 
 ## Documentation First
 - Always review relevant files in `/docs` before implementing features or making architectural decisions.
+- Follow directions provided in markdown files in the `/docs` directory.
 - Treat `/docs` as the source of truth for project-specific patterns and conventions.
 
 ## Project Stack

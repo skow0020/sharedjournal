@@ -1,5 +1,4 @@
 import { auth } from "@clerk/nextjs/server";
-import { and, desc, eq } from "drizzle-orm";
 import { format, isValid, parseISO } from "date-fns";
 
 import { DateFilter } from "@/app/dashboard/date-filter";
@@ -10,8 +9,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { db } from "@/db";
-import { entries, journalMembers, journals, users } from "@/db/schema";
+import { getJournalEntriesByDate, type JournalEntry } from "@/data/entries";
+import { getUserByClerkUserId } from "@/data/users";
 
 type DashboardPageProps = {
   searchParams?: Promise<{
@@ -53,11 +52,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     );
   }
 
-  const [currentUser] = await db
-    .select({ id: users.id })
-    .from(users)
-    .where(eq(users.clerkUserId, clerkUserId))
-    .limit(1);
+  const currentUser = await getUserByClerkUserId(clerkUserId);
 
   if (!currentUser) {
     return (
@@ -72,26 +67,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     );
   }
 
-  const journalEntries = await db
-    .select({
-      id: entries.id,
-      title: entries.title,
-      content: entries.content,
-      journalTitle: journals.title,
-      authorName: users.displayName,
-      createdAt: entries.createdAt,
-    })
-    .from(entries)
-    .innerJoin(journalMembers, eq(journalMembers.journalId, entries.journalId))
-    .innerJoin(journals, eq(journals.id, entries.journalId))
-    .innerJoin(users, eq(users.id, entries.authorUserId))
-    .where(
-      and(
-        eq(journalMembers.userId, currentUser.id),
-        eq(entries.entryDate, selectedDate),
-      ),
-    )
-    .orderBy(desc(entries.createdAt));
+  const journalEntries = await getJournalEntriesByDate(currentUser.id, selectedDate);
 
   const headingDate = format(parseISO(selectedDate), "MMMM d, yyyy");
 
@@ -115,7 +91,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           </CardHeader>
         </Card>
       ) : (
-        journalEntries.map((entry) => (
+        journalEntries.map((entry: JournalEntry) => (
           <Card key={entry.id}>
             <CardHeader>
               <CardTitle>{entry.title || "Untitled entry"}</CardTitle>
