@@ -1,51 +1,24 @@
 import { auth } from "@clerk/nextjs/server";
-import { format, isValid, parseISO } from "date-fns";
 
-import { DateFilter } from "@/app/dashboard/date-filter";
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getJournalEntriesByDate, type JournalEntry } from "@/data/entries";
+import { getUserJournals, type UserJournal } from "@/data/journals";
 import { getUserByClerkUserId } from "@/data/users";
 
-type DashboardPageProps = {
-  searchParams?: Promise<{
-    date?: string;
-  }>;
-};
-
-const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
-
-function getSelectedDate(dateValue?: string) {
-  if (!dateValue || !DATE_PATTERN.test(dateValue)) {
-    return format(new Date(), "yyyy-MM-dd");
-  }
-
-  const parsedDate = parseISO(dateValue);
-
-  if (!isValid(parsedDate)) {
-    return format(new Date(), "yyyy-MM-dd");
-  }
-
-  return dateValue;
-}
-
-export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+export default async function DashboardPage() {
   const { userId: clerkUserId } = await auth();
-  const params = await searchParams;
-  const selectedDate = getSelectedDate(params?.date);
 
   if (!clerkUserId) {
     return (
       <main className="mx-auto w-full max-w-5xl px-6 py-8">
         <Card>
           <CardHeader>
-            <CardTitle>Dashboard</CardTitle>
-            <CardDescription>Sign in to view your journal entries.</CardDescription>
+            <CardTitle>Journals</CardTitle>
+            <CardDescription>Sign in to view your journals.</CardDescription>
           </CardHeader>
         </Card>
       </main>
@@ -59,7 +32,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       <main className="mx-auto w-full max-w-5xl px-6 py-8">
         <Card>
           <CardHeader>
-            <CardTitle>Dashboard</CardTitle>
+            <CardTitle>Journals</CardTitle>
             <CardDescription>Your profile is not available yet.</CardDescription>
           </CardHeader>
         </Card>
@@ -67,41 +40,30 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     );
   }
 
-  const journalEntries = await getJournalEntriesByDate(currentUser.id, selectedDate);
-
-  const headingDate = format(parseISO(selectedDate), "MMMM d, yyyy");
+  const userJournals = await getUserJournals(currentUser.id);
 
   return (
     <main className="mx-auto w-full max-w-5xl space-y-6 px-6 py-8">
-      <Card>
-        <CardHeader>
-          <CardTitle>Dashboard</CardTitle>
-          <CardDescription>Journal entries for {headingDate}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <DateFilter value={selectedDate} />
-        </CardContent>
-      </Card>
+      <section className="space-y-4">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-semibold tracking-tight">Journals</h1>
+        </div>
+      </section>
 
-      {journalEntries.length === 0 ? (
+      {userJournals.length === 0 ? (
         <Card>
           <CardHeader>
-            <CardTitle>No entries found</CardTitle>
-            <CardDescription>There are no journal entries for this date.</CardDescription>
+            <CardTitle>No journals found</CardTitle>
+            <CardDescription>You are not a member of any journals yet.</CardDescription>
           </CardHeader>
         </Card>
       ) : (
-        journalEntries.map((entry: JournalEntry) => (
-          <Card key={entry.id}>
+        userJournals.map((journal: UserJournal) => (
+          <Card key={journal.id}>
             <CardHeader>
-              <CardTitle>{entry.title || "Untitled entry"}</CardTitle>
-              <CardDescription>
-                {entry.journalTitle} · {entry.authorName || "Unknown author"}
-              </CardDescription>
+              <CardTitle>{journal.title}</CardTitle>
+              <CardDescription>{journal.description || "No description"}</CardDescription>
             </CardHeader>
-            <CardContent>
-              <p className="text-sm leading-6 whitespace-pre-wrap">{entry.content}</p>
-            </CardContent>
           </Card>
         ))
       )}

@@ -1,0 +1,27 @@
+import { desc, eq } from "drizzle-orm";
+
+import { db } from "@/db";
+import { journalMembers, journals } from "@/db/schema";
+
+export type UserJournal = {
+  id: string;
+  title: string;
+  description: string | null;
+};
+
+/**
+ * Get journals accessible to a specific user.
+ */
+export async function getUserJournals(userId: string): Promise<UserJournal[]> {
+  return db
+    .select({
+      id: journals.id,
+      title: journals.title,
+      description: journals.description,
+    })
+    .from(journals)
+    .innerJoin(journalMembers, eq(journalMembers.journalId, journals.id))
+    .where(eq(journalMembers.userId, userId))
+    .groupBy(journals.id, journals.title, journals.description, journals.updatedAt)
+    .orderBy(desc(journals.updatedAt));
+}
