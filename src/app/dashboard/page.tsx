@@ -1,4 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
+import Link from "next/link";
 
 import {
   Card,
@@ -59,12 +60,14 @@ export default async function DashboardPage() {
         </Card>
       ) : (
         userJournals.map((journal: UserJournal) => (
-          <Card key={journal.id}>
-            <CardHeader>
-              <CardTitle>{journal.title}</CardTitle>
-              <CardDescription>{journal.description || "No description"}</CardDescription>
-            </CardHeader>
-          </Card>
+          <Link key={journal.id} href={`/dashboard/journals/${journal.id}`} className="block">
+            <Card className="transition-colors hover:bg-muted/40">
+              <CardHeader>
+                <CardTitle>{journal.title}</CardTitle>
+                <CardDescription>{journal.description || "No description"}</CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
         ))
       )}
     </main>
