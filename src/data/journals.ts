@@ -52,3 +52,37 @@ export async function getUserJournalById(
 
   return journal ?? null;
 }
+
+type CreateJournalInput = {
+  ownerUserId: string;
+  title: string;
+  description: string | null;
+};
+
+export async function createJournalForOwner({
+  ownerUserId,
+  title,
+  description,
+}: CreateJournalInput): Promise<{ id: string }> {
+  const [createdJournal] = await db
+    .insert(journals)
+    .values({
+      ownerUserId,
+      title,
+      description,
+    })
+    .returning({ id: journals.id });
+
+  try {
+    await db.insert(journalMembers).values({
+      journalId: createdJournal.id,
+      userId: ownerUserId,
+      role: "owner",
+    });
+  } catch (error) {
+    await db.delete(journals).where(eq(journals.id, createdJournal.id));
+    throw error;
+  }
+
+  return createdJournal;
+}

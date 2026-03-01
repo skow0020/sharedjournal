@@ -21,6 +21,17 @@
 - Use **Drizzle ORM** for all database queries.
 - **DO NOT USE RAW SQL.**
 
+## Authenticated App User Pattern
+
+- For authenticated Server Components that need a database user, call `getCurrentAppUser` from `src/lib/get-current-app-user.ts`.
+- `getCurrentAppUser` is the single entry point for:
+	- reading auth state from Clerk
+	- creating the user in Neon on first login
+	- syncing profile fields (display name, avatar URL) on subsequent requests
+- Do **NOT** duplicate `auth()` + `currentUser()` + user upsert logic inside pages.
+- After resolving `appUser`, pass `appUser.id` into `/data` helper functions for all user-scoped queries.
+- If `getCurrentAppUser` returns `null`, render an unauthenticated state (or redirect) instead of querying user-scoped data.
+
 ## Data Security
 
 - A logged in user can **ONLY** access their own data and journals/entries shared with them.

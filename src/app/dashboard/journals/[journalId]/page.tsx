@@ -1,4 +1,3 @@
-import { auth } from "@clerk/nextjs/server";
 import { format, parseISO } from "date-fns";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -12,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { getJournalEntriesForJournal, type JournalEntryForJournal } from "@/data/entries";
 import { getUserJournalById } from "@/data/journals";
-import { getUserByClerkUserId } from "@/data/users";
+import { getCurrentAppUser } from "@/lib/get-current-app-user";
 
 type JournalDetailsPageProps = {
   params: Promise<{
@@ -21,9 +20,9 @@ type JournalDetailsPageProps = {
 };
 
 export default async function JournalDetailsPage({ params }: JournalDetailsPageProps) {
-  const { userId: clerkUserId } = await auth();
+  const appUser = await getCurrentAppUser();
 
-  if (!clerkUserId) {
+  if (!appUser) {
     return (
       <main className="mx-auto w-full max-w-5xl px-6 py-8">
         <Card>
@@ -36,29 +35,14 @@ export default async function JournalDetailsPage({ params }: JournalDetailsPageP
     );
   }
 
-  const currentUser = await getUserByClerkUserId(clerkUserId);
-
-  if (!currentUser) {
-    return (
-      <main className="mx-auto w-full max-w-5xl px-6 py-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Journal</CardTitle>
-            <CardDescription>Your profile is not available yet.</CardDescription>
-          </CardHeader>
-        </Card>
-      </main>
-    );
-  }
-
   const { journalId } = await params;
-  const journal = await getUserJournalById(currentUser.id, journalId);
+  const journal = await getUserJournalById(appUser.id, journalId);
 
   if (!journal) {
     notFound();
   }
 
-  const entries = await getJournalEntriesForJournal(currentUser.id, journalId);
+  const entries = await getJournalEntriesForJournal(appUser.id, journalId);
 
   return (
     <main className="mx-auto w-full max-w-5xl space-y-6 px-6 py-8">

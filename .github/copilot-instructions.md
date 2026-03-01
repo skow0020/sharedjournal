@@ -34,6 +34,8 @@
 - Use existing database schema and query conventions in src/db.
 - Use Clerk auth patterns already established in the project.
 - Prefer server components unless client interactivity is required.
+- Follow the authenticated app-user pattern documented in `docs/data-fetching.md`.
+- For authenticated server pages that need a database user, use `getCurrentAppUser` from `src/lib/get-current-app-user.ts`.
 
 ## Architecture Conventions
 - App Router files live in `src/app` (not Pages Router).
