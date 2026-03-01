@@ -1,19 +1,19 @@
-import Link from "next/link";
-import { redirect } from "next/navigation";
+import Link from 'next/link'
+import { redirect } from 'next/navigation'
 
 import {
   Card,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { CreateJournalModal } from "@/app/dashboard/create-journal-modal";
-import { createJournalForOwner } from "@/data/journals";
-import { getUserJournals, type UserJournal } from "@/data/journals";
-import { getCurrentAppUser } from "@/lib/get-current-app-user";
+} from '@/components/ui/card'
+import { CreateJournalModal } from '@/app/dashboard/create-journal-modal'
+import { createJournalForOwner } from '@/data/journals'
+import { getUserJournals, type UserJournal } from '@/data/journals'
+import { getCurrentAppUser } from '@/lib/get-current-app-user'
 
 export default async function DashboardPage() {
-  const appUser = await getCurrentAppUser();
+  const appUser = await getCurrentAppUser()
 
   if (!appUser) {
     return (
@@ -25,45 +25,45 @@ export default async function DashboardPage() {
           </CardHeader>
         </Card>
       </main>
-    );
+    )
   }
 
   async function createJournalAction(
     _prevState: { error: string | null },
     formData: FormData,
   ) {
-    "use server";
+    'use server'
 
-    const currentUser = await getCurrentAppUser();
+    const currentUser = await getCurrentAppUser()
 
     if (!currentUser) {
       return {
-        error: "You must be signed in to create a journal.",
-      };
+        error: 'You must be signed in to create a journal.',
+      }
     }
 
-    const titleValue = formData.get("title");
-    const descriptionValue = formData.get("description");
+    const titleValue = formData.get('title')
+    const descriptionValue = formData.get('description')
 
-    const title = typeof titleValue === "string" ? titleValue.trim() : "";
-    const description = typeof descriptionValue === "string" ? descriptionValue.trim() : "";
+    const title = typeof titleValue === 'string' ? titleValue.trim() : ''
+    const description = typeof descriptionValue === 'string' ? descriptionValue.trim() : ''
 
     if (!title) {
       return {
-        error: "Title is required.",
-      };
+        error: 'Title is required.',
+      }
     }
 
     const createdJournal = await createJournalForOwner({
       ownerUserId: currentUser.id,
       title,
       description: description || null,
-    });
+    })
 
-    redirect(`/dashboard/journals/${createdJournal.id}`);
+    redirect(`/dashboard/journals/${createdJournal.id}`)
   }
 
-  const userJournals = await getUserJournals(appUser.id);
+  const userJournals = await getUserJournals(appUser.id)
 
   return (
     <main className="mx-auto w-full max-w-5xl space-y-6 px-6 py-8">
@@ -87,12 +87,12 @@ export default async function DashboardPage() {
             <Card className="transition-colors hover:bg-muted/40">
               <CardHeader>
                 <CardTitle>{journal.title}</CardTitle>
-                <CardDescription>{journal.description || "No description"}</CardDescription>
+                <CardDescription>{journal.description || 'No description'}</CardDescription>
               </CardHeader>
             </Card>
           </Link>
         ))
       )}
     </main>
-  );
+  )
 }

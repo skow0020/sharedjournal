@@ -1,28 +1,28 @@
-"use client";
+'use client'
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useTransition } from "react";
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useTransition } from 'react'
 
-import { Input } from "@/components/ui/input";
+import { Input } from '@/components/ui/input'
 
 type DateFilterProps = {
   value: string;
 };
 
 export function DateFilter({ value }: DateFilterProps) {
-  const [isPending, startTransition] = useTransition();
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition()
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
 
   const handleDateChange = (nextDate: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("date", nextDate);
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('date', nextDate)
 
     startTransition(() => {
-      router.replace(`${pathname}?${params.toString()}`);
-    });
-  };
+      router.replace(`${pathname}?${params.toString()}`)
+    })
+  }
 
   return (
     <div className="space-y-2">
@@ -38,5 +38,5 @@ export function DateFilter({ value }: DateFilterProps) {
         aria-busy={isPending}
       />
     </div>
-  );
+  )
 }

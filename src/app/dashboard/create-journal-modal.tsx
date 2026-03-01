@@ -1,9 +1,9 @@
-"use client";
+'use client'
 
-import { useActionState, useState } from "react";
-import { useFormStatus } from "react-dom";
+import { useActionState, useState } from 'react'
+import { useFormStatus } from 'react-dom'
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -12,9 +12,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 
 type CreateJournalState = {
   error: string | null;
@@ -26,21 +26,21 @@ type CreateJournalModalProps = {
 
 const initialState: CreateJournalState = {
   error: null,
-};
+}
 
 function SubmitButton() {
-  const { pending } = useFormStatus();
+  const { pending } = useFormStatus()
 
   return (
     <Button type="submit" disabled={pending}>
-      {pending ? "Creating..." : "Create journal"}
+      {pending ? 'Creating...' : 'Create journal'}
     </Button>
-  );
+  )
 }
 
 export function CreateJournalModal({ action }: CreateJournalModalProps) {
-  const [state, formAction] = useActionState(action, initialState);
-  const [open, setOpen] = useState(false);
+  const [state, formAction] = useActionState(action, initialState)
+  const [open, setOpen] = useState(false)
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -75,5 +75,5 @@ export function CreateJournalModal({ action }: CreateJournalModalProps) {
         </form>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

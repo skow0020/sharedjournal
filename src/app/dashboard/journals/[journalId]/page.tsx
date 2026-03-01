@@ -1,6 +1,6 @@
-import { format, parseISO } from "date-fns";
-import Link from "next/link";
-import { notFound } from "next/navigation";
+import { format, parseISO } from 'date-fns'
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
 
 import {
   Card,
@@ -8,10 +8,10 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { getJournalEntriesForJournal, type JournalEntryForJournal } from "@/data/entries";
-import { getUserJournalById } from "@/data/journals";
-import { getCurrentAppUser } from "@/lib/get-current-app-user";
+} from '@/components/ui/card'
+import { getJournalEntriesForJournal, type JournalEntryForJournal } from '@/data/entries'
+import { getUserJournalById } from '@/data/journals'
+import { getCurrentAppUser } from '@/lib/get-current-app-user'
 
 type JournalDetailsPageProps = {
   params: Promise<{
@@ -20,7 +20,7 @@ type JournalDetailsPageProps = {
 };
 
 export default async function JournalDetailsPage({ params }: JournalDetailsPageProps) {
-  const appUser = await getCurrentAppUser();
+  const appUser = await getCurrentAppUser()
 
   if (!appUser) {
     return (
@@ -32,17 +32,17 @@ export default async function JournalDetailsPage({ params }: JournalDetailsPageP
           </CardHeader>
         </Card>
       </main>
-    );
+    )
   }
 
-  const { journalId } = await params;
-  const journal = await getUserJournalById(appUser.id, journalId);
+  const { journalId } = await params
+  const journal = await getUserJournalById(appUser.id, journalId)
 
   if (!journal) {
-    notFound();
+    notFound()
   }
 
-  const entries = await getJournalEntriesForJournal(appUser.id, journalId);
+  const entries = await getJournalEntriesForJournal(appUser.id, journalId)
 
   return (
     <main className="mx-auto w-full max-w-5xl space-y-6 px-6 py-8">
@@ -67,9 +67,9 @@ export default async function JournalDetailsPage({ params }: JournalDetailsPageP
         entries.map((entry: JournalEntryForJournal) => (
           <Card key={entry.id}>
             <CardHeader>
-              <CardTitle>{entry.title || "Untitled entry"}</CardTitle>
+              <CardTitle>{entry.title || 'Untitled entry'}</CardTitle>
               <CardDescription>
-                {format(parseISO(entry.entryDate), "MMMM d, yyyy")} · {entry.authorName || "Unknown author"}
+                {format(parseISO(entry.entryDate), 'MMMM d, yyyy')} · {entry.authorName || 'Unknown author'}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -79,5 +79,5 @@ export default async function JournalDetailsPage({ params }: JournalDetailsPageP
         ))
       )}
     </main>
-  );
+  )
 }

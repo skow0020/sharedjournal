@@ -1,7 +1,7 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq } from 'drizzle-orm'
 
-import { db } from "@/db";
-import { journalMembers, journals } from "@/db/schema";
+import { db } from '@/db'
+import { journalMembers, journals } from '@/db/schema'
 
 export type UserJournal = {
   id: string;
@@ -23,7 +23,7 @@ export async function getUserJournals(userId: string): Promise<UserJournal[]> {
     .innerJoin(journalMembers, eq(journalMembers.journalId, journals.id))
     .where(eq(journalMembers.userId, userId))
     .groupBy(journals.id, journals.title, journals.description, journals.updatedAt)
-    .orderBy(desc(journals.updatedAt));
+    .orderBy(desc(journals.updatedAt))
 }
 
 export type UserJournalDetails = {
@@ -48,9 +48,9 @@ export async function getUserJournalById(
     .from(journals)
     .innerJoin(journalMembers, eq(journalMembers.journalId, journals.id))
     .where(and(eq(journalMembers.userId, userId), eq(journals.id, journalId)))
-    .limit(1);
+    .limit(1)
 
-  return journal ?? null;
+  return journal ?? null
 }
 
 type CreateJournalInput = {
@@ -71,18 +71,18 @@ export async function createJournalForOwner({
       title,
       description,
     })
-    .returning({ id: journals.id });
+    .returning({ id: journals.id })
 
   try {
     await db.insert(journalMembers).values({
       journalId: createdJournal.id,
       userId: ownerUserId,
-      role: "owner",
-    });
+      role: 'owner',
+    })
   } catch (error) {
-    await db.delete(journals).where(eq(journals.id, createdJournal.id));
-    throw error;
+    await db.delete(journals).where(eq(journals.id, createdJournal.id))
+    throw error
   }
 
-  return createdJournal;
+  return createdJournal
 }

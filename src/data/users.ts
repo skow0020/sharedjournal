@@ -1,7 +1,7 @@
-import { eq } from "drizzle-orm";
+import { eq } from 'drizzle-orm'
 
-import { db } from "@/db";
-import { users } from "@/db/schema";
+import { db } from '@/db'
+import { users } from '@/db/schema'
 
 type UpsertClerkUserInput = {
   clerkUserId: string;
@@ -18,9 +18,9 @@ export async function getUserByClerkUserId(clerkUserId: string) {
     .select({ id: users.id })
     .from(users)
     .where(eq(users.clerkUserId, clerkUserId))
-    .limit(1);
+    .limit(1)
 
-  return user;
+  return user
 }
 
 export async function upsertUserByClerkUserId({
@@ -42,7 +42,7 @@ export async function upsertUserByClerkUserId({
         imageUrl: imageUrl ?? null,
       },
     })
-    .returning({ id: users.id });
+    .returning({ id: users.id })
 
-  return user;
+  return user
 }

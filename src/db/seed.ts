@@ -1,4 +1,4 @@
-import { db } from './index';
+import { db } from './index'
 import {
 	entries,
 	entryPhotos,
@@ -6,7 +6,7 @@ import {
 	journalMembers,
 	journals,
 	users,
-} from './schema';
+} from './schema'
 
 async function seed() {
 	await db
@@ -34,7 +34,7 @@ async function seed() {
 				createdAt: new Date('2026-02-20T14:10:00Z'),
 			},
 		])
-		.onConflictDoNothing();
+		.onConflictDoNothing()
 
 	await db
 		.insert(journals)
@@ -56,7 +56,7 @@ async function seed() {
 				updatedAt: new Date('2026-02-22T09:30:00Z'),
 			},
 		])
-		.onConflictDoNothing();
+		.onConflictDoNothing()
 
 	await db
 		.insert(journalMembers)
@@ -90,7 +90,7 @@ async function seed() {
 				createdAt: new Date('2026-02-21T08:01:00Z'),
 			},
 		])
-		.onConflictDoNothing();
+		.onConflictDoNothing()
 
 	await db
 		.insert(journalInvitations)
@@ -122,7 +122,7 @@ async function seed() {
 				createdAt: new Date('2026-02-21T08:10:00Z'),
 			},
 		])
-		.onConflictDoNothing();
+		.onConflictDoNothing()
 
 	await db
 		.insert(entries)
@@ -158,7 +158,7 @@ async function seed() {
 				updatedAt: new Date('2026-02-21T19:00:00Z'),
 			},
 		])
-		.onConflictDoNothing();
+		.onConflictDoNothing()
 
 	await db
 		.insert(entryPhotos)
@@ -203,12 +203,12 @@ async function seed() {
 				createdAt: new Date('2026-02-22T13:05:00Z'),
 			},
 		])
-		.onConflictDoNothing();
+		.onConflictDoNothing()
 
-	console.log('Seed complete.');
+	console.log('Seed complete.')
 }
 
 seed().catch((error) => {
-	console.error('Seed failed:', error);
-	process.exit(1);
-});
+	console.error('Seed failed:', error)
+	process.exit(1)
+})

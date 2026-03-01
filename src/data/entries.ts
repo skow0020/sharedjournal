@@ -1,7 +1,7 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq } from 'drizzle-orm'
 
-import { db } from "@/db";
-import { entries, journalMembers, journals, users } from "@/db/schema";
+import { db } from '@/db'
+import { entries, journalMembers, journals, users } from '@/db/schema'
 
 export type JournalEntry = {
   id: string;
@@ -49,7 +49,7 @@ export async function getJournalEntriesByDate(userId: string, date: string): Pro
         eq(entries.entryDate, date),
       ),
     )
-    .orderBy(desc(entries.createdAt));
+    .orderBy(desc(entries.createdAt))
 }
 
 /**
@@ -77,5 +77,5 @@ export async function getJournalEntriesForJournal(
         eq(entries.journalId, journalId),
       ),
     )
-    .orderBy(desc(entries.entryDate), desc(entries.createdAt));
+    .orderBy(desc(entries.entryDate), desc(entries.createdAt))
 }
