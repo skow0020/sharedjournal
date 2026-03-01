@@ -28,6 +28,28 @@ export async function upsertUserByClerkUserId({
   displayName,
   imageUrl,
 }: UpsertClerkUserInput) {
+  if (displayName === undefined && imageUrl === undefined) {
+    const [insertedUser] = await db
+      .insert(users)
+      .values({
+        clerkUserId,
+      })
+      .onConflictDoNothing()
+      .returning({ id: users.id })
+
+    if (insertedUser) {
+      return insertedUser
+    }
+
+    const existingUser = await getUserByClerkUserId(clerkUserId)
+
+    if (!existingUser) {
+      throw new Error('Unable to resolve user record after upsert fallback.')
+    }
+
+    return existingUser
+  }
+
   const [user] = await db
     .insert(users)
     .values({

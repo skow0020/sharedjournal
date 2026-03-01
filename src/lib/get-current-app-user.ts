@@ -11,9 +11,15 @@ export async function getCurrentAppUser() {
 
   const clerkUser = await currentUser()
 
+  if (!clerkUser) {
+    return upsertUserByClerkUserId({
+      clerkUserId,
+    })
+  }
+
   return upsertUserByClerkUserId({
     clerkUserId,
-    displayName: clerkUser?.fullName ?? clerkUser?.username ?? null,
-    imageUrl: clerkUser?.imageUrl ?? null,
+    displayName: clerkUser.fullName ?? clerkUser.username ?? null,
+    imageUrl: clerkUser.imageUrl ?? null,
   })
 }
