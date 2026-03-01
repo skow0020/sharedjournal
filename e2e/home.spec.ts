@@ -12,7 +12,7 @@ test('can log in', async ({ page }) => {
   const email = process.env.E2E_CLERK_EMAIL
   const password = process.env.E2E_CLERK_PASSWORD
 
-  test.skip(!email || !password, 'Set E2E_CLERK_EMAIL and E2E_CLERK_PASSWORD to run auth setup.')
+  test.fail(!email || !password, 'Set E2E_CLERK_EMAIL and E2E_CLERK_PASSWORD to run auth setup.')
 
   await page.goto('/')
   await expect(page).toHaveTitle(/Create Next App/i)
@@ -46,7 +46,7 @@ test('can log in', async ({ page }) => {
 })
 
 test('dashboard page loads with saved auth state', async ({ browser }) => {
-  test.skip(!existsSync(authFile), 'Run the auth setup test first to generate storage state.')
+  test.fail(!existsSync(authFile), 'Run the auth setup test first to generate storage state.')
 
   const context = await browser.newContext({ storageState: authFile })
   const page = await context.newPage()
