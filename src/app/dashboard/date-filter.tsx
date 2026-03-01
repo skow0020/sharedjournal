@@ -32,7 +32,7 @@ export function DateFilter({ value }: DateFilterProps) {
       <Input
         id="entry-date"
         type="date"
-        defaultValue={value}
+        value={value}
         max="9999-12-31"
         onChange={(event) => handleDateChange(event.target.value)}
         aria-busy={isPending}
