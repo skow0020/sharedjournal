@@ -54,5 +54,12 @@ test('dashboard page loads with saved auth state', async ({ browser }) => {
   await page.goto('/dashboard')
   await expect(page.getByText('Journals', { exact: true })).toBeVisible()
 
+  const cabinMusingsLink = page.getByRole('link', { name: 'Cabin musings' })
+  await expect(cabinMusingsLink).toBeVisible()
+  await cabinMusingsLink.click()
+
+  await expect(page).toHaveURL(/\/dashboard\/journals\/[a-z0-9-]+$/i)
+  await expect(page.getByRole('heading', { level: 1, name: 'Cabin musings' })).toBeVisible()
+
   await context.close()
 })

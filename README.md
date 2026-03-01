@@ -161,3 +161,6 @@ For more information, visit:
 - [Neon MCP GitHub](https://github.com/neondatabase/mcp-server-neon)
 - [Ollama Documentation](https://docs.ollama.com)
 - [Model Context Protocol](https://modelcontextprotocol.io)
+
+### Note:
+Created with the help of this udemy course: [Course](https://sdg.udemy.com/course/learn-claude-code/learn/lecture/54834735#overview)
