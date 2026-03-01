@@ -1,4 +1,4 @@
-import { relations, sql } from 'drizzle-orm';
+import { relations, sql } from 'drizzle-orm'
 import {
 	date,
 	index,
@@ -10,9 +10,9 @@ import {
 	uniqueIndex,
 	uuid,
 	varchar,
-} from 'drizzle-orm/pg-core';
+} from 'drizzle-orm/pg-core'
 
-export const journalRoleEnum = pgEnum('journal_role', ['owner', 'editor', 'viewer']);
+export const journalRoleEnum = pgEnum('journal_role', ['owner', 'editor', 'viewer'])
 
 export const invitationStatusEnum = pgEnum('invitation_status', [
 	'pending',
@@ -20,7 +20,7 @@ export const invitationStatusEnum = pgEnum('invitation_status', [
 	'declined',
 	'revoked',
 	'expired',
-]);
+])
 
 export const users = pgTable(
 	'users',
@@ -32,7 +32,7 @@ export const users = pgTable(
 		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 	},
 	(table) => [uniqueIndex('users_clerk_user_id_uidx').on(table.clerkUserId)],
-);
+)
 
 export const journals = pgTable(
 	'journals',
@@ -50,7 +50,7 @@ export const journals = pgTable(
 			.$onUpdateFn(() => new Date()),
 	},
 	(table) => [index('journals_owner_user_id_idx').on(table.ownerUserId)],
-);
+)
 
 export const journalMembers = pgTable(
 	'journal_members',
@@ -70,7 +70,7 @@ export const journalMembers = pgTable(
 		index('journal_members_user_id_idx').on(table.userId),
 		index('journal_members_journal_role_idx').on(table.journalId, table.role),
 	],
-);
+)
 
 export const journalInvitations = pgTable(
 	'journal_invitations',
@@ -96,7 +96,7 @@ export const journalInvitations = pgTable(
 		index('journal_invitations_journal_status_idx').on(table.journalId, table.status),
 		index('journal_invitations_email_status_idx').on(table.inviteeEmail, table.status),
 	],
-);
+)
 
 export const entries = pgTable(
 	'entries',
@@ -121,7 +121,7 @@ export const entries = pgTable(
 		index('entries_journal_entry_date_idx').on(table.journalId, table.entryDate.desc()),
 		index('entries_author_created_at_idx').on(table.authorUserId, table.createdAt.desc()),
 	],
-);
+)
 
 export const entryPhotos = pgTable(
 	'entry_photos',
@@ -143,7 +143,7 @@ export const entryPhotos = pgTable(
 		uniqueIndex('entry_photos_storage_key_uidx').on(table.storageKey),
 		index('entry_photos_entry_position_idx').on(table.entryId, table.position),
 	],
-);
+)
 
 export const usersRelations = relations(users, ({ many }) => ({
 	ownedJournals: many(journals),
@@ -156,7 +156,7 @@ export const usersRelations = relations(users, ({ many }) => ({
 	invitationsAccepted: many(journalInvitations, {
 		relationName: 'journalInvitationsAccepted',
 	}),
-}));
+}))
 
 export const journalsRelations = relations(journals, ({ one, many }) => ({
 	owner: one(users, {
@@ -166,7 +166,7 @@ export const journalsRelations = relations(journals, ({ one, many }) => ({
 	members: many(journalMembers),
 	invitations: many(journalInvitations),
 	entries: many(entries),
-}));
+}))
 
 export const journalMembersRelations = relations(journalMembers, ({ one }) => ({
 	journal: one(journals, {
@@ -177,7 +177,7 @@ export const journalMembersRelations = relations(journalMembers, ({ one }) => ({
 		fields: [journalMembers.userId],
 		references: [users.id],
 	}),
-}));
+}))
 
 export const journalInvitationsRelations = relations(journalInvitations, ({ one }) => ({
 	journal: one(journals, {
@@ -194,7 +194,7 @@ export const journalInvitationsRelations = relations(journalInvitations, ({ one 
 		fields: [journalInvitations.acceptedByUserId],
 		references: [users.id],
 	}),
-}));
+}))
 
 export const entriesRelations = relations(entries, ({ one, many }) => ({
 	journal: one(journals, {
@@ -206,7 +206,7 @@ export const entriesRelations = relations(entries, ({ one, many }) => ({
 		references: [users.id],
 	}),
 	photos: many(entryPhotos),
-}));
+}))
 
 export const entryPhotosRelations = relations(entryPhotos, ({ one }) => ({
 	entry: one(entries, {
@@ -217,22 +217,22 @@ export const entryPhotosRelations = relations(entryPhotos, ({ one }) => ({
 		fields: [entryPhotos.uploaderUserId],
 		references: [users.id],
 	}),
-}));
+}))
 
-export type User = typeof users.$inferSelect;
-export type NewUser = typeof users.$inferInsert;
+export type User = typeof users.$inferSelect
+export type NewUser = typeof users.$inferInsert
 
-export type Journal = typeof journals.$inferSelect;
-export type NewJournal = typeof journals.$inferInsert;
+export type Journal = typeof journals.$inferSelect
+export type NewJournal = typeof journals.$inferInsert
 
-export type JournalMember = typeof journalMembers.$inferSelect;
-export type NewJournalMember = typeof journalMembers.$inferInsert;
+export type JournalMember = typeof journalMembers.$inferSelect
+export type NewJournalMember = typeof journalMembers.$inferInsert
 
-export type JournalInvitation = typeof journalInvitations.$inferSelect;
-export type NewJournalInvitation = typeof journalInvitations.$inferInsert;
+export type JournalInvitation = typeof journalInvitations.$inferSelect
+export type NewJournalInvitation = typeof journalInvitations.$inferInsert
 
-export type Entry = typeof entries.$inferSelect;
-export type NewEntry = typeof entries.$inferInsert;
+export type Entry = typeof entries.$inferSelect
+export type NewEntry = typeof entries.$inferInsert
 
-export type EntryPhoto = typeof entryPhotos.$inferSelect;
-export type NewEntryPhoto = typeof entryPhotos.$inferInsert;
+export type EntryPhoto = typeof entryPhotos.$inferSelect
+export type NewEntryPhoto = typeof entryPhotos.$inferInsert
