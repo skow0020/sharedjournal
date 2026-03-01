@@ -30,6 +30,12 @@ jobs:
 
   e2e:
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+      CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      E2E_CLERK_EMAIL: ${{ vars.E2E_CLERK_EMAIL }}
+      E2E_CLERK_PASSWORD: ${{ secrets.E2E_CLERK_PASSWORD }}
 
     steps:
       - name: Checkout
