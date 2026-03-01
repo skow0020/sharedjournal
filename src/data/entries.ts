@@ -4,22 +4,22 @@ import { db } from '@/db'
 import { entries, journalMembers, journals, users } from '@/db/schema'
 
 export type JournalEntry = {
-  id: string;
-  title: string | null;
-  content: string;
-  journalTitle: string;
-  authorName: string | null;
-  createdAt: Date;
-};
+  id: string
+  title: string | null
+  content: string
+  journalTitle: string
+  authorName: string | null
+  createdAt: Date
+}
 
 export type JournalEntryForJournal = {
-  id: string;
-  title: string | null;
-  content: string;
-  entryDate: string;
-  authorName: string | null;
-  createdAt: Date;
-};
+  id: string
+  title: string | null
+  content: string
+  entryDate: string
+  authorName: string | null
+  createdAt: Date
+}
 
 /**
  * Get journal entries for a specific user and date.

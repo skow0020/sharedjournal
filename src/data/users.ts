@@ -4,10 +4,10 @@ import { db } from '@/db'
 import { users } from '@/db/schema'
 
 type UpsertClerkUserInput = {
-  clerkUserId: string;
-  displayName?: string | null;
-  imageUrl?: string | null;
-};
+  clerkUserId: string
+  displayName?: string | null
+  imageUrl?: string | null
+}
 
 /**
  * Get a user by their Clerk user ID.

@@ -219,20 +219,20 @@ export const entryPhotosRelations = relations(entryPhotos, ({ one }) => ({
 	}),
 }))
 
-export type User = typeof users.$inferSelect;
-export type NewUser = typeof users.$inferInsert;
+export type User = typeof users.$inferSelect
+export type NewUser = typeof users.$inferInsert
 
-export type Journal = typeof journals.$inferSelect;
-export type NewJournal = typeof journals.$inferInsert;
+export type Journal = typeof journals.$inferSelect
+export type NewJournal = typeof journals.$inferInsert
 
-export type JournalMember = typeof journalMembers.$inferSelect;
-export type NewJournalMember = typeof journalMembers.$inferInsert;
+export type JournalMember = typeof journalMembers.$inferSelect
+export type NewJournalMember = typeof journalMembers.$inferInsert
 
-export type JournalInvitation = typeof journalInvitations.$inferSelect;
-export type NewJournalInvitation = typeof journalInvitations.$inferInsert;
+export type JournalInvitation = typeof journalInvitations.$inferSelect
+export type NewJournalInvitation = typeof journalInvitations.$inferInsert
 
-export type Entry = typeof entries.$inferSelect;
-export type NewEntry = typeof entries.$inferInsert;
+export type Entry = typeof entries.$inferSelect
+export type NewEntry = typeof entries.$inferInsert
 
-export type EntryPhoto = typeof entryPhotos.$inferSelect;
-export type NewEntryPhoto = typeof entryPhotos.$inferInsert;
+export type EntryPhoto = typeof entryPhotos.$inferSelect
+export type NewEntryPhoto = typeof entryPhotos.$inferInsert

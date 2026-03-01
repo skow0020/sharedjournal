@@ -15,9 +15,9 @@ import { getCurrentAppUser } from '@/lib/get-current-app-user'
 
 type JournalDetailsPageProps = {
   params: Promise<{
-    journalId: string;
-  }>;
-};
+    journalId: string
+  }>
+}
 
 export default async function JournalDetailsPage({ params }: JournalDetailsPageProps) {
   const appUser = await getCurrentAppUser()

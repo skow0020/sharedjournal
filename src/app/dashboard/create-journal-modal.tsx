@@ -17,12 +17,12 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 
 type CreateJournalState = {
-  error: string | null;
-};
+  error: string | null
+}
 
 type CreateJournalModalProps = {
-  action: (prevState: CreateJournalState, formData: FormData) => Promise<CreateJournalState>;
-};
+  action: (prevState: CreateJournalState, formData: FormData) => Promise<CreateJournalState>
+}
 
 const initialState: CreateJournalState = {
   error: null,

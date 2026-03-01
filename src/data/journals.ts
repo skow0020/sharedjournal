@@ -4,10 +4,10 @@ import { db } from '@/db'
 import { journalMembers, journals } from '@/db/schema'
 
 export type UserJournal = {
-  id: string;
-  title: string;
-  description: string | null;
-};
+  id: string
+  title: string
+  description: string | null
+}
 
 /**
  * Get journals accessible to a specific user.
@@ -27,10 +27,10 @@ export async function getUserJournals(userId: string): Promise<UserJournal[]> {
 }
 
 export type UserJournalDetails = {
-  id: string;
-  title: string;
-  description: string | null;
-};
+  id: string
+  title: string
+  description: string | null
+}
 
 /**
  * Get a specific journal only if the user has access to it.
@@ -54,10 +54,10 @@ export async function getUserJournalById(
 }
 
 type CreateJournalInput = {
-  ownerUserId: string;
-  title: string;
-  description: string | null;
-};
+  ownerUserId: string
+  title: string
+  description: string | null
+}
 
 export async function createJournalForOwner({
   ownerUserId,

@@ -6,8 +6,8 @@ import { useTransition } from 'react'
 import { Input } from '@/components/ui/input'
 
 type DateFilterProps = {
-  value: string;
-};
+  value: string
+}
 
 export function DateFilter({ value }: DateFilterProps) {
   const [isPending, startTransition] = useTransition()
