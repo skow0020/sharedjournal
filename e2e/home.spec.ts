@@ -15,8 +15,8 @@ test('can log in', async ({ page }) => {
   test.fail(!email || !password, 'Set E2E_CLERK_EMAIL and E2E_CLERK_PASSWORD to run auth setup.')
 
   await page.goto('/')
-  await expect(page).toHaveTitle(/Create Next App/i)
-  await expect(page.getByText('To get started, edit the page.tsx file.')).toBeVisible()
+  
+  await expect(page).toHaveTitle(/SharedJournal/i)
 
   await page.getByRole('button', { name: 'Sign In' }).click()
 
