@@ -16,6 +16,7 @@ import {
   getJournalEntriesForJournal,
   type JournalEntryForJournal,
 } from '@/data/entries'
+import { createJournalInvitation } from '@/data/invitations'
 import { getUserJournalById } from '@/data/journals'
 import { getCurrentAppUser } from '@/lib/get-current-app-user'
 
@@ -23,6 +24,12 @@ type JournalDetailsPageProps = {
   params: Promise<{
     journalId: string
   }>
+}
+
+type InviteActionState = {
+  error: string | null
+  successMessage: string | null
+  inviteLink: string | null
 }
 
 export default async function JournalDetailsPage({ params }: JournalDetailsPageProps) {
@@ -99,6 +106,46 @@ export default async function JournalDetailsPage({ params }: JournalDetailsPageP
     redirect(`/dashboard/journals/${journalId}`)
   }
 
+  async function createInviteAction(
+    _prevState: InviteActionState,
+    formData: FormData,
+  ) {
+    'use server'
+
+    const currentUser = await getCurrentAppUser()
+
+    if (!currentUser) {
+      return {
+        error: 'You must be signed in to invite users.',
+        successMessage: null,
+        inviteLink: null,
+      }
+    }
+
+    const emailValue = formData.get('email')
+    const email = typeof emailValue === 'string' ? emailValue.trim() : ''
+
+    const result = await createJournalInvitation({
+      inviterUserId: currentUser.id,
+      journalId,
+      inviteeEmail: email,
+    })
+
+    if (!result.ok) {
+      return {
+        error: result.message,
+        successMessage: null,
+        inviteLink: null,
+      }
+    }
+
+    return {
+      error: null,
+      successMessage: `Invitation created for ${result.inviteeEmail}. Email sending will be added next.`,
+      inviteLink: `/invitations/${result.inviteToken}`,
+    }
+  }
+
   const entries = await getJournalEntriesForJournal(appUser.id, journalId)
 
   return (
@@ -116,7 +163,7 @@ export default async function JournalDetailsPage({ params }: JournalDetailsPageP
           </div>
           <div className="flex items-center gap-2">
             <CreateEntryModal action={createEntryAction} />
-            <InviteUserModal />
+            <InviteUserModal action={createInviteAction} />
           </div>
         </div>
       </section>
