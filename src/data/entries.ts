@@ -21,6 +21,14 @@ export type JournalEntryForJournal = {
   createdAt: Date
 }
 
+type CreateEntryForJournalInput = {
+  userId: string
+  journalId: string
+  title: string | null
+  content: string
+  entryDate: string | null
+}
+
 /**
  * Get journal entries for a specific user and date.
  * This function enforces access control by only returning entries from journals
@@ -78,4 +86,38 @@ export async function getJournalEntriesForJournal(
       ),
     )
     .orderBy(desc(entries.entryDate), desc(entries.createdAt))
+}
+
+/**
+ * Create an entry in a journal only if the user is a member of that journal.
+ */
+export async function createEntryForJournal({
+  userId,
+  journalId,
+  title,
+  content,
+  entryDate,
+}: CreateEntryForJournalInput): Promise<{ id: string } | null> {
+  const [membership] = await db
+    .select({ id: journalMembers.id })
+    .from(journalMembers)
+    .where(and(eq(journalMembers.userId, userId), eq(journalMembers.journalId, journalId)))
+    .limit(1)
+
+  if (!membership) {
+    return null
+  }
+
+  const [createdEntry] = await db
+    .insert(entries)
+    .values({
+      journalId,
+      authorUserId: userId,
+      title,
+      content,
+      ...(entryDate ? { entryDate } : {}),
+    })
+    .returning({ id: entries.id })
+
+  return createdEntry
 }

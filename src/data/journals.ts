@@ -64,22 +64,20 @@ export async function createJournalForOwner({
   title,
   description,
 }: CreateJournalInput): Promise<{ id: string }> {
-  return db.transaction(async (tx) => {
-    const [createdJournal] = await tx
-      .insert(journals)
-      .values({
-        ownerUserId,
-        title,
-        description,
-      })
-      .returning({ id: journals.id })
-
-    await tx.insert(journalMembers).values({
-      journalId: createdJournal.id,
-      userId: ownerUserId,
-      role: 'owner',
+  const [createdJournal] = await db
+    .insert(journals)
+    .values({
+      ownerUserId,
+      title,
+      description,
     })
+    .returning({ id: journals.id })
 
-    return createdJournal
+  await db.insert(journalMembers).values({
+    journalId: createdJournal.id,
+    userId: ownerUserId,
+    role: 'owner',
   })
+
+  return createdJournal
 }

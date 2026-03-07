@@ -1,6 +1,6 @@
 import { format, parseISO } from 'date-fns'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 
 import {
   Card,
@@ -9,7 +9,12 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { getJournalEntriesForJournal, type JournalEntryForJournal } from '@/data/entries'
+import { CreateEntryModal } from '@/app/dashboard/journals/[journalId]/create-entry-modal'
+import {
+  createEntryForJournal,
+  getJournalEntriesForJournal,
+  type JournalEntryForJournal,
+} from '@/data/entries'
 import { getUserJournalById } from '@/data/journals'
 import { getCurrentAppUser } from '@/lib/get-current-app-user'
 
@@ -42,18 +47,74 @@ export default async function JournalDetailsPage({ params }: JournalDetailsPageP
     notFound()
   }
 
+  async function createEntryAction(
+    _prevState: { error: string | null },
+    formData: FormData,
+  ) {
+    'use server'
+
+    const currentUser = await getCurrentAppUser()
+
+    if (!currentUser) {
+      return {
+        error: 'You must be signed in to create an entry.',
+      }
+    }
+
+    const titleValue = formData.get('title')
+    const contentValue = formData.get('content')
+    const entryDateValue = formData.get('entryDate')
+
+    const title = typeof titleValue === 'string' ? titleValue.trim() : ''
+    const content = typeof contentValue === 'string' ? contentValue.trim() : ''
+    const entryDate = typeof entryDateValue === 'string' ? entryDateValue.trim() : ''
+
+    if (!content) {
+      return {
+        error: 'Content is required.',
+      }
+    }
+
+    if (entryDate && !/^\d{4}-\d{2}-\d{2}$/.test(entryDate)) {
+      return {
+        error: 'Entry date is invalid.',
+      }
+    }
+
+    const createdEntry = await createEntryForJournal({
+      userId: currentUser.id,
+      journalId,
+      title: title || null,
+      content,
+      entryDate: entryDate || null,
+    })
+
+    if (!createdEntry) {
+      return {
+        error: 'You do not have permission to add entries to this journal.',
+      }
+    }
+
+    redirect(`/dashboard/journals/${journalId}`)
+  }
+
   const entries = await getJournalEntriesForJournal(appUser.id, journalId)
 
   return (
     <main className="mx-auto w-full max-w-5xl space-y-6 px-6 py-8">
       <section className="space-y-2">
-        <Link href="/dashboard" className="text-muted-foreground text-sm underline-offset-4 hover:underline">
-          Back to journals
-        </Link>
-        <h1 className="text-3xl font-semibold tracking-tight">{journal.title}</h1>
-        {journal.description ? (
-          <p className="text-muted-foreground text-sm">{journal.description}</p>
-        ) : null}
+        <div className="flex items-start justify-between gap-4">
+          <div className="space-y-2">
+            <Link href="/dashboard" className="text-muted-foreground text-sm underline-offset-4 hover:underline">
+              Back to journals
+            </Link>
+            <h1 className="text-3xl font-semibold tracking-tight">{journal.title}</h1>
+            {journal.description ? (
+              <p className="text-muted-foreground text-sm">{journal.description}</p>
+            ) : null}
+          </div>
+          <CreateEntryModal action={createEntryAction} />
+        </div>
       </section>
 
       {entries.length === 0 ? (
