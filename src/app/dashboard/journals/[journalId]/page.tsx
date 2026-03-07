@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { CreateEntryModal } from '@/app/dashboard/journals/[journalId]/create-entry-modal'
+import { InviteUserModal } from '@/app/dashboard/journals/[journalId]/invite-user-modal'
 import {
   createEntryForJournal,
   getJournalEntriesForJournal,
@@ -113,7 +114,10 @@ export default async function JournalDetailsPage({ params }: JournalDetailsPageP
               <p className="text-muted-foreground text-sm">{journal.description}</p>
             ) : null}
           </div>
-          <CreateEntryModal action={createEntryAction} />
+          <div className="flex items-center gap-2">
+            <CreateEntryModal action={createEntryAction} />
+            <InviteUserModal />
+          </div>
         </div>
       </section>
 
