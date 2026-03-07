@@ -1,7 +1,7 @@
-import { and, eq } from 'drizzle-orm'
+import { and, desc, eq } from 'drizzle-orm'
 
 import { db } from '@/db'
-import { journalInvitations, journalMembers } from '@/db/schema'
+import { journalInvitations, journalMembers, journals, users } from '@/db/schema'
 
 export type CreateJournalInvitationInput = {
   inviterUserId: string
@@ -23,13 +23,90 @@ export type CreateJournalInvitationResult =
       message: string
     }
 
-function normalizeEmail(value: string): string {
+export type InvitationDetails = {
+  id: string
+  journalId: string
+  journalTitle: string
+  inviteeEmail: string
+  role: 'owner' | 'editor' | 'viewer'
+  status: 'pending' | 'accepted' | 'declined' | 'revoked' | 'expired'
+  expiresAt: Date
+  inviterName: string | null
+  createdAt: Date
+}
+
+export type InvitationLookupState =
+  | InvitationNotFoundState
+  | InvitationExpiredState
+  | InvitationReadyState
+  | InvitationUnavailableState
+
+type InvitationNotFoundState = {
+  state: 'not-found'
+}
+
+type InvitationExpiredState = {
+  state: 'expired'
+  invitation: InvitationDetails
+}
+
+type InvitationReadyState = {
+  state: 'ready'
+  invitation: InvitationDetails
+}
+
+type InvitationUnavailableState = {
+  state: 'unavailable'
+  invitation: InvitationDetails
+}
+
+export type AcceptJournalInvitationResult =
+  | AcceptJournalInvitationSuccess
+  | {
+      ok: false
+      error: 'NOT_FOUND' | 'EXPIRED' | 'EMAIL_MISMATCH' | 'NOT_PENDING'
+      message: string
+    }
+
+type AcceptJournalInvitationSuccess = {
+  ok: true
+  journalId: string
+}
+
+export type DeclineJournalInvitationResult =
+  | DeclineJournalInvitationSuccess
+  | {
+      ok: false
+      error: 'NOT_FOUND' | 'EXPIRED' | 'EMAIL_MISMATCH' | 'NOT_PENDING'
+      message: string
+    }
+
+type DeclineJournalInvitationSuccess = {
+  ok: true
+}
+
+export type PendingInvitation = {
+  id: string
+  journalId: string
+  journalTitle: string
+  inviteToken: string
+  role: 'owner' | 'editor' | 'viewer'
+  inviterName: string | null
+  expiresAt: Date
+  createdAt: Date
+}
+
+export function normalizeEmail(value: string): string {
   return value.trim().toLowerCase()
 }
 
 function isValidEmail(value: string): boolean {
   // Lightweight validation for server action payloads.
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+}
+
+function isExpired(expiresAt: Date): boolean {
+  return expiresAt.getTime() < Date.now()
 }
 
 function buildInviteToken(): string {
@@ -110,4 +187,250 @@ export async function createJournalInvitation({
     inviteeEmail: createdInvitation.inviteeEmail,
     expiresAt: createdInvitation.expiresAt,
   }
+}
+
+export async function getInvitationByToken(token: string): Promise<InvitationLookupState> {
+  const [invitation] = await db
+    .select({
+      id: journalInvitations.id,
+      journalId: journalInvitations.journalId,
+      journalTitle: journals.title,
+      inviteeEmail: journalInvitations.inviteeEmail,
+      role: journalInvitations.role,
+      status: journalInvitations.status,
+      expiresAt: journalInvitations.expiresAt,
+      inviterName: users.displayName,
+      createdAt: journalInvitations.createdAt,
+    })
+    .from(journalInvitations)
+    .innerJoin(journals, eq(journals.id, journalInvitations.journalId))
+    .leftJoin(users, eq(users.id, journalInvitations.inviterUserId))
+    .where(eq(journalInvitations.inviteToken, token))
+    .limit(1)
+
+  if (!invitation) {
+    return { state: 'not-found' }
+  }
+
+  if (invitation.status !== 'pending') {
+    return {
+      state: 'unavailable',
+      invitation,
+    }
+  }
+
+  if (isExpired(invitation.expiresAt)) {
+    await db
+      .update(journalInvitations)
+      .set({ status: 'expired' })
+      .where(
+        and(
+          eq(journalInvitations.id, invitation.id),
+          eq(journalInvitations.status, 'pending'),
+        ),
+      )
+
+    return {
+      state: 'expired',
+      invitation: {
+        ...invitation,
+        status: 'expired',
+      },
+    }
+  }
+
+  return {
+    state: 'ready',
+    invitation,
+  }
+}
+
+export async function acceptJournalInvitation({
+  token,
+  acceptingUserId,
+  acceptingEmail,
+}: {
+  token: string
+  acceptingUserId: string
+  acceptingEmail: string
+}): Promise<AcceptJournalInvitationResult> {
+  const lookup = await getInvitationByToken(token)
+
+  if (lookup.state === 'not-found') {
+    return {
+      ok: false,
+      error: 'NOT_FOUND',
+      message: 'Invitation not found.',
+    }
+  }
+
+  if (lookup.state === 'expired') {
+    return {
+      ok: false,
+      error: 'EXPIRED',
+      message: 'This invitation has expired.',
+    }
+  }
+
+  if (lookup.state === 'unavailable') {
+    return {
+      ok: false,
+      error: 'NOT_PENDING',
+      message: 'This invitation is no longer pending.',
+    }
+  }
+
+  const normalizedAcceptingEmail = normalizeEmail(acceptingEmail)
+
+  if (normalizedAcceptingEmail !== normalizeEmail(lookup.invitation.inviteeEmail)) {
+    return {
+      ok: false,
+      error: 'EMAIL_MISMATCH',
+      message: 'You must sign in with the invited email address to accept this invitation.',
+    }
+  }
+
+  const [existingMembership] = await db
+    .select({ id: journalMembers.id })
+    .from(journalMembers)
+    .where(
+      and(
+        eq(journalMembers.journalId, lookup.invitation.journalId),
+        eq(journalMembers.userId, acceptingUserId),
+      ),
+    )
+    .limit(1)
+
+  if (!existingMembership) {
+    await db.insert(journalMembers).values({
+      journalId: lookup.invitation.journalId,
+      userId: acceptingUserId,
+      role: lookup.invitation.role,
+    })
+  }
+
+  await db
+    .update(journalInvitations)
+    .set({
+      status: 'accepted',
+      acceptedByUserId: acceptingUserId,
+      acceptedAt: new Date(),
+    })
+    .where(
+      and(
+        eq(journalInvitations.id, lookup.invitation.id),
+        eq(journalInvitations.status, 'pending'),
+      ),
+    )
+
+  return {
+    ok: true,
+    journalId: lookup.invitation.journalId,
+  }
+}
+
+export async function declineJournalInvitation({
+  token,
+  decliningEmail,
+}: {
+  token: string
+  decliningEmail: string
+}): Promise<DeclineJournalInvitationResult> {
+  const lookup = await getInvitationByToken(token)
+
+  if (lookup.state === 'not-found') {
+    return {
+      ok: false,
+      error: 'NOT_FOUND',
+      message: 'Invitation not found.',
+    }
+  }
+
+  if (lookup.state === 'expired') {
+    return {
+      ok: false,
+      error: 'EXPIRED',
+      message: 'This invitation has expired.',
+    }
+  }
+
+  if (lookup.state === 'unavailable') {
+    return {
+      ok: false,
+      error: 'NOT_PENDING',
+      message: 'This invitation is no longer pending.',
+    }
+  }
+
+  if (normalizeEmail(decliningEmail) !== normalizeEmail(lookup.invitation.inviteeEmail)) {
+    return {
+      ok: false,
+      error: 'EMAIL_MISMATCH',
+      message: 'You must sign in with the invited email address to decline this invitation.',
+    }
+  }
+
+  await db
+    .update(journalInvitations)
+    .set({ status: 'declined' })
+    .where(
+      and(
+        eq(journalInvitations.id, lookup.invitation.id),
+        eq(journalInvitations.status, 'pending'),
+      ),
+    )
+
+  return { ok: true }
+}
+
+export async function getPendingInvitationsForEmail(email: string): Promise<PendingInvitation[]> {
+  const normalizedEmail = normalizeEmail(email)
+
+  const rows = await db
+    .select({
+      id: journalInvitations.id,
+      journalId: journalInvitations.journalId,
+      journalTitle: journals.title,
+      inviteToken: journalInvitations.inviteToken,
+      role: journalInvitations.role,
+      inviterName: users.displayName,
+      expiresAt: journalInvitations.expiresAt,
+      createdAt: journalInvitations.createdAt,
+    })
+    .from(journalInvitations)
+    .innerJoin(journals, eq(journals.id, journalInvitations.journalId))
+    .leftJoin(users, eq(users.id, journalInvitations.inviterUserId))
+    .where(
+      and(
+        eq(journalInvitations.inviteeEmail, normalizedEmail),
+        eq(journalInvitations.status, 'pending'),
+      ),
+    )
+    .orderBy(desc(journalInvitations.createdAt))
+
+  const activeInvitations: PendingInvitation[] = []
+  const expiredIds: string[] = []
+
+  for (const row of rows) {
+    if (isExpired(row.expiresAt)) {
+      expiredIds.push(row.id)
+      continue
+    }
+
+    activeInvitations.push(row)
+  }
+
+  for (const invitationId of expiredIds) {
+    await db
+      .update(journalInvitations)
+      .set({ status: 'expired' })
+      .where(
+        and(
+          eq(journalInvitations.id, invitationId),
+          eq(journalInvitations.status, 'pending'),
+        ),
+      )
+  }
+
+  return activeInvitations
 }
