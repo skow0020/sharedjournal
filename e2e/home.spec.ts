@@ -15,7 +15,7 @@ test('can log in', async ({ page }) => {
   test.fail(!email || !password, 'Set E2E_CLERK_EMAIL and E2E_CLERK_PASSWORD to run auth setup.')
 
   await page.goto('/')
-  
+
   await expect(page).toHaveTitle(/SharedJournal/i)
 
   await page.getByRole('button', { name: 'Sign In' }).click()
@@ -45,7 +45,7 @@ test('can log in', async ({ page }) => {
   await page.context().storageState({ path: authFile })
 })
 
-test('dashboard page loads with saved auth state', async ({ browser }) => {
+test('can navigate and kind of do stuff', async ({ browser }) => {
   test.fail(!existsSync(authFile), 'Run the auth setup test first to generate storage state.')
 
   const context = await browser.newContext({ storageState: authFile })
@@ -59,7 +59,24 @@ test('dashboard page loads with saved auth state', async ({ browser }) => {
   await cabinMusingsLink.click()
 
   await expect(page).toHaveURL(/\/dashboard\/journals\/[a-z0-9-]+$/i)
-  await expect(page.getByRole('heading', { level: 1, name: 'Cabin musings' })).toBeVisible()
+  await page.getByRole('heading', { level: 1, name: 'Cabin musings' }).click()
+
+  await page.getByRole('button', { name: 'Add entry' }).click()
+  await expect(page.getByText('Create an entry')).toBeVisible()
+  await page.getByRole('button', { name: 'Cancel' }).click()
+
+  await page.getByRole('button', { name: 'Invite' }).click()
+  await expect(page.getByText('Invite a user')).toBeVisible()
+  await page.getByRole('button', { name: 'Cancel' }).click()
+
+  await page.getByRole('button', { name: 'Collaborators (0)' }).click()
+  await expect(page.getByText('Not shared with anyone yet.')).toBeVisible()
+
+  await expect(page.getByText('Not shared with anyone yet.')).toBeVisible()
+  await page.getByRole('button', { name: 'Collaborators (0)' }).click()
+  await page.getByRole('button', { name: 'Collaborators (0)' }).click()
+  await page.getByRole('button', { name: 'Collaborators (0)' }).click()
+
 
   await context.close()
 })
