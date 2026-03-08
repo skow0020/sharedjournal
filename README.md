@@ -86,7 +86,6 @@ In Vercel DNS, add the records provided by Resend for `notify.sharedjournal.app`
 
 Important notes:
 
-- Do not create `A` records for Resend verification records.
 - The domain in Resend, DNS records in Vercel, and `RESEND_FROM_EMAIL` must all match the same `.app` domain family.
 - In development, keep `NEXT_PUBLIC_APP_URL=http://localhost:3000`.
 - In production, set `NEXT_PUBLIC_APP_URL=https://sharedjournal.app` so invite links in emails point to your live app.
