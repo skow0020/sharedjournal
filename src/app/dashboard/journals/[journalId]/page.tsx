@@ -19,6 +19,7 @@ import {
 import { createJournalInvitation } from '@/data/invitations'
 import { getUserJournalById } from '@/data/journals'
 import { getCurrentAppUser } from '@/lib/get-current-app-user'
+import { sendInviteEmail } from '@/lib/invitations/send-invite-email'
 
 type JournalDetailsPageProps = {
   params: Promise<{
@@ -30,6 +31,10 @@ type InviteActionState = {
   error: string | null
   successMessage: string | null
   inviteLink: string | null
+}
+
+function getAppBaseUrl(): string {
+  return process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 }
 
 export default async function JournalDetailsPage({ params }: JournalDetailsPageProps) {
@@ -54,6 +59,8 @@ export default async function JournalDetailsPage({ params }: JournalDetailsPageP
   if (!journal) {
     notFound()
   }
+
+  const journalTitle = journal.title
 
   async function createEntryAction(
     _prevState: { error: string | null },
@@ -139,10 +146,25 @@ export default async function JournalDetailsPage({ params }: JournalDetailsPageP
       }
     }
 
+    const inviteLinkPath = `/invitations/${result.inviteToken}`
+    const inviteLink = `${getAppBaseUrl()}${inviteLinkPath}`
+
+    // Email transport failures should not block invite creation.
+    const emailSendResult = await sendInviteEmail({
+      toEmail: result.inviteeEmail,
+      inviteLink,
+      journalTitle,
+      inviterName: null,
+    })
+
+    const successMessage = emailSendResult.delivered
+      ? `Invitation sent to ${result.inviteeEmail}.`
+      : `Invitation created for ${result.inviteeEmail}. ${emailSendResult.message}`
+
     return {
       error: null,
-      successMessage: `Invitation created for ${result.inviteeEmail}. Email sending will be added next.`,
-      inviteLink: `/invitations/${result.inviteToken}`,
+      successMessage,
+      inviteLink,
     }
   }
 
