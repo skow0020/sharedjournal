@@ -63,6 +63,29 @@ npm run db:seed
 npm run db:migrate
 ```
 
+### Migration Basics (Drizzle)
+
+Use this simple workflow for database changes:
+
+1. Update schema in `src/db/schema.ts`.
+2. Generate a migration file:
+
+```bash
+npm run db:generate
+```
+
+3. Commit the new files under `drizzle/`.
+4. Apply pending migrations:
+
+```bash
+npm run db:migrate
+```
+
+Notes:
+
+- Drizzle tracks applied migrations in the database and only runs new ones.
+- Do not edit a migration that has already been applied; create a new migration instead.
+
 ### Invite Email Provider (Resend)
 
 1. Create a [Resend](https://resend.com/) account.
