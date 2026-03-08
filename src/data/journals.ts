@@ -1,7 +1,7 @@
-import { and, desc, eq } from 'drizzle-orm'
+import { and, desc, eq, ne } from 'drizzle-orm'
 
 import { db } from '@/db'
-import { journalMembers, journals } from '@/db/schema'
+import { journalMembers, journals, users } from '@/db/schema'
 
 export type UserJournal = {
   id: string
@@ -32,6 +32,12 @@ export type UserJournalDetails = {
   description: string | null
 }
 
+export type JournalCollaborator = {
+  id: string
+  displayName: string | null
+  role: 'owner' | 'editor' | 'viewer'
+}
+
 /**
  * Get a specific journal only if the user has access to it.
  */
@@ -51,6 +57,34 @@ export async function getUserJournalById(
     .limit(1)
 
   return journal ?? null
+}
+
+/**
+ * Get non-owner collaborators for a journal if the requesting user can access it.
+ */
+export async function getCollaboratorsForJournal(
+  userId: string,
+  journalId: string,
+): Promise<JournalCollaborator[]> {
+  const [membership] = await db
+    .select({ id: journalMembers.id })
+    .from(journalMembers)
+    .where(and(eq(journalMembers.userId, userId), eq(journalMembers.journalId, journalId)))
+    .limit(1)
+
+  if (!membership) {
+    return []
+  }
+
+  return db
+    .select({
+      id: users.id,
+      displayName: users.displayName,
+      role: journalMembers.role,
+    })
+    .from(journalMembers)
+    .innerJoin(users, eq(users.id, journalMembers.userId))
+    .where(and(eq(journalMembers.journalId, journalId), ne(journalMembers.role, 'owner')))
 }
 
 type CreateJournalInput = {
