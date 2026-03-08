@@ -1,4 +1,5 @@
 import { format, parseISO } from 'date-fns'
+import { currentUser as getClerkCurrentUser } from '@clerk/nextjs/server'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
@@ -16,7 +17,11 @@ import {
   getJournalEntriesForJournal,
   type JournalEntryForJournal,
 } from '@/data/entries'
-import { createJournalInvitation } from '@/data/invitations'
+import {
+  createJournalInvitation,
+  getPendingInvitationsForOwnedJournal,
+  setInvitationEmailDeliveryFlag,
+} from '@/data/invitations'
 import { getUserJournalById } from '@/data/journals'
 import { getCurrentAppUser } from '@/lib/get-current-app-user'
 import { sendInviteEmail } from '@/lib/invitations/send-invite-email'
@@ -34,7 +39,15 @@ type InviteActionState = {
 }
 
 function getAppBaseUrl(): string {
-  return process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL
+  }
+
+  if (process.env.NODE_ENV === 'production') {
+    return 'https://sharedjournal.app'
+  }
+
+  return 'http://localhost:3000'
 }
 
 export default async function JournalDetailsPage({ params }: JournalDetailsPageProps) {
@@ -148,18 +161,25 @@ export default async function JournalDetailsPage({ params }: JournalDetailsPageP
 
     const inviteLinkPath = `/invitations/${result.inviteToken}`
     const inviteLink = `${getAppBaseUrl()}${inviteLinkPath}`
+    const clerkUser = await getClerkCurrentUser()
+    const inviterName = clerkUser?.fullName ?? clerkUser?.username ?? null
 
     // Email transport failures should not block invite creation.
     const emailSendResult = await sendInviteEmail({
       toEmail: result.inviteeEmail,
       inviteLink,
       journalTitle,
-      inviterName: null,
+      inviterName,
     })
 
     const successMessage = emailSendResult.delivered
       ? `Invitation sent to ${result.inviteeEmail}.`
       : `Invitation created for ${result.inviteeEmail}. ${emailSendResult.message}`
+
+    await setInvitationEmailDeliveryFlag({
+      invitationId: result.invitationId,
+      emailDelivered: emailSendResult.delivered,
+    })
 
     return {
       error: null,
@@ -169,6 +189,10 @@ export default async function JournalDetailsPage({ params }: JournalDetailsPageP
   }
 
   const entries = await getJournalEntriesForJournal(appUser.id, journalId)
+  const pendingInvitations = await getPendingInvitationsForOwnedJournal({
+    ownerUserId: appUser.id,
+    journalId,
+  })
 
   return (
     <main className="mx-auto w-full max-w-5xl space-y-6 px-6 py-8">
@@ -189,6 +213,24 @@ export default async function JournalDetailsPage({ params }: JournalDetailsPageP
           </div>
         </div>
       </section>
+
+      {pendingInvitations.length > 0 ? (
+        <section className="space-y-3">
+          <h2 className="text-xl font-semibold tracking-tight">Pending invites</h2>
+          <div className="grid gap-3">
+            {pendingInvitations.map((invitation) => (
+              <Card key={invitation.id}>
+                <CardHeader>
+                  <CardTitle className="text-base">{invitation.inviteeEmail}</CardTitle>
+                  <CardDescription>
+                    {invitation.role} · {invitation.emailDelivered ? 'email delivered' : 'manual share needed'}
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       {entries.length === 0 ? (
         <Card>

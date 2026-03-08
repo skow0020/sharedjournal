@@ -1,5 +1,6 @@
 import { relations, sql } from 'drizzle-orm'
 import {
+	boolean,
 	date,
 	index,
 	integer,
@@ -84,6 +85,7 @@ export const journalInvitations = pgTable(
 		inviteToken: text('invite_token').notNull(),
 		role: journalRoleEnum('role').notNull().default('viewer'),
 		status: invitationStatusEnum('status').notNull().default('pending'),
+		emailDelivered: boolean('email_delivered').notNull().default(false),
 		expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
 		acceptedByUserId: uuid('accepted_by_user_id').references(() => users.id, {
 			onDelete: 'set null',

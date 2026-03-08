@@ -96,6 +96,15 @@ export type PendingInvitation = {
   createdAt: Date
 }
 
+export type PendingJournalInvitation = {
+  id: string
+  inviteeEmail: string
+  role: 'owner' | 'editor' | 'viewer'
+  expiresAt: Date
+  createdAt: Date
+  emailDelivered: boolean
+}
+
 export function normalizeEmail(value: string): string {
   return value.trim().toLowerCase()
 }
@@ -433,4 +442,87 @@ export async function getPendingInvitationsForEmail(email: string): Promise<Pend
   }
 
   return activeInvitations
+}
+
+export async function setInvitationEmailDeliveryFlag({
+  invitationId,
+  emailDelivered,
+}: {
+  invitationId: string
+  emailDelivered: boolean
+}) {
+  try {
+    await db
+      .update(journalInvitations)
+      .set({ emailDelivered })
+      .where(eq(journalInvitations.id, invitationId))
+  } catch {
+    // Keep invite creation resilient if database schema hasn't been migrated yet.
+  }
+}
+
+export async function getPendingInvitationsForOwnedJournal({
+  ownerUserId,
+  journalId,
+}: {
+  ownerUserId: string
+  journalId: string
+}): Promise<PendingJournalInvitation[]> {
+  const [ownerMembership] = await db
+    .select({ id: journalMembers.id })
+    .from(journalMembers)
+    .where(
+      and(
+        eq(journalMembers.journalId, journalId),
+        eq(journalMembers.userId, ownerUserId),
+        eq(journalMembers.role, 'owner'),
+      ),
+    )
+    .limit(1)
+
+  if (!ownerMembership) {
+    return []
+  }
+
+  try {
+    return db
+      .select({
+        id: journalInvitations.id,
+        inviteeEmail: journalInvitations.inviteeEmail,
+        role: journalInvitations.role,
+        expiresAt: journalInvitations.expiresAt,
+        createdAt: journalInvitations.createdAt,
+        emailDelivered: journalInvitations.emailDelivered,
+      })
+      .from(journalInvitations)
+      .where(
+        and(
+          eq(journalInvitations.journalId, journalId),
+          eq(journalInvitations.status, 'pending'),
+        ),
+      )
+      .orderBy(desc(journalInvitations.createdAt))
+  } catch {
+    const rows = await db
+      .select({
+        id: journalInvitations.id,
+        inviteeEmail: journalInvitations.inviteeEmail,
+        role: journalInvitations.role,
+        expiresAt: journalInvitations.expiresAt,
+        createdAt: journalInvitations.createdAt,
+      })
+      .from(journalInvitations)
+      .where(
+        and(
+          eq(journalInvitations.journalId, journalId),
+          eq(journalInvitations.status, 'pending'),
+        ),
+      )
+      .orderBy(desc(journalInvitations.createdAt))
+
+    return rows.map((row) => ({
+      ...row,
+      emailDelivered: false,
+    }))
+  }
 }

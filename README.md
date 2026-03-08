@@ -57,6 +57,12 @@ RESEND_FROM_EMAIL=SharedJournal <invites@notify.sharedjournal.app>
 npm run db:seed
 ```
 
+5. Run schema migrations when pulling DB changes:
+
+```bash
+npm run db:migrate
+```
+
 ### Invite Email Provider (Resend)
 
 1. Create a [Resend](https://resend.com/) account.
