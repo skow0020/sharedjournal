@@ -95,6 +95,28 @@ describe('sendInviteEmail', () => {
     })
   })
 
+  it('returns resend failure details when resend fetch throws a transport error', async () => {
+    process.env.INVITE_EMAIL_PROVIDER = 'resend'
+    process.env.RESEND_API_KEY = 'test-api-key'
+    process.env.RESEND_FROM_EMAIL = 'noreply@example.com'
+
+    const fetchMock = vi.fn().mockRejectedValue(new TypeError('fetch failed'))
+    vi.stubGlobal('fetch', fetchMock)
+
+    const result = await sendInviteEmail({
+      toEmail: 'invitee@example.com',
+      inviteLink: 'https://example.com/invitations/token',
+      journalTitle: 'Test Journal',
+      inviterName: 'Inviter',
+    })
+
+    expect(result).toEqual({
+      delivered: false,
+      provider: 'resend',
+      message: 'Resend API transport error: fetch failed',
+    })
+  })
+
   it('sends via resend and returns delivered true on success', async () => {
     process.env.INVITE_EMAIL_PROVIDER = 'resend'
     process.env.RESEND_API_KEY = 'test-api-key'

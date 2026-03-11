@@ -42,20 +42,33 @@ async function sendWithResend({
 
   const inviter = inviterName || 'A SharedJournal member'
 
-  const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      from: fromEmail,
-      to: [toEmail],
-      subject: `You are invited to join ${journalTitle}`,
-      text: `${inviter} invited you to join "${journalTitle}" on SharedJournal.\n\nAccept invitation: ${inviteLink}`,
-    }),
-    cache: 'no-store',
-  })
+  let response: Response
+
+  try {
+    response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: fromEmail,
+        to: [toEmail],
+        subject: `You are invited to join ${journalTitle}`,
+        text: `${inviter} invited you to join "${journalTitle}" on SharedJournal.\n\nAccept invitation: ${inviteLink}`,
+      }),
+      cache: 'no-store',
+    })
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown transport error'
+
+    return {
+      delivered: false,
+      provider: 'resend',
+      message: `Resend API transport error: ${errorMessage}`,
+    }
+  }
 
   if (!response.ok) {
     const errorBody = await response.text()
