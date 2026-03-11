@@ -114,3 +114,63 @@ For page-level server components, test branch rendering by mocking data/auth dep
 - Do not rely on brittle selectors (class names, DOM shape) unless unavoidable.
 - Do not use arbitrary timers when waiting for async updates.
 - Do not use `fireEvent` for standard interaction flows.
+
+---
+
+## Integration Tests (Data Layer)
+
+Functions in `src/data/` execute real Drizzle queries. Component-level mocking works for pages and UI, but the data layer itself is best verified against a real database.
+
+### Setup
+
+Integration tests use a separate Vitest config:
+
+- Config: `vitest.integration.config.ts`
+- Environment: `node` (no jsdom)
+- Setup file: `src/test/setup.integration.ts` (loads `.env.test` via dotenv)
+- Pattern: `src/**/*.integration.test.ts`
+- Script: `npm run test:integration`
+
+Create a `.env.test` file (see `.env.test.example`) pointing to a dedicated **Neon test branch** so integration runs never touch production or development data:
+
+```bash
+npx neonctl branches create --name integration-tests
+```
+
+### Conventions
+
+- Seed required rows in `beforeEach` using direct Drizzle inserts.
+- Track inserted IDs and delete them in `afterEach` to keep the database clean.
+- Use `crypto.randomUUID()` for unique `clerkUserId` values to prevent collisions between runs.
+- Journal cascades (`ON DELETE CASCADE`) clean up related `journalMembers` and `entries` rows automatically when deleting a journal.
+- Test **access control branches** explicitly (non-member returning empty/null) alongside happy paths.
+
+### Example pattern
+
+```ts
+// src/data/my-helper.integration.test.ts
+import { db } from '@/db'
+import { users, journals, journalMembers } from '@/db/schema'
+import { myDataFunction } from '@/data/my-helper'
+
+let userId: string
+let journalId: string
+
+beforeEach(async () => {
+  const [user] = await db.insert(users).values({ clerkUserId: `test_${crypto.randomUUID()}` }).returning({ id: users.id })
+  const [journal] = await db.insert(journals).values({ ownerUserId: user.id, title: 'Test' }).returning({ id: journals.id })
+  await db.insert(journalMembers).values({ journalId: journal.id, userId: user.id, role: 'owner' })
+  userId = user.id
+  journalId = journal.id
+})
+
+afterEach(async () => {
+  await db.delete(journals).where(eq(journals.id, journalId))
+  await db.delete(users).where(eq(users.id, userId))
+})
+
+it('returns data only for members', async () => {
+  const result = await myDataFunction(userId, journalId)
+  expect(result).toHaveLength(1)
+})
+```
