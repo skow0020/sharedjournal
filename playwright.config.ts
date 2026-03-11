@@ -1,6 +1,8 @@
 import 'dotenv/config'
 import { defineConfig, devices } from '@playwright/test'
 
+const authFile = 'playwright/.auth/user.json'
+
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
@@ -18,8 +20,23 @@ export default defineConfig({
   },
   projects: [
     {
-      name: 'chromium',
+      name: 'setup',
+      testMatch: /.*\.setup\.ts/,
       use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'public',
+      testIgnore: [/.*\.setup\.ts/, /.*\.auth\.spec\.ts/],
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'authenticated',
+      testMatch: /.*\.auth\.spec\.ts/,
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: authFile,
+      },
     },
   ],
 })

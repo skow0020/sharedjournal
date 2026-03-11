@@ -1,82 +1,22 @@
 import { expect, test } from '@playwright/test'
-import { existsSync } from 'node:fs'
-import { mkdir } from 'node:fs/promises'
-import path from 'node:path'
 
-const authDir = path.join(process.cwd(), 'playwright', '.auth')
-const authFile = path.join(authDir, 'user.json')
-
-test.describe.configure({ mode: 'serial' })
-
-test('can log in', async ({ page }) => {
-  const email = process.env.E2E_CLERK_EMAIL
-  const password = process.env.E2E_CLERK_PASSWORD
-
-  test.fail(!email || !password, 'Set E2E_CLERK_EMAIL and E2E_CLERK_PASSWORD to run auth setup.')
-
+test('shows public home content and feature cards', async ({ page }) => {
   await page.goto('/')
 
   await expect(page).toHaveTitle(/SharedJournal/i)
+  await expect(page.getByText('SharedJournal')).toBeVisible()
+  await expect(page.getByText('Open dashboard')).toBeVisible()
 
-  await page.getByRole('button', { name: 'Sign In' }).click()
-
-  const emailInput = page
-    .locator('input[name="identifier"], input[name="emailAddress"], input[type="email"]')
-    .first()
-  await expect(emailInput).toBeVisible()
-  await emailInput.fill(email!)
-
-  await page
-    .getByRole('button', { name: 'Continue', exact: true })
-    .first()
-    .click()
-
-  const passwordInput = page.locator('input[type="password"]').first()
-  await expect(passwordInput).toBeVisible()
-  await passwordInput.fill(password!)
-
-  await page
-    .getByRole('button', { name: 'Continue', exact: true })
-    .first()
-    .click()
-
-  await expect(page.getByRole('button', { name: 'Sign In' })).toHaveCount(0)
-  await mkdir(authDir, { recursive: true })
-  await page.context().storageState({ path: authFile })
+  await expect(page.getByText('Personal writing')).toBeVisible()
+  await expect(page.getByText('Shared spaces')).toBeVisible()
+  await expect(page.getByText('Focused review')).toBeVisible()
 })
 
-test('can navigate and kind of do stuff', async ({ browser }) => {
-  test.fail(!existsSync(authFile), 'Run the auth setup test first to generate storage state.')
+test('shows invitation not found for an invalid token', async ({ page }) => {
+  await page.goto('/invitations/e2e-invalid-token')
 
-  const context = await browser.newContext({ storageState: authFile })
-  const page = await context.newPage()
-
-  await page.goto('/dashboard')
-  await expect(page.getByText('Journals', { exact: true })).toBeVisible()
-
-  const cabinMusingsLink = page.getByRole('link', { name: 'Cabin musings' })
-  await expect(cabinMusingsLink).toBeVisible()
-  await cabinMusingsLink.click()
-
-  await expect(page).toHaveURL(/\/dashboard\/journals\/[a-z0-9-]+$/i)
-  await page.getByRole('heading', { level: 1, name: 'Cabin musings' }).click()
-
-  await page.getByRole('button', { name: 'Add entry' }).click()
-  await expect(page.getByText('Create an entry')).toBeVisible()
-  await page.getByRole('button', { name: 'Cancel' }).click()
-
-  await page.getByRole('button', { name: 'Invite' }).click()
-  await expect(page.getByText('Invite a user')).toBeVisible()
-  await page.getByRole('button', { name: 'Cancel' }).click()
-
-  await page.getByRole('button', { name: 'Collaborators (0)' }).click()
-  await expect(page.getByText('Not shared with anyone yet.')).toBeVisible()
-
-  await expect(page.getByText('Not shared with anyone yet.')).toBeVisible()
-  await page.getByRole('button', { name: 'Collaborators (0)' }).click()
-  await page.getByRole('button', { name: 'Collaborators (0)' }).click()
-  await page.getByRole('button', { name: 'Collaborators (0)' }).click()
-
-
-  await context.close()
+  await expect(page.getByText('Invitation not found')).toBeVisible()
+  await expect(
+    page.getByText('This invitation link is invalid or no longer exists.'),
+  ).toBeVisible()
 })
