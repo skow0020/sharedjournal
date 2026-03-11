@@ -107,11 +107,18 @@ export async function createJournalForOwner({
     })
     .returning({ id: journals.id })
 
-  await db.insert(journalMembers).values({
-    journalId: createdJournal.id,
-    userId: ownerUserId,
-    role: 'owner',
-  })
+  try {
+    await db.insert(journalMembers).values({
+      journalId: createdJournal.id,
+      userId: ownerUserId,
+      role: 'owner',
+    })
+  } catch (error) {
+    // Neon HTTP driver does not support transactions, so compensate by removing
+    // the just-created journal when owner membership creation fails.
+    await db.delete(journals).where(eq(journals.id, createdJournal.id))
+    throw error
+  }
 
   return createdJournal
 }

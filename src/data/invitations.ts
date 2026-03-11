@@ -485,7 +485,7 @@ export async function getPendingInvitationsForOwnedJournal({
   }
 
   try {
-    return db
+    return await db
       .select({
         id: journalInvitations.id,
         inviteeEmail: journalInvitations.inviteeEmail,
