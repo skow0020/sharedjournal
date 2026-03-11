@@ -180,7 +180,7 @@ export default async function JournalDetailsPage({ params }: JournalDetailsPageP
 
     const successMessage = emailSendResult.delivered
       ? `Invitation sent to ${result.inviteeEmail}.`
-      : `Invitation created for ${result.inviteeEmail}. ${emailSendResult.message}`
+      : `Invitation created for ${result.inviteeEmail}. Copy the link below to share.`
 
     await setInvitationEmailDeliveryFlag({
       invitationId: result.invitationId,
