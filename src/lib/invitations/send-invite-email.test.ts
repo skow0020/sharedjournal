@@ -69,7 +69,7 @@ describe('sendInviteEmail', () => {
     })
   })
 
-  it('returns resend failure details when resend responds with non-2xx', async () => {
+  it('returns generic message when resend responds with non-2xx', async () => {
     process.env.INVITE_EMAIL_PROVIDER = 'resend'
     process.env.RESEND_API_KEY = 'test-api-key'
     process.env.RESEND_FROM_EMAIL = 'noreply@example.com'
@@ -91,11 +91,11 @@ describe('sendInviteEmail', () => {
     expect(result).toEqual({
       delivered: false,
       provider: 'resend',
-      message: 'Resend API request failed (401): unauthorized',
+      message: 'Email delivery failed. The invitation was created—share the link directly.',
     })
   })
 
-  it('returns resend failure details when resend fetch throws a transport error', async () => {
+  it('returns generic message when resend fetch throws a transport error', async () => {
     process.env.INVITE_EMAIL_PROVIDER = 'resend'
     process.env.RESEND_API_KEY = 'test-api-key'
     process.env.RESEND_FROM_EMAIL = 'noreply@example.com'
@@ -113,7 +113,7 @@ describe('sendInviteEmail', () => {
     expect(result).toEqual({
       delivered: false,
       provider: 'resend',
-      message: 'Resend API transport error: fetch failed',
+      message: 'Email delivery failed. The invitation was created—share the link directly.',
     })
   })
 

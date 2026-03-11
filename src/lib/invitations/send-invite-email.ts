@@ -60,23 +60,24 @@ async function sendWithResend({
       cache: 'no-store',
     })
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Unknown transport error'
+    const errorDetails = error instanceof Error ? error.message : String(error)
+    console.error('[sendInviteEmail] Resend transport error:', errorDetails)
 
     return {
       delivered: false,
       provider: 'resend',
-      message: `Resend API transport error: ${errorMessage}`,
+      message: 'Email delivery failed. The invitation was created—share the link directly.',
     }
   }
 
   if (!response.ok) {
     const errorBody = await response.text()
+    console.error(`[sendInviteEmail] Resend API error (${response.status}):`, errorBody)
 
     return {
       delivered: false,
       provider: 'resend',
-      message: `Resend API request failed (${response.status}): ${errorBody}`,
+      message: 'Email delivery failed. The invitation was created—share the link directly.',
     }
   }
 
