@@ -1,3 +1,4 @@
+import { format } from 'date-fns'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
@@ -8,9 +9,11 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { CreateJournalModal } from '@/app/dashboard/create-journal-modal'
+import { getPendingInvitationsForEmail } from '@/data/invitations'
 import { createJournalForOwner } from '@/data/journals'
 import { getUserJournals, type UserJournal } from '@/data/journals'
 import { getCurrentAppUser } from '@/lib/get-current-app-user'
+import { getCurrentUserEmail } from '@/lib/get-current-user-email'
 
 export default async function DashboardPage() {
   const appUser = await getCurrentAppUser()
@@ -64,6 +67,10 @@ export default async function DashboardPage() {
   }
 
   const userJournals = await getUserJournals(appUser.id)
+  const currentUserEmail = await getCurrentUserEmail()
+  const pendingInvitations = currentUserEmail
+    ? await getPendingInvitationsForEmail(currentUserEmail)
+    : []
 
   return (
     <main className="mx-auto w-full max-w-5xl space-y-6 px-6 py-8">
@@ -73,6 +80,26 @@ export default async function DashboardPage() {
           <CreateJournalModal action={createJournalAction} />
         </div>
       </section>
+
+      {pendingInvitations.length > 0 ? (
+        <section className="space-y-3">
+          <h2 className="text-xl font-semibold tracking-tight">Pending invites</h2>
+          <div className="grid gap-3">
+            {pendingInvitations.map((invitation) => (
+              <Link key={invitation.id} href={`/invitations/${invitation.inviteToken}`} className="block">
+                <Card className="transition-colors hover:bg-muted/40">
+                  <CardHeader>
+                    <CardTitle>{invitation.journalTitle}</CardTitle>
+                    <CardDescription>
+                      Invited as {invitation.role} · Expires {format(invitation.expiresAt, 'MMMM d, yyyy')}
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       {userJournals.length === 0 ? (
         <Card>

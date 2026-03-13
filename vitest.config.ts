@@ -11,6 +11,22 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
     include: ['src/**/*.test.{ts,tsx}'],
+    exclude: ['src/**/*.integration.test.{ts,tsx}'],
     clearMocks: true,
+    coverage: {
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: [
+        'src/**/*.test.{ts,tsx}',
+        'src/test/**',
+        'src/components/ui/**',
+        'src/app/layout.tsx',
+        'src/app/globals.css',
+        'src/proxy.ts',
+        'src/db/seed.ts',
+        'src/db/schema.ts',
+        'src/data/**'
+      ],
+      reporter: ['text', 'html'],
+    },
   },
 })

@@ -29,6 +29,15 @@ CLERK_SECRET_KEY=sk_test_...
 
 # Database (Neon/PostgreSQL)
 DATABASE_URL=postgresql://user:password@host:port/database
+
+# App URL (used in invite links)
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Invite Email Provider (optional)
+# Set to 'resend' to enable real invite emails, otherwise leave unset.
+INVITE_EMAIL_PROVIDER=resend
+RESEND_API_KEY=re_...
+RESEND_FROM_EMAIL=SharedJournal <invites@notify.sharedjournal.app>
 ```
 
 ### Clerk Authentication
@@ -47,6 +56,75 @@ DATABASE_URL=postgresql://user:password@host:port/database
 ```bash
 npm run db:seed
 ```
+
+5. Run schema migrations when pulling DB changes:
+
+```bash
+npm run db:migrate
+```
+
+### Migration Basics (Drizzle)
+
+Use this simple workflow for database changes:
+
+1. Update schema in `src/db/schema.ts`.
+2. Generate a migration file:
+
+```bash
+npm run db:generate
+```
+
+3. Commit the new files under `drizzle/`.
+4. Apply pending migrations:
+
+```bash
+npm run db:migrate
+```
+
+Notes:
+
+- Drizzle tracks applied migrations in the database and only runs new ones.
+- Do not edit a migration that has already been applied; create a new migration instead.
+
+### Invite Email Provider (Resend)
+
+1. Create a [Resend](https://resend.com/) account.
+2. Verify a sending domain in Resend (required for production).
+3. Create an API key in Resend.
+4. Add `INVITE_EMAIL_PROVIDER=resend`, `RESEND_API_KEY`, and `RESEND_FROM_EMAIL` to `.env.local`.
+5. Set `NEXT_PUBLIC_APP_URL` to your app origin so invite links are correct.
+
+If invite email env vars are missing, invitations are still created and the UI shows the invite link for manual sharing.
+
+### Vercel Domain Provider for Invites
+
+This project uses Vercel as the DNS provider for `sharedjournal.app` and Resend for email delivery.
+
+Use this exact domain alignment for invites:
+
+- App domain: `sharedjournal.app`
+- Email sending subdomain in Resend: `notify.sharedjournal.app`
+- From address: `SharedJournal <invites@notify.sharedjournal.app>`
+
+In Vercel DNS, add the records provided by Resend for `notify.sharedjournal.app`. Typical records are:
+
+- DKIM: `TXT` at `resend._domainkey.notify` with the `p=...` key from Resend
+- SPF: `TXT` at `send.notify` with `v=spf1 include:amazonses.com ~all`
+- MAIL FROM: `MX` at `send.notify` with `feedback-smtp.us-east-1.amazonses.com`
+- DMARC: `TXT` at `_dmarc.notify` with `v=DMARC1; p=none;`
+
+Important notes:
+
+- The domain in Resend, DNS records in Vercel, and `RESEND_FROM_EMAIL` must all match the same `.app` domain family.
+- In development, keep `NEXT_PUBLIC_APP_URL=http://localhost:3000`.
+- In production, set `NEXT_PUBLIC_APP_URL=https://sharedjournal.app` so invite links in emails point to your live app.
+
+### Journal Invite Link Behavior
+
+- When an owner invites a user, SharedJournal creates a tokenized link at `/invitations/[token]`.
+- Invite links are generated from `NEXT_PUBLIC_APP_URL`.
+- If email delivery is configured and successful, the invite is sent via Resend.
+- If email is not configured or fails, the invite record is still created and the UI shows the invite link for manual sharing.
 
 ### Implementation Details
 
