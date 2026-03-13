@@ -5,7 +5,7 @@ test('can create a journal, add an entry, and invite a collaborator', async ({ p
   const journalDescription = 'Journal created by Playwright end-to-end coverage.'
   const entryTitle = 'First E2E entry'
   const entryContent = 'Entry content written by Playwright for lifecycle coverage.'
-  // const inviteeEmail = `invitee+${Date.now()}@example.com`
+  const inviteeEmail = `invitee+${Date.now()}@example.com`
 
   await page.goto('/dashboard')
   await expect(page.getByRole('heading', { level: 1, name: 'Journals' })).toBeVisible()
@@ -28,22 +28,25 @@ test('can create a journal, add an entry, and invite a collaborator', async ({ p
   await page.getByRole('button', { name: 'Create entry' }).click()
 
   await expect(page.getByRole('heading', { name: 'Journal entries' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: entryTitle })).toBeVisible()
-  // await expect(page.getByText(entryContent)).toBeVisible()
+  await expect(page.getByText(entryTitle)).toBeVisible()
+  await expect(page.getByText(entryContent)).toBeVisible()
 
-  // await page.getByRole('button', { name: 'Invite' }).click()
-  // await expect(page.getByRole('heading', { name: 'Invite a user' })).toBeVisible()
-  // await page.getByLabel('Email').fill(inviteeEmail)
-  // await page.getByRole('button', { name: 'Send invite' }).click()
+  await page.getByRole('button', { name: 'Invite' }).click()
+  await expect(page.getByRole('heading', { name: 'Invite a user' })).toBeVisible()
+  await page.getByLabel('Email').fill(inviteeEmail)
+  await page.getByRole('button', { name: 'Send invite' }).click()
 
-  // await expect(
-  //   page.getByText(new RegExp(`Invitation (sent to|created for) ${inviteeEmail}\\.`, 'i')),
-  // ).toBeVisible()
-  // await expect(page.getByText('Invite link:', { exact: false })).toBeVisible()
+  await expect(
+    page.getByText(new RegExp(`Invitation (sent to|created for) invitee+`, 'i')),
+  ).toBeVisible()
+  await expect(page.getByText('Invite link:', { exact: false })).toBeVisible()
+  
+  await page.getByRole('button', {name: 'Cancel'}).click()
+  await page.reload()
 
-  // await expect(page.getByRole('heading', { name: 'Pending invites' })).toBeVisible()
-  // await expect(page.getByText(inviteeEmail)).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Pending invites' })).toBeVisible()
+  await expect(page.getByText(inviteeEmail)).toBeVisible()
 
-  // await page.getByRole('button', { name: 'Collaborators (0)' }).click()
-  // await expect(page.getByText('Not shared with anyone yet.')).toBeVisible()
+  await page.getByRole('button', { name: 'Collaborators (0)' }).click()
+  await expect(page.getByText('Not shared with anyone yet.')).toBeVisible()
 })
