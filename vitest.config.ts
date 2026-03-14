@@ -27,6 +27,12 @@ export default defineConfig({
         'src/data/**'
       ],
       reporter: ['text', 'html'],
+      thresholds: {
+        statements: 90,
+        branches: 85,
+        functions: 80,
+        lines: 90,
+      },
     },
   },
 })

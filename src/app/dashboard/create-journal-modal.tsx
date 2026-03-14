@@ -1,7 +1,12 @@
 'use client'
 
-import { useActionState, useState } from 'react'
-import { useFormStatus } from 'react-dom'
+import { useRouter } from 'next/navigation'
+import { useState, useTransition } from 'react'
+
+import {
+  type CreateJournalInput,
+  type CreateJournalState,
+} from '@/app/dashboard/actions'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -16,31 +21,34 @@ import {
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 
-type CreateJournalState = {
-  error: string | null
-}
-
 type CreateJournalModalProps = {
-  action: (prevState: CreateJournalState, formData: FormData) => Promise<CreateJournalState>
-}
-
-const initialState: CreateJournalState = {
-  error: null,
-}
-
-function SubmitButton() {
-  const { pending } = useFormStatus()
-
-  return (
-    <Button type="submit" disabled={pending}>
-      {pending ? 'Creating...' : 'Create journal'}
-    </Button>
-  )
+  action: (input: CreateJournalInput) => Promise<CreateJournalState>
 }
 
 export function CreateJournalModal({ action }: CreateJournalModalProps) {
-  const [state, formAction] = useActionState(action, initialState)
+  const router = useRouter()
   const [open, setOpen] = useState(false)
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
+  const [state, setState] = useState<CreateJournalState>({
+    error: null,
+    redirectTo: null,
+  })
+  const [pending, startTransition] = useTransition()
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+
+    startTransition(async () => {
+      const nextState = await action({ title, description })
+      setState(nextState)
+
+      if (nextState.redirectTo) {
+        setOpen(false)
+        router.push(nextState.redirectTo)
+      }
+    })
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -52,25 +60,40 @@ export function CreateJournalModal({ action }: CreateJournalModalProps) {
           <DialogTitle>Create a journal</DialogTitle>
           <DialogDescription>Fill in the details below to create your journal.</DialogDescription>
         </DialogHeader>
-        <form action={formAction} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <label htmlFor="journal-title" className="text-sm font-medium">
               Title
             </label>
-            <Input id="journal-title" name="title" required maxLength={180} />
+            <Input
+              id="journal-title"
+              name="title"
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              required
+              maxLength={180}
+            />
           </div>
           <div className="space-y-2">
             <label htmlFor="journal-description" className="text-sm font-medium">
               Description
             </label>
-            <Textarea id="journal-description" name="description" maxLength={2000} />
+            <Textarea
+              id="journal-description"
+              name="description"
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              maxLength={2000}
+            />
           </div>
           {state.error ? <p className="text-destructive text-sm">{state.error}</p> : null}
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <SubmitButton />
+            <Button type="submit" disabled={pending}>
+              {pending ? 'Creating...' : 'Create journal'}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

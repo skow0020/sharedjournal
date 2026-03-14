@@ -1,6 +1,5 @@
 import { format } from 'date-fns'
 import Link from 'next/link'
-import { redirect } from 'next/navigation'
 
 import {
   Card,
@@ -8,9 +7,9 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { createJournalAction } from '@/app/dashboard/actions'
 import { CreateJournalModal } from '@/app/dashboard/create-journal-modal'
 import { getPendingInvitationsForEmail } from '@/data/invitations'
-import { createJournalForOwner } from '@/data/journals'
 import { getUserJournals, type UserJournal } from '@/data/journals'
 import { getCurrentAppUser } from '@/lib/get-current-app-user'
 import { getCurrentUserEmail } from '@/lib/get-current-user-email'
@@ -29,41 +28,6 @@ export default async function DashboardPage() {
         </Card>
       </main>
     )
-  }
-
-  async function createJournalAction(
-    _prevState: { error: string | null },
-    formData: FormData,
-  ) {
-    'use server'
-
-    const currentUser = await getCurrentAppUser()
-
-    if (!currentUser) {
-      return {
-        error: 'You must be signed in to create a journal.',
-      }
-    }
-
-    const titleValue = formData.get('title')
-    const descriptionValue = formData.get('description')
-
-    const title = typeof titleValue === 'string' ? titleValue.trim() : ''
-    const description = typeof descriptionValue === 'string' ? descriptionValue.trim() : ''
-
-    if (!title) {
-      return {
-        error: 'Title is required.',
-      }
-    }
-
-    const createdJournal = await createJournalForOwner({
-      ownerUserId: currentUser.id,
-      title,
-      description: description || null,
-    })
-
-    redirect(`/dashboard/journals/${createdJournal.id}`)
   }
 
   const userJournals = await getUserJournals(appUser.id)

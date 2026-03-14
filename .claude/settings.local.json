@@ -12,7 +12,8 @@
       "Bash(npm view:*)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "mcp__Neon__list_projects",
-      "mcp__Neon__get_database_tables"
+      "mcp__Neon__get_database_tables",
+      "mcp__Neon__run_sql_transaction"
     ]
   }
 }
