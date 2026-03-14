@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
 import type { UpdateJournalTitleInput, UpdateJournalTitleState } from '@/app/dashboard/journals/[journalId]/actions'
+import { JOURNAL_TITLE_MAX_LENGTH } from '@/lib/journal-constants'
 
 type JournalTitleEditorProps = {
   journalId: string
@@ -83,7 +84,7 @@ export function JournalTitleEditor({ journalId, title, canEdit, action }: Journa
               ref={inputRef}
               value={draftTitle}
               onChange={(event) => setDraftTitle(event.target.value)}
-              maxLength={180}
+              maxLength={JOURNAL_TITLE_MAX_LENGTH}
               className="h-10 text-3xl font-semibold tracking-tight"
               disabled={isPending}
             />

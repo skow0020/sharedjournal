@@ -1,0 +1,1 @@
+export const JOURNAL_TITLE_MAX_LENGTH = 180
