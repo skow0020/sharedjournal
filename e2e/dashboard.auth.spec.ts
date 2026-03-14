@@ -49,4 +49,10 @@ test('can create a journal, add an entry, and invite a collaborator', async ({ p
 
   await page.getByRole('button', { name: 'Collaborators (0)' }).click()
   await expect(page.getByText('Not shared with anyone yet.')).toBeVisible()
+
+  await page.getByRole('button', { name: 'Delete' }).click()
+  await page.getByRole('dialog', { name: 'Delete journal' }).getByRole('button', { name: 'Delete' }).click()
+
+  await expect(page).toHaveURL('/dashboard')
+  await expect(page.getByText(journalTitle)).not.toBeVisible()
 })

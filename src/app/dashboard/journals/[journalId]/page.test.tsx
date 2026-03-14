@@ -40,6 +40,10 @@ vi.mock('@/app/dashboard/journals/[journalId]/invite-user-modal', () => ({
   InviteUserModal: () => <div data-testid="invite-user-modal">Invite user modal</div>,
 }))
 
+vi.mock('@/app/dashboard/delete-journal-button', () => ({
+  DeleteJournalButton: () => <div data-testid="delete-journal-button">Delete journal</div>,
+}))
+
 vi.mock('@/app/dashboard/journals/[journalId]/actions', () => ({
   createEntryAction: vi.fn(),
   createInviteAction: vi.fn(),
@@ -88,6 +92,7 @@ describe('JournalDetailsPage', () => {
       id: 'journal-1',
       title: 'Family Journal',
       description: 'Shared notes and reflections',
+      isOwner: true,
     })
     getCollaboratorsForJournalMock.mockResolvedValue([
       {
@@ -154,6 +159,7 @@ describe('JournalDetailsPage', () => {
 
     expect(screen.getByTestId('create-entry-modal')).toBeInTheDocument()
     expect(screen.getByTestId('invite-user-modal')).toBeInTheDocument()
+    expect(screen.getByTestId('delete-journal-button')).toBeInTheDocument()
   })
 
   it('renders empty entries state when there are no journal entries', async () => {
@@ -166,5 +172,18 @@ describe('JournalDetailsPage', () => {
     expect(screen.getByText('No entries yet')).toBeInTheDocument()
     expect(screen.getByText('This journal does not have any entries yet.')).toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: 'Pending invites' })).not.toBeInTheDocument()
+  })
+
+  it('does not render delete button for journals shared with the user', async () => {
+    getUserJournalByIdMock.mockResolvedValue({
+      id: 'journal-1',
+      title: 'Family Journal',
+      description: 'Shared notes and reflections',
+      isOwner: false,
+    })
+
+    await renderJournalDetailsPage()
+
+    expect(screen.queryByTestId('delete-journal-button')).not.toBeInTheDocument()
   })
 })

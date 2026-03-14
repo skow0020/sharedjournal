@@ -2,13 +2,15 @@ import { format } from 'date-fns'
 import Link from 'next/link'
 
 import {
+  CardContent,
   Card,
   CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { createJournalAction } from '@/app/dashboard/actions'
+import { createJournalAction, deleteJournalAction } from '@/app/dashboard/actions'
 import { CreateJournalModal } from '@/app/dashboard/create-journal-modal'
+import { DeleteJournalButton } from '@/app/dashboard/delete-journal-button'
 import { getPendingInvitationsForEmail } from '@/data/invitations'
 import { getUserJournals, type UserJournal } from '@/data/journals'
 import { getCurrentAppUser } from '@/lib/get-current-app-user'
@@ -74,14 +76,24 @@ export default async function DashboardPage() {
         </Card>
       ) : (
         userJournals.map((journal: UserJournal) => (
-          <Link key={journal.id} href={`/dashboard/journals/${journal.id}`} className="block">
-            <Card className="transition-colors hover:bg-muted/40">
-              <CardHeader>
-                <CardTitle>{journal.title}</CardTitle>
-                <CardDescription>{journal.description || 'No description'}</CardDescription>
-              </CardHeader>
-            </Card>
-          </Link>
+          <Card key={journal.id} className="relative gap-3 transition-colors hover:bg-muted/40">
+            <Link
+              href={`/dashboard/journals/${journal.id}`}
+              aria-label={`Open ${journal.title}`}
+              className="focus-visible:ring-ring absolute inset-0 rounded-xl focus-visible:ring-2"
+            />
+            <CardHeader className="relative z-10 pointer-events-none">
+              <CardTitle>{journal.title}</CardTitle>
+              <CardDescription>{journal.description || 'No description'}</CardDescription>
+            </CardHeader>
+            {journal.isOwner ? (
+              <CardContent className="relative z-20 pt-0 pointer-events-none">
+                <div className="ml-auto w-fit pointer-events-auto">
+                  <DeleteJournalButton journalId={journal.id} action={deleteJournalAction} />
+                </div>
+              </CardContent>
+            ) : null}
+          </Card>
         ))
       )}
     </main>

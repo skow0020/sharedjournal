@@ -5,6 +5,7 @@ import { db } from '@/db'
 import { journalMembers, journals, users } from '@/db/schema'
 import {
   createJournalForOwner,
+  deleteJournalOwnedByUser,
   getCollaboratorsForJournal,
   getUserJournalById,
   getUserJournals,
@@ -105,6 +106,7 @@ describe('getUserJournals', () => {
     const ids = result.map((j) => j.id)
     expect(ids).toContain(journalId1)
     expect(ids).toContain(journalId2)
+    expect(result.every((journal) => journal.isOwner)).toBe(true)
   })
 
   it('returns only journals the member belongs to', async () => {
@@ -113,6 +115,7 @@ describe('getUserJournals', () => {
     const ids = result.map((j) => j.id)
     expect(ids).toContain(journalId1)
     expect(ids).not.toContain(journalId2)
+    expect(result.every((journal) => !journal.isOwner)).toBe(true)
   })
 
   it('returns empty array for a user with no memberships', async () => {
@@ -132,6 +135,63 @@ describe('getUserJournals', () => {
     expect(found?.description).toBe('A description.')
 
     await deleteJournals([journalWithDesc.id])
+  })
+})
+
+describe('deleteJournalOwnedByUser', () => {
+  let ownerId: string
+  let memberId: string
+  let journalId: string
+
+  beforeEach(async () => {
+    const owner = await createUser({ displayName: 'Owner' })
+    const member = await createUser({ displayName: 'Member' })
+
+    ownerId = owner.id
+    memberId = member.id
+
+    const journal = await createJournal(ownerId, 'Delete Journal')
+    journalId = journal.id
+
+    await addMember(journalId, ownerId, 'owner')
+    await addMember(journalId, memberId, 'editor')
+  })
+
+  afterEach(async () => {
+    await deleteJournals([journalId])
+    await deleteUsers([ownerId, memberId])
+  })
+
+  it('deletes a journal when requested by its owner', async () => {
+    const deleted = await deleteJournalOwnedByUser({
+      userId: ownerId,
+      journalId,
+    })
+
+    expect(deleted).toBe(true)
+
+    const [journal] = await db
+      .select({ id: journals.id })
+      .from(journals)
+      .where(eq(journals.id, journalId))
+
+    expect(journal).toBeUndefined()
+  })
+
+  it('does not delete a journal when requested by a non-owner member', async () => {
+    const deleted = await deleteJournalOwnedByUser({
+      userId: memberId,
+      journalId,
+    })
+
+    expect(deleted).toBe(false)
+
+    const [journal] = await db
+      .select({ id: journals.id })
+      .from(journals)
+      .where(eq(journals.id, journalId))
+
+    expect(journal?.id).toBe(journalId)
   })
 })
 
@@ -165,6 +225,7 @@ describe('getUserJournalById', () => {
     expect(result?.id).toBe(journalId)
     expect(result?.title).toBe('Detail Journal')
     expect(result?.description).toBe('Some details.')
+    expect(result?.isOwner).toBe(true)
   })
 
   it('returns null for a user who is not a member', async () => {
@@ -186,6 +247,7 @@ describe('getUserJournalById', () => {
     const result = await getUserJournalById(editor.id, journalId)
 
     expect(result?.id).toBe(journalId)
+    expect(result?.isOwner).toBe(false)
 
     await deleteUsers([editor.id])
   })
