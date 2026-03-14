@@ -30,6 +30,7 @@ export type UserJournalDetails = {
   id: string
   title: string
   description: string | null
+  ownerUserId: string
 }
 
 export type JournalCollaborator = {
@@ -50,6 +51,7 @@ export async function getUserJournalById(
       id: journals.id,
       title: journals.title,
       description: journals.description,
+      ownerUserId: journals.ownerUserId,
     })
     .from(journals)
     .innerJoin(journalMembers, eq(journalMembers.journalId, journals.id))
@@ -93,6 +95,12 @@ type CreateJournalInput = {
   description: string | null
 }
 
+type UpdateJournalTitleInput = {
+  ownerUserId: string
+  journalId: string
+  title: string
+}
+
 export async function createJournalForOwner({
   ownerUserId,
   title,
@@ -121,4 +129,18 @@ export async function createJournalForOwner({
   }
 
   return createdJournal
+}
+
+export async function updateJournalTitleForOwner({
+  ownerUserId,
+  journalId,
+  title,
+}: UpdateJournalTitleInput): Promise<boolean> {
+  const [updatedJournal] = await db
+    .update(journals)
+    .set({ title })
+    .where(and(eq(journals.id, journalId), eq(journals.ownerUserId, ownerUserId)))
+    .returning({ id: journals.id })
+
+  return Boolean(updatedJournal)
 }

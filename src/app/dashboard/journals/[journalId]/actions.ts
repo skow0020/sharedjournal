@@ -1,6 +1,7 @@
 'use server'
 
 import { currentUser as getClerkCurrentUser } from '@clerk/nextjs/server'
+import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
 import { createEntryForJournal } from '@/data/entries'
@@ -8,6 +9,7 @@ import {
   createJournalInvitation,
   setInvitationEmailDeliveryFlag,
 } from '@/data/invitations'
+import { updateJournalTitleForOwner } from '@/data/journals'
 import { getCurrentAppUser } from '@/lib/get-current-app-user'
 import { sendInviteEmail } from '@/lib/invitations/send-invite-email'
 
@@ -29,10 +31,19 @@ export type InviteUserInput = {
   email: string
 }
 
+export type UpdateJournalTitleInput = {
+  journalId: string
+  title: string
+}
+
 export type InviteActionState = {
   error: string | null
   successMessage: string | null
   inviteLink: string | null
+}
+
+export type UpdateJournalTitleState = {
+  error: string | null
 }
 
 const createEntrySchema = z.object({
@@ -46,6 +57,11 @@ const inviteUserSchema = z.object({
   journalId: z.string().trim().min(1, 'Journal is required.'),
   journalTitle: z.string().trim().min(1, 'Journal title is required.'),
   email: z.string().trim().email('Please provide a valid email address.').transform((value) => value.toLowerCase()),
+})
+
+const updateJournalTitleSchema = z.object({
+  journalId: z.string().trim().min(1, 'Journal is required.'),
+  title: z.string().trim().min(1, 'Title is required.').max(180, 'Title must be 180 characters or less.'),
 })
 
 function getAppBaseUrl(): string {
@@ -164,5 +180,43 @@ export async function createInviteAction(
     error: null,
     successMessage,
     inviteLink,
+  }
+}
+
+export async function updateJournalTitleAction(
+  input: UpdateJournalTitleInput,
+): Promise<UpdateJournalTitleState> {
+  const currentUser = await getCurrentAppUser()
+
+  if (!currentUser) {
+    return {
+      error: 'You must be signed in to update this journal.',
+    }
+  }
+
+  const parsedInput = updateJournalTitleSchema.safeParse(input)
+
+  if (!parsedInput.success) {
+    return {
+      error: parsedInput.error.issues[0]?.message ?? 'Unable to update journal title.',
+    }
+  }
+
+  const updated = await updateJournalTitleForOwner({
+    ownerUserId: currentUser.id,
+    journalId: parsedInput.data.journalId,
+    title: parsedInput.data.title,
+  })
+
+  if (!updated) {
+    return {
+      error: 'You do not have permission to update this journal.',
+    }
+  }
+
+  revalidatePath(`/dashboard/journals/${parsedInput.data.journalId}`)
+
+  return {
+    error: null,
   }
 }

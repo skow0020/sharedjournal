@@ -4,16 +4,20 @@ const {
   getClerkCurrentUserMock,
   createEntryForJournalMock,
   createJournalInvitationMock,
+  updateJournalTitleForOwnerMock,
   setInvitationEmailDeliveryFlagMock,
   getCurrentAppUserMock,
   sendInviteEmailMock,
+  revalidatePathMock,
 } = vi.hoisted(() => ({
   getClerkCurrentUserMock: vi.fn(),
   createEntryForJournalMock: vi.fn(),
   createJournalInvitationMock: vi.fn(),
+  updateJournalTitleForOwnerMock: vi.fn(),
   setInvitationEmailDeliveryFlagMock: vi.fn(),
   getCurrentAppUserMock: vi.fn(),
   sendInviteEmailMock: vi.fn(),
+  revalidatePathMock: vi.fn(),
 }))
 
 vi.mock('@clerk/nextjs/server', () => ({
@@ -29,6 +33,10 @@ vi.mock('@/data/invitations', () => ({
   setInvitationEmailDeliveryFlag: setInvitationEmailDeliveryFlagMock,
 }))
 
+vi.mock('@/data/journals', () => ({
+  updateJournalTitleForOwner: updateJournalTitleForOwnerMock,
+}))
+
 vi.mock('@/lib/get-current-app-user', () => ({
   getCurrentAppUser: getCurrentAppUserMock,
 }))
@@ -37,9 +45,14 @@ vi.mock('@/lib/invitations/send-invite-email', () => ({
   sendInviteEmail: sendInviteEmailMock,
 }))
 
+vi.mock('next/cache', () => ({
+  revalidatePath: revalidatePathMock,
+}))
+
 import {
   createEntryAction,
   createInviteAction,
+  updateJournalTitleAction,
 } from '@/app/dashboard/journals/[journalId]/actions'
 
 const originalAppUrl = process.env.NEXT_PUBLIC_APP_URL
@@ -295,6 +308,74 @@ describe('createInviteAction', () => {
       error: null,
       successMessage: 'Invitation created for friend@example.com. Copy the link below to share.',
       inviteLink: 'https://sharedjournal.test/invitations/token-123',
+    })
+  })
+})
+
+describe('updateJournalTitleAction', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns an auth error when the user is signed out', async () => {
+    getCurrentAppUserMock.mockResolvedValue(null)
+
+    const result = await updateJournalTitleAction({
+      journalId: 'journal-1',
+      title: 'New title',
+    })
+
+    expect(result).toEqual({
+      error: 'You must be signed in to update this journal.',
+    })
+    expect(updateJournalTitleForOwnerMock).not.toHaveBeenCalled()
+  })
+
+  it('validates the title before calling the data helper', async () => {
+    getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
+
+    const result = await updateJournalTitleAction({
+      journalId: 'journal-1',
+      title: '   ',
+    })
+
+    expect(result).toEqual({
+      error: 'Title is required.',
+    })
+    expect(updateJournalTitleForOwnerMock).not.toHaveBeenCalled()
+  })
+
+  it('returns a permission error when the data helper rejects the update', async () => {
+    getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
+    updateJournalTitleForOwnerMock.mockResolvedValue(false)
+
+    const result = await updateJournalTitleAction({
+      journalId: 'journal-1',
+      title: 'New title',
+    })
+
+    expect(result).toEqual({
+      error: 'You do not have permission to update this journal.',
+    })
+  })
+
+  it('trims inputs and revalidates the journal page on success', async () => {
+    getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
+    updateJournalTitleForOwnerMock.mockResolvedValue(true)
+
+    const result = await updateJournalTitleAction({
+      journalId: '  journal-1  ',
+      title: '  Fresh title  ',
+    })
+
+    expect(updateJournalTitleForOwnerMock).toHaveBeenCalledWith({
+      ownerUserId: 'user-1',
+      journalId: 'journal-1',
+      title: 'Fresh title',
+    })
+    expect(revalidatePathMock).toHaveBeenCalledWith('/dashboard/journals/journal-1')
+    expect(result).toEqual({
+      error: null,
     })
   })
 })
