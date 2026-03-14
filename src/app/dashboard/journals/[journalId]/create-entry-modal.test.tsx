@@ -2,15 +2,28 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
+const { pushMock, refreshMock } = vi.hoisted(() => ({
+  pushMock: vi.fn(),
+  refreshMock: vi.fn(),
+}))
+
+vi.mock('next/navigation', () => ({
+  usePathname: () => '/dashboard/journals/journal-1',
+  useRouter: () => ({
+    push: pushMock,
+    refresh: refreshMock,
+  }),
+}))
+
 import { CreateEntryModal } from '@/app/dashboard/journals/[journalId]/create-entry-modal'
 
 describe('CreateEntryModal', () => {
   it('opens modal and renders entry fields', async () => {
     const user = userEvent.setup()
 
-    const action = vi.fn(async () => ({ error: null }))
+    const action = vi.fn(async () => ({ error: null, redirectTo: null }))
 
-    render(<CreateEntryModal action={action} />)
+    render(<CreateEntryModal journalId="journal-1" action={action} />)
 
     await user.click(screen.getByRole('button', { name: 'Add entry' }))
 
@@ -23,13 +36,14 @@ describe('CreateEntryModal', () => {
   it('submits entry values to the action', async () => {
     const user = userEvent.setup()
 
-    const action = vi.fn(async (_prevState: { error: string | null }, formData: FormData) => {
+    const action = vi.fn(async () => {
       return {
-        error: formData.get('content') ? null : 'Content is required.',
+        error: null,
+        redirectTo: '/dashboard/journals/journal-1',
       }
     })
 
-    render(<CreateEntryModal action={action} />)
+    render(<CreateEntryModal journalId="journal-1" action={action} />)
 
     await user.click(screen.getByRole('button', { name: 'Add entry' }))
     await user.type(screen.getByLabelText('Title'), 'Morning Reflection')
@@ -42,9 +56,13 @@ describe('CreateEntryModal', () => {
       expect(action).toHaveBeenCalled()
     })
 
-    const [, submittedFormData] = action.mock.calls[0]
-    expect(submittedFormData.get('title')).toBe('Morning Reflection')
-    expect(submittedFormData.get('content')).toBe('Wrote about priorities for today.')
-    expect(submittedFormData.get('entryDate')).toBe('2026-03-07')
+    expect(action).toHaveBeenCalledWith({
+      journalId: 'journal-1',
+      title: 'Morning Reflection',
+      content: 'Wrote about priorities for today.',
+      entryDate: '2026-03-07',
+    })
+    expect(pushMock).not.toHaveBeenCalled()
+    expect(refreshMock).toHaveBeenCalled()
   })
 })

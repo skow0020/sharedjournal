@@ -1,13 +1,13 @@
 import { SignInButton } from '@clerk/nextjs'
-import { redirect } from 'next/navigation'
 
+import {
+  acceptInvitationAction,
+  declineInvitationAction,
+} from '@/app/invitations/[token]/actions'
+import { InvitationResponseActions } from '@/app/invitations/[token]/invitation-response-actions'
 import { Button } from '@/components/ui/button'
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  acceptJournalInvitation,
-  declineJournalInvitation,
-  getInvitationByToken,
-} from '@/data/invitations'
+import { getInvitationByToken } from '@/data/invitations'
 import { getCurrentAppUser } from '@/lib/get-current-app-user'
 import { getCurrentUserEmail } from '@/lib/get-current-user-email'
 
@@ -20,46 +20,6 @@ type InvitationPageProps = {
 export default async function InvitationPage({ params }: InvitationPageProps) {
   const { token } = await params
   const invitationLookup = await getInvitationByToken(token)
-
-  async function acceptInvitationAction() {
-    'use server'
-
-    const appUser = await getCurrentAppUser()
-    const email = await getCurrentUserEmail()
-
-    if (!appUser || !email) {
-      redirect(`/invitations/${token}`)
-    }
-
-    const result = await acceptJournalInvitation({
-      token,
-      acceptingUserId: appUser.id,
-      acceptingEmail: email,
-    })
-
-    if (!result.ok) {
-      redirect(`/invitations/${token}`)
-    }
-
-    redirect(`/dashboard/journals/${result.journalId}`)
-  }
-
-  async function declineInvitationAction() {
-    'use server'
-
-    const email = await getCurrentUserEmail()
-
-    if (!email) {
-      redirect(`/invitations/${token}`)
-    }
-
-    await declineJournalInvitation({
-      token,
-      decliningEmail: email,
-    })
-
-    redirect('/dashboard')
-  }
 
   if (invitationLookup.state === 'not-found') {
     return (
@@ -132,14 +92,11 @@ export default async function InvitationPage({ params }: InvitationPageProps) {
               <Button>Sign in to accept</Button>
             </SignInButton>
           ) : emailMatchesInvite ? (
-            <div className="flex items-center gap-2">
-              <form action={acceptInvitationAction}>
-                <Button type="submit">Accept invite</Button>
-              </form>
-              <form action={declineInvitationAction}>
-                <Button type="submit" variant="outline">Decline</Button>
-              </form>
-            </div>
+            <InvitationResponseActions
+              token={token}
+              acceptAction={acceptInvitationAction}
+              declineAction={declineInvitationAction}
+            />
           ) : (
             <p className="text-destructive text-sm">
               You are signed in as <span className="font-medium">{currentUserEmail}</span>. Sign in with{' '}

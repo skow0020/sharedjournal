@@ -40,6 +40,11 @@ vi.mock('@/app/dashboard/journals/[journalId]/invite-user-modal', () => ({
   InviteUserModal: () => <div data-testid="invite-user-modal">Invite user modal</div>,
 }))
 
+vi.mock('@/app/dashboard/journals/[journalId]/actions', () => ({
+  createEntryAction: vi.fn(),
+  createInviteAction: vi.fn(),
+}))
+
 vi.mock('@/lib/get-current-app-user', () => ({
   getCurrentAppUser: getCurrentAppUserMock,
 }))

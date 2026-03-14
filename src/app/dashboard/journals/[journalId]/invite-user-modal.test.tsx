@@ -13,7 +13,7 @@ describe('InviteUserModal', () => {
       inviteLink: null,
     }))
 
-    render(<InviteUserModal action={action} />)
+    render(<InviteUserModal journalId="journal-1" journalTitle="Family Journal" action={action} />)
 
     await user.click(screen.getByRole('button', { name: 'Invite' }))
 
@@ -24,13 +24,13 @@ describe('InviteUserModal', () => {
 
   it('submits email to action and renders success state', async () => {
     const user = userEvent.setup()
-    const action = vi.fn(async (_prevState: unknown, formData: FormData) => ({
+    const action = vi.fn(async () => ({
       error: null,
-      successMessage: `Invitation created for ${formData.get('email')}.`,
+      successMessage: 'Invitation created for friend@example.com.',
       inviteLink: '/invitations/example-token',
     }))
 
-    render(<InviteUserModal action={action} />)
+    render(<InviteUserModal journalId="journal-1" journalTitle="Family Journal" action={action} />)
 
     await user.click(screen.getByRole('button', { name: 'Invite' }))
     await user.type(screen.getByLabelText('Email'), 'friend@example.com')
@@ -40,8 +40,11 @@ describe('InviteUserModal', () => {
       expect(action).toHaveBeenCalled()
     })
 
-    const [, submittedFormData] = action.mock.calls[0]
-    expect(submittedFormData.get('email')).toBe('friend@example.com')
+    expect(action).toHaveBeenCalledWith({
+      journalId: 'journal-1',
+      journalTitle: 'Family Journal',
+      email: 'friend@example.com',
+    })
 
     await waitFor(() => {
       expect(screen.getByText('Invitation created for friend@example.com.')).toBeInTheDocument()

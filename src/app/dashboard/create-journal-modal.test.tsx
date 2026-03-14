@@ -2,13 +2,25 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
+const { pushMock, refreshMock } = vi.hoisted(() => ({
+  pushMock: vi.fn(),
+  refreshMock: vi.fn(),
+}))
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: pushMock,
+    refresh: refreshMock,
+  }),
+}))
+
 import { CreateJournalModal } from '@/app/dashboard/create-journal-modal'
 
 describe('CreateJournalModal', () => {
   it('opens modal and renders journal fields', async () => {
     const user = userEvent.setup()
 
-    const action = vi.fn(async () => ({ error: null }))
+    const action = vi.fn(async () => ({ error: null, redirectTo: null }))
 
     render(<CreateJournalModal action={action} />)
 
@@ -22,9 +34,10 @@ describe('CreateJournalModal', () => {
   it('submits title and description to the action', async () => {
     const user = userEvent.setup()
 
-    const action = vi.fn(async (_prevState: { error: string | null }, formData: FormData) => {
+    const action = vi.fn(async () => {
       return {
-        error: formData.get('title') ? null : 'Title is required.',
+        error: null,
+        redirectTo: '/dashboard/journals/journal-1',
       }
     })
 
@@ -39,9 +52,12 @@ describe('CreateJournalModal', () => {
       expect(action).toHaveBeenCalled()
     })
 
-    const [, submittedFormData] = action.mock.calls[0]
-    expect(submittedFormData.get('title')).toBe('Trip Notes')
-    expect(submittedFormData.get('description')).toBe('Weekend plans and entries.')
+    expect(action).toHaveBeenCalledWith({
+      title: 'Trip Notes',
+      description: 'Weekend plans and entries.',
+    })
+    expect(pushMock).toHaveBeenCalledWith('/dashboard/journals/journal-1')
+    expect(refreshMock).not.toHaveBeenCalled()
   })
 
   it('shows validation error when title is missing', async () => {
@@ -49,6 +65,7 @@ describe('CreateJournalModal', () => {
 
     const action = vi.fn(async () => ({
       error: 'Title is required.',
+      redirectTo: null,
     }))
 
     render(<CreateJournalModal action={action} />)

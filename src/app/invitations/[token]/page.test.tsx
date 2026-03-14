@@ -4,14 +4,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const {
   getInvitationByTokenMock,
-  acceptJournalInvitationMock,
-  declineJournalInvitationMock,
   getCurrentAppUserMock,
   getCurrentUserEmailMock,
 } = vi.hoisted(() => ({
   getInvitationByTokenMock: vi.fn(),
-  acceptJournalInvitationMock: vi.fn(),
-  declineJournalInvitationMock: vi.fn(),
   getCurrentAppUserMock: vi.fn(),
   getCurrentUserEmailMock: vi.fn(),
 }))
@@ -22,8 +18,15 @@ vi.mock('@clerk/nextjs', () => ({
 
 vi.mock('@/data/invitations', () => ({
   getInvitationByToken: getInvitationByTokenMock,
-  acceptJournalInvitation: acceptJournalInvitationMock,
-  declineJournalInvitation: declineJournalInvitationMock,
+}))
+
+vi.mock('@/app/invitations/[token]/actions', () => ({
+  acceptInvitationAction: vi.fn(),
+  declineInvitationAction: vi.fn(),
+}))
+
+vi.mock('@/app/invitations/[token]/invitation-response-actions', () => ({
+  InvitationResponseActions: () => <div data-testid="invitation-response-actions">Invitation response actions</div>,
 }))
 
 vi.mock('@/lib/get-current-app-user', () => ({
@@ -112,8 +115,7 @@ describe('InvitationPage', () => {
 
     await renderInvitationPage()
 
-    expect(screen.getByRole('button', { name: 'Accept invite' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Decline' })).toBeInTheDocument()
+    expect(screen.getByTestId('invitation-response-actions')).toBeInTheDocument()
   })
 
   it('shows mismatch message when signed in with different email', async () => {
