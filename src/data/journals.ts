@@ -1,4 +1,4 @@
-import { and, desc, eq, ne } from 'drizzle-orm'
+import { and, desc, eq, ne, sql } from 'drizzle-orm'
 
 import { db } from '@/db'
 import { journalMembers, journals, users } from '@/db/schema'
@@ -7,6 +7,7 @@ export type UserJournal = {
   id: string
   title: string
   description: string | null
+  isOwner: boolean
 }
 
 /**
@@ -18,6 +19,7 @@ export async function getUserJournals(userId: string): Promise<UserJournal[]> {
       id: journals.id,
       title: journals.title,
       description: journals.description,
+      isOwner: sql<boolean>`${journals.ownerUserId} = ${userId}`,
     })
     .from(journals)
     .innerJoin(journalMembers, eq(journalMembers.journalId, journals.id))
@@ -26,11 +28,27 @@ export async function getUserJournals(userId: string): Promise<UserJournal[]> {
     .orderBy(desc(journals.updatedAt))
 }
 
+/**
+ * Delete a journal only if the requesting user is the owner.
+ */
+export async function deleteJournalOwnedByUser(input: {
+  userId: string
+  journalId: string
+}): Promise<boolean> {
+  const deleted = await db
+    .delete(journals)
+    .where(and(eq(journals.id, input.journalId), eq(journals.ownerUserId, input.userId)))
+    .returning({ id: journals.id })
+
+  return deleted.length > 0
+}
+
 export type UserJournalDetails = {
   id: string
   title: string
   description: string | null
   ownerUserId: string
+  isOwner: boolean
 }
 
 export type JournalCollaborator = {
@@ -52,6 +70,7 @@ export async function getUserJournalById(
       title: journals.title,
       description: journals.description,
       ownerUserId: journals.ownerUserId,
+      isOwner: sql<boolean>`${journals.ownerUserId} = ${userId}`,
     })
     .from(journals)
     .innerJoin(journalMembers, eq(journalMembers.journalId, journals.id))

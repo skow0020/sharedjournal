@@ -22,6 +22,12 @@ vi.mock('@/app/dashboard/create-journal-modal', () => ({
   ),
 }))
 
+vi.mock('@/app/dashboard/delete-journal-button', () => ({
+  DeleteJournalButton: ({ journalId }: { journalId: string }) => (
+    <div data-testid={`delete-journal-${journalId}`}>Delete</div>
+  ),
+}))
+
 vi.mock('@/lib/get-current-app-user', () => ({
   getCurrentAppUser: getCurrentAppUserMock,
 }))
@@ -94,6 +100,7 @@ describe('DashboardPage', () => {
         id: 'journal-1',
         title: 'Family Journal',
         description: 'Daily family reflections',
+        isOwner: true,
       },
     ])
 
@@ -105,6 +112,32 @@ describe('DashboardPage', () => {
 
     expect(screen.getByText('Family Journal')).toBeInTheDocument()
     expect(screen.getByText('Daily family reflections')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Open Family Journal' })).toBeInTheDocument()
+    expect(screen.getByTestId('delete-journal-journal-1')).toBeInTheDocument()
+  })
+
+  it('renders delete button only for journals owned by current user', async () => {
+    getUserJournalsMock.mockResolvedValue([
+      {
+        id: 'journal-1',
+        title: 'Owned Journal',
+        description: null,
+        isOwner: true,
+      },
+      {
+        id: 'journal-2',
+        title: 'Shared With Me',
+        description: null,
+        isOwner: false,
+      },
+    ])
+
+    await renderDashboardPage()
+
+    expect(screen.getByRole('link', { name: 'Open Owned Journal' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Open Shared With Me' })).toBeInTheDocument()
+    expect(screen.getByTestId('delete-journal-journal-1')).toBeInTheDocument()
+    expect(screen.queryByTestId('delete-journal-journal-2')).not.toBeInTheDocument()
   })
 
   it('does not fetch pending invitations when current user email is unavailable', async () => {

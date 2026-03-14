@@ -20,6 +20,8 @@ import {
   createInviteAction,
   updateJournalTitleAction,
 } from '@/app/dashboard/journals/[journalId]/actions'
+import { deleteJournalAction } from '@/app/dashboard/actions'
+import { DeleteJournalButton } from '@/app/dashboard/delete-journal-button'
 import { CreateEntryModal } from '@/app/dashboard/journals/[journalId]/create-entry-modal'
 import { InviteUserModal } from '@/app/dashboard/journals/[journalId]/invite-user-modal'
 import { JournalTitleEditor } from '@/app/dashboard/journals/[journalId]/journal-title-editor'
@@ -114,6 +116,13 @@ export default async function JournalDetailsPage({ params }: JournalDetailsPageP
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {journal.isOwner ? (
+              <DeleteJournalButton
+                journalId={journalId}
+                action={deleteJournalAction}
+                successRedirectTo="/dashboard"
+              />
+            ) : null}
             <CreateEntryModal journalId={journalId} action={createEntryAction} />
             <InviteUserModal journalId={journalId} journalTitle={journalTitle} action={createInviteAction} />
           </div>
