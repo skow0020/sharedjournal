@@ -1,6 +1,5 @@
 import { format, parseISO } from 'date-fns'
 import Link from 'next/link'
-import Image from 'next/image'
 import { notFound } from 'next/navigation'
 
 import {
@@ -32,6 +31,7 @@ import {
   type JournalEntryForJournal,
 } from '@/data/entries'
 import { buildEntryPhotoProxyUrl } from '@/lib/entry-image-storage'
+import { EntryPhotoGallery } from '@/app/dashboard/journals/[journalId]/entry-photo-gallery'
 import {
   getPendingInvitationsForOwnedJournal,
 } from '@/data/invitations'
@@ -176,20 +176,12 @@ export default async function JournalDetailsPage({ params }: JournalDetailsPageP
                 <CardContent>
                   <p className="text-sm leading-6 whitespace-pre-wrap">{entry.content}</p>
                   {entry.photos.length > 0 ? (
-                    <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
-                      {entry.photos.map((photo, index) => (
-                        <Image
-                          key={photo.id}
-                          src={buildEntryPhotoProxyUrl(entry.id, photo.id)}
-                          alt={`Entry image ${index + 1}`}
-                          width={640}
-                          height={480}
-                          unoptimized
-                          loading="lazy"
-                          className="h-32 w-full rounded-md border object-cover"
-                        />
-                      ))}
-                    </div>
+                    <EntryPhotoGallery
+                      photos={entry.photos.map((photo) => ({
+                        id: photo.id,
+                        src: buildEntryPhotoProxyUrl(entry.id, photo.id),
+                      }))}
+                    />
                   ) : null}
                 </CardContent>
               </Card>
