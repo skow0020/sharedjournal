@@ -48,6 +48,7 @@ vi.mock('@/app/dashboard/delete-journal-button', () => ({
 }))
 
 vi.mock('@/app/dashboard/journals/[journalId]/actions', () => ({
+  cleanupEntryImageUploadsAction: vi.fn(),
   createEntryAction: vi.fn(),
   createInviteAction: vi.fn(),
   updateJournalTitleAction: vi.fn(),
@@ -114,6 +115,7 @@ describe('JournalDetailsPage', () => {
         entryDate: '2026-03-10',
         authorName: 'Colin',
         createdAt: new Date('2026-03-10T09:00:00.000Z'),
+        photos: [],
       },
     ])
     getPendingInvitationsForOwnedJournalMock.mockResolvedValue([

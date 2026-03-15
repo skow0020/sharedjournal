@@ -1,5 +1,6 @@
 import { format, parseISO } from 'date-fns'
 import Link from 'next/link'
+import Image from 'next/image'
 import { notFound } from 'next/navigation'
 
 import {
@@ -16,6 +17,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion'
 import {
+  cleanupEntryImageUploadsAction,
   createEntryAction,
   createInviteAction,
   updateJournalTitleAction,
@@ -29,6 +31,7 @@ import {
   getJournalEntriesForJournal,
   type JournalEntryForJournal,
 } from '@/data/entries'
+import { buildEntryPhotoProxyUrl } from '@/lib/entry-image-storage'
 import {
   getPendingInvitationsForOwnedJournal,
 } from '@/data/invitations'
@@ -123,7 +126,11 @@ export default async function JournalDetailsPage({ params }: JournalDetailsPageP
                 successRedirectTo="/dashboard"
               />
             ) : null}
-            <CreateEntryModal journalId={journalId} action={createEntryAction} />
+            <CreateEntryModal
+              journalId={journalId}
+              action={createEntryAction}
+              cleanupAction={cleanupEntryImageUploadsAction}
+            />
             <InviteUserModal journalId={journalId} journalTitle={journalTitle} action={createInviteAction} />
           </div>
         </div>
@@ -168,6 +175,22 @@ export default async function JournalDetailsPage({ params }: JournalDetailsPageP
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm leading-6 whitespace-pre-wrap">{entry.content}</p>
+                  {entry.photos.length > 0 ? (
+                    <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                      {entry.photos.map((photo, index) => (
+                        <Image
+                          key={photo.id}
+                          src={buildEntryPhotoProxyUrl(entry.id, photo.id)}
+                          alt={`Entry image ${index + 1}`}
+                          width={640}
+                          height={480}
+                          unoptimized
+                          loading="lazy"
+                          className="h-32 w-full rounded-md border object-cover"
+                        />
+                      ))}
+                    </div>
+                  ) : null}
                 </CardContent>
               </Card>
             ))}

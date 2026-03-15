@@ -1,29 +1,50 @@
 'use server'
 
+import { del } from '@vercel/blob'
 import { currentUser as getClerkCurrentUser } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
-import { createEntryForJournal } from '@/data/entries'
+import { createEntryWithUploadedImagesForJournal } from '@/data/entries'
 import {
   createJournalInvitation,
   setInvitationEmailDeliveryFlag,
 } from '@/data/invitations'
-import { updateJournalTitleForOwner } from '@/data/journals'
+import { getUserJournalById, updateJournalTitleForOwner } from '@/data/journals'
+import { ENTRY_IMAGE_ALLOWED_MIME_TYPES, ENTRY_IMAGE_MAX_FILES } from '@/lib/entry-image-constants'
+import { isTempEntryImageStorageKeyForJournal } from '@/lib/entry-image-storage'
 import { getCurrentAppUser } from '@/lib/get-current-app-user'
 import { sendInviteEmail } from '@/lib/invitations/send-invite-email'
 import { JOURNAL_TITLE_MAX_LENGTH } from '@/lib/journal-constants'
+
+export type UploadedEntryImageInput = {
+  tempStorageKey: string
+  fileName: string
+  mimeType: string
+  width: number | null
+  height: number | null
+}
 
 export type CreateEntryInput = {
   journalId: string
   title: string
   content: string
   entryDate: string
+  uploadedImages?: UploadedEntryImageInput[]
 }
 
 export type CreateEntryState = {
   error: string | null
   redirectTo: string | null
+}
+
+export type CleanupEntryImageUploadsInput = {
+  journalId: string
+  storageKeys: string[]
+}
+
+export type CleanupEntryImageUploadsState = {
+  error: string | null
 }
 
 export type InviteUserInput = {
@@ -52,6 +73,33 @@ const createEntrySchema = z.object({
   title: z.string().trim().max(220, 'Title must be 220 characters or less.'),
   content: z.string().trim().min(1, 'Content is required.'),
   entryDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Entry date is invalid.'),
+  uploadedImages: z
+    .array(
+      z.object({
+        tempStorageKey: z.string().trim().min(1, 'Uploaded image path is required.'),
+        fileName: z.string().trim().min(1, 'Uploaded image file name is required.'),
+        mimeType: z
+          .string()
+          .refine(
+            (value) =>
+              ENTRY_IMAGE_ALLOWED_MIME_TYPES.includes(
+                value as (typeof ENTRY_IMAGE_ALLOWED_MIME_TYPES)[number],
+              ),
+            'Unsupported image type.',
+          ),
+        width: z.number().int().positive().nullable(),
+        height: z.number().int().positive().nullable(),
+      }),
+    )
+    .max(ENTRY_IMAGE_MAX_FILES, `You can upload up to ${ENTRY_IMAGE_MAX_FILES} images per entry.`)
+    .default([]),
+})
+
+const cleanupEntryImageUploadsSchema = z.object({
+  journalId: z.string().trim().min(1, 'Journal is required.'),
+  storageKeys: z
+    .array(z.string().trim().min(1, 'Storage key is required.'))
+    .max(ENTRY_IMAGE_MAX_FILES, `You can upload up to ${ENTRY_IMAGE_MAX_FILES} images per entry.`),
 })
 
 const inviteUserSchema = z.object({
@@ -102,12 +150,24 @@ export async function createEntryAction(
     }
   }
 
-  const createdEntry = await createEntryForJournal({
+  const hasInvalidStorageKey = parsedInput.data.uploadedImages.some(
+    (image) => !isTempEntryImageStorageKeyForJournal(image.tempStorageKey, parsedInput.data.journalId),
+  )
+
+  if (hasInvalidStorageKey) {
+    return {
+      error: 'One or more uploaded images are invalid for this journal.',
+      redirectTo: null,
+    }
+  }
+
+  const createdEntry = await createEntryWithUploadedImagesForJournal({
     userId: currentUser.id,
     journalId: parsedInput.data.journalId,
     title: parsedInput.data.title || null,
     content: parsedInput.data.content,
     entryDate: parsedInput.data.entryDate,
+    uploadedImages: parsedInput.data.uploadedImages,
   })
 
   if (!createdEntry) {
@@ -120,6 +180,56 @@ export async function createEntryAction(
   return {
     error: null,
     redirectTo: `/dashboard/journals/${parsedInput.data.journalId}`,
+  }
+}
+
+export async function cleanupEntryImageUploadsAction(
+  input: CleanupEntryImageUploadsInput,
+): Promise<CleanupEntryImageUploadsState> {
+  const currentUser = await getCurrentAppUser()
+
+  if (!currentUser) {
+    return {
+      error: 'You must be signed in to remove uploaded images.',
+    }
+  }
+
+  const parsedInput = cleanupEntryImageUploadsSchema.safeParse(input)
+
+  if (!parsedInput.success) {
+    return {
+      error: parsedInput.error.issues[0]?.message ?? 'Unable to remove uploaded images.',
+    }
+  }
+
+  if (parsedInput.data.storageKeys.length === 0) {
+    return {
+      error: null,
+    }
+  }
+
+  const journal = await getUserJournalById(currentUser.id, parsedInput.data.journalId)
+
+  if (!journal) {
+    return {
+      error: 'You do not have permission to remove uploaded images for this journal.',
+    }
+  }
+
+  const hasInvalidStorageKey = parsedInput.data.storageKeys.some(
+    (storageKey) => !isTempEntryImageStorageKeyForJournal(storageKey, parsedInput.data.journalId),
+  )
+
+  if (hasInvalidStorageKey) {
+    return {
+      error: 'One or more image paths are invalid for this journal.',
+    }
+  }
+
+  await del(parsedInput.data.storageKeys)
+
+  return {
+    error: null,
   }
 }
 

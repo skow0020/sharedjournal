@@ -22,8 +22,9 @@ describe('CreateEntryModal', () => {
     const user = userEvent.setup()
 
     const action = vi.fn(async () => ({ error: null, redirectTo: null }))
+    const cleanupAction = vi.fn(async () => ({ error: null }))
 
-    render(<CreateEntryModal journalId="journal-1" action={action} />)
+    render(<CreateEntryModal journalId="journal-1" action={action} cleanupAction={cleanupAction} />)
 
     await user.click(screen.getByRole('button', { name: 'Add entry' }))
 
@@ -31,6 +32,7 @@ describe('CreateEntryModal', () => {
     expect(screen.getByLabelText('Title')).toBeInTheDocument()
     expect(screen.getByLabelText('Content')).toBeInTheDocument()
     expect(screen.getByLabelText('Entry date')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Browse images' })).toBeInTheDocument()
   })
 
   it('submits entry values to the action', async () => {
@@ -42,8 +44,9 @@ describe('CreateEntryModal', () => {
         redirectTo: '/dashboard/journals/journal-1',
       }
     })
+    const cleanupAction = vi.fn(async () => ({ error: null }))
 
-    render(<CreateEntryModal journalId="journal-1" action={action} />)
+    render(<CreateEntryModal journalId="journal-1" action={action} cleanupAction={cleanupAction} />)
 
     await user.click(screen.getByRole('button', { name: 'Add entry' }))
     await user.type(screen.getByLabelText('Title'), 'Morning Reflection')
@@ -61,6 +64,7 @@ describe('CreateEntryModal', () => {
       title: 'Morning Reflection',
       content: 'Wrote about priorities for today.',
       entryDate: '2026-03-07',
+      uploadedImages: [],
     })
     expect(pushMock).not.toHaveBeenCalled()
     expect(refreshMock).toHaveBeenCalled()
