@@ -16,6 +16,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion'
 import {
+  cleanupEntryImageUploadsAction,
   createEntryAction,
   createInviteAction,
   updateJournalTitleAction,
@@ -29,6 +30,8 @@ import {
   getJournalEntriesForJournal,
   type JournalEntryForJournal,
 } from '@/data/entries'
+import { buildEntryPhotoProxyUrl } from '@/lib/entry-image-storage'
+import { EntryPhotoGallery } from '@/app/dashboard/journals/[journalId]/entry-photo-gallery'
 import {
   getPendingInvitationsForOwnedJournal,
 } from '@/data/invitations'
@@ -123,7 +126,11 @@ export default async function JournalDetailsPage({ params }: JournalDetailsPageP
                 successRedirectTo="/dashboard"
               />
             ) : null}
-            <CreateEntryModal journalId={journalId} action={createEntryAction} />
+            <CreateEntryModal
+              journalId={journalId}
+              action={createEntryAction}
+              cleanupAction={cleanupEntryImageUploadsAction}
+            />
             <InviteUserModal journalId={journalId} journalTitle={journalTitle} action={createInviteAction} />
           </div>
         </div>
@@ -168,6 +175,14 @@ export default async function JournalDetailsPage({ params }: JournalDetailsPageP
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm leading-6 whitespace-pre-wrap">{entry.content}</p>
+                  {entry.photos.length > 0 ? (
+                    <EntryPhotoGallery
+                      photos={entry.photos.map((photo) => ({
+                        id: photo.id,
+                        src: buildEntryPhotoProxyUrl(entry.id, photo.id),
+                      }))}
+                    />
+                  ) : null}
                 </CardContent>
               </Card>
             ))}

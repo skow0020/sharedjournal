@@ -2,20 +2,24 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const {
   getClerkCurrentUserMock,
-  createEntryForJournalMock,
+  createEntryWithUploadedImagesForJournalMock,
   createJournalInvitationMock,
   updateJournalTitleForOwnerMock,
   setInvitationEmailDeliveryFlagMock,
+  delMock,
   getCurrentAppUserMock,
+  getUserJournalByIdMock,
   sendInviteEmailMock,
   revalidatePathMock,
 } = vi.hoisted(() => ({
   getClerkCurrentUserMock: vi.fn(),
-  createEntryForJournalMock: vi.fn(),
+  createEntryWithUploadedImagesForJournalMock: vi.fn(),
   createJournalInvitationMock: vi.fn(),
   updateJournalTitleForOwnerMock: vi.fn(),
   setInvitationEmailDeliveryFlagMock: vi.fn(),
+  delMock: vi.fn(),
   getCurrentAppUserMock: vi.fn(),
+  getUserJournalByIdMock: vi.fn(),
   sendInviteEmailMock: vi.fn(),
   revalidatePathMock: vi.fn(),
 }))
@@ -24,8 +28,12 @@ vi.mock('@clerk/nextjs/server', () => ({
   currentUser: getClerkCurrentUserMock,
 }))
 
+vi.mock('@vercel/blob', () => ({
+  del: delMock,
+}))
+
 vi.mock('@/data/entries', () => ({
-  createEntryForJournal: createEntryForJournalMock,
+  createEntryWithUploadedImagesForJournal: createEntryWithUploadedImagesForJournalMock,
 }))
 
 vi.mock('@/data/invitations', () => ({
@@ -34,6 +42,7 @@ vi.mock('@/data/invitations', () => ({
 }))
 
 vi.mock('@/data/journals', () => ({
+  getUserJournalById: getUserJournalByIdMock,
   updateJournalTitleForOwner: updateJournalTitleForOwnerMock,
 }))
 
@@ -50,6 +59,7 @@ vi.mock('next/cache', () => ({
 }))
 
 import {
+  cleanupEntryImageUploadsAction,
   createEntryAction,
   createInviteAction,
   updateJournalTitleAction,
@@ -76,7 +86,7 @@ describe('createEntryAction', () => {
       error: 'You must be signed in to create an entry.',
       redirectTo: null,
     })
-    expect(createEntryForJournalMock).not.toHaveBeenCalled()
+    expect(createEntryWithUploadedImagesForJournalMock).not.toHaveBeenCalled()
   })
 
   it('validates payload fields before calling the data helper', async () => {
@@ -93,12 +103,12 @@ describe('createEntryAction', () => {
       error: 'Content is required.',
       redirectTo: null,
     })
-    expect(createEntryForJournalMock).not.toHaveBeenCalled()
+    expect(createEntryWithUploadedImagesForJournalMock).not.toHaveBeenCalled()
   })
 
   it('returns a permission error when the data helper rejects the mutation', async () => {
     getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
-    createEntryForJournalMock.mockResolvedValue(null)
+    createEntryWithUploadedImagesForJournalMock.mockResolvedValue(null)
 
     const result = await createEntryAction({
       journalId: 'journal-1',
@@ -115,7 +125,7 @@ describe('createEntryAction', () => {
 
   it('trims entry values and returns the journal redirect path on success', async () => {
     getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
-    createEntryForJournalMock.mockResolvedValue({ id: 'entry-1' })
+    createEntryWithUploadedImagesForJournalMock.mockResolvedValue({ id: 'entry-1' })
 
     const result = await createEntryAction({
       journalId: '  journal-1  ',
@@ -124,12 +134,13 @@ describe('createEntryAction', () => {
       entryDate: '2026-03-14',
     })
 
-    expect(createEntryForJournalMock).toHaveBeenCalledWith({
+    expect(createEntryWithUploadedImagesForJournalMock).toHaveBeenCalledWith({
       userId: 'user-1',
       journalId: 'journal-1',
       title: 'Morning Reflection',
       content: 'Wrote about priorities for today.',
       entryDate: '2026-03-14',
+      uploadedImages: [],
     })
     expect(result).toEqual({
       error: null,
@@ -139,7 +150,7 @@ describe('createEntryAction', () => {
 
   it('passes null title when the trimmed title is empty', async () => {
     getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
-    createEntryForJournalMock.mockResolvedValue({ id: 'entry-1' })
+    createEntryWithUploadedImagesForJournalMock.mockResolvedValue({ id: 'entry-1' })
 
     await createEntryAction({
       journalId: 'journal-1',
@@ -148,13 +159,86 @@ describe('createEntryAction', () => {
       entryDate: '2026-03-14',
     })
 
-    expect(createEntryForJournalMock).toHaveBeenCalledWith({
+    expect(createEntryWithUploadedImagesForJournalMock).toHaveBeenCalledWith({
       userId: 'user-1',
       journalId: 'journal-1',
       title: null,
       content: 'Notes',
       entryDate: '2026-03-14',
+      uploadedImages: [],
     })
+  })
+
+  it('rejects uploaded image paths that do not belong to the journal', async () => {
+    getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
+
+    const result = await createEntryAction({
+      journalId: 'journal-1',
+      title: 'Morning Reflection',
+      content: 'Notes',
+      entryDate: '2026-03-14',
+      uploadedImages: [
+        {
+          tempStorageKey: 'tmp/journals/journal-2/wrong.jpg',
+          fileName: 'wrong.jpg',
+          mimeType: 'image/jpeg',
+          width: 1024,
+          height: 768,
+        },
+      ],
+    })
+
+    expect(result).toEqual({
+      error: 'One or more uploaded images are invalid for this journal.',
+      redirectTo: null,
+    })
+    expect(createEntryWithUploadedImagesForJournalMock).not.toHaveBeenCalled()
+  })
+})
+
+describe('cleanupEntryImageUploadsAction', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns an auth error when the user is signed out', async () => {
+    getCurrentAppUserMock.mockResolvedValue(null)
+
+    const result = await cleanupEntryImageUploadsAction({
+      journalId: 'journal-1',
+      storageKeys: ['tmp/journals/journal-1/image.jpg'],
+    })
+
+    expect(result).toEqual({
+      error: 'You must be signed in to remove uploaded images.',
+    })
+  })
+
+  it('returns a permission error when the journal is not accessible', async () => {
+    getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
+    getUserJournalByIdMock.mockResolvedValue(null)
+
+    const result = await cleanupEntryImageUploadsAction({
+      journalId: 'journal-1',
+      storageKeys: ['tmp/journals/journal-1/image.jpg'],
+    })
+
+    expect(result).toEqual({
+      error: 'You do not have permission to remove uploaded images for this journal.',
+    })
+  })
+
+  it('removes uploaded temp images when input is valid', async () => {
+    getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
+    getUserJournalByIdMock.mockResolvedValue({ id: 'journal-1' })
+
+    const result = await cleanupEntryImageUploadsAction({
+      journalId: 'journal-1',
+      storageKeys: ['tmp/journals/journal-1/image.jpg'],
+    })
+
+    expect(delMock).toHaveBeenCalledWith(['tmp/journals/journal-1/image.jpg'])
+    expect(result).toEqual({ error: null })
   })
 })
 
