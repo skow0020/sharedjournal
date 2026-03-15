@@ -56,3 +56,25 @@ test('can create a journal, add an entry, and invite a collaborator', async ({ p
   await expect(page).toHaveURL('/dashboard')
   await expect(page.getByText(journalTitle)).not.toBeVisible()
 })
+
+test('can edit journal name', async ({ page }) => {
+  const journalTitle = `E2E Journal ${Date.now()}`
+  const newJournalTitle = `Updated ${journalTitle}`
+
+  await page.goto('/dashboard')
+  await expect(page.getByRole('heading', { level: 1, name: 'Journals' })).toBeVisible()
+
+  await page.getByRole('button', { name: 'Add journal' }).click()
+  await expect(page.getByRole('heading', { name: 'Create a journal' })).toBeVisible()
+  await page.getByLabel('Title').fill(journalTitle)
+  await page.getByRole('button', { name: 'Create journal' }).click()
+
+  await expect(page).toHaveURL(/\/dashboard\/journals\/[a-z0-9-]+$/i)
+  await expect(page.getByRole('heading', { level: 1, name: journalTitle })).toBeVisible()
+
+  await page.getByRole('button', { name: 'Edit journal' }).click()
+  await page.getByRole('textbox', { name: 'Journal title' }).fill(newJournalTitle)
+  await page.getByRole('button', { name: 'Save journal title' }).click()
+
+  await expect(page.getByRole('heading', { level: 1, name: newJournalTitle })).toBeVisible()
+})
