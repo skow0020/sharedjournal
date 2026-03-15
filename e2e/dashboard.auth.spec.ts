@@ -22,7 +22,7 @@ test('can create a journal, add an entry, and invite a collaborator', async ({ p
 
   await page.getByRole('button', { name: 'Add entry' }).click()
   await expect(page.getByRole('heading', { name: 'Create an entry' })).toBeVisible()
-  await page.getByLabel('Title').fill(entryTitle)
+  await page.getByRole('dialog', {name: 'Create an entry'}).getByLabel('Title').fill(entryTitle)
   await page.getByLabel('Content').fill(entryContent)
   await page.getByLabel('Entry date').fill('2026-03-10')
   await page.getByRole('button', { name: 'Create entry' }).click()
