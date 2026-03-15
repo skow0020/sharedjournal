@@ -18,11 +18,13 @@ import {
 import {
   createEntryAction,
   createInviteAction,
+  updateJournalTitleAction,
 } from '@/app/dashboard/journals/[journalId]/actions'
 import { deleteJournalAction } from '@/app/dashboard/actions'
 import { DeleteJournalButton } from '@/app/dashboard/delete-journal-button'
 import { CreateEntryModal } from '@/app/dashboard/journals/[journalId]/create-entry-modal'
 import { InviteUserModal } from '@/app/dashboard/journals/[journalId]/invite-user-modal'
+import { JournalTitleEditor } from '@/app/dashboard/journals/[journalId]/journal-title-editor'
 import {
   getJournalEntriesForJournal,
   type JournalEntryForJournal,
@@ -63,6 +65,7 @@ export default async function JournalDetailsPage({ params }: JournalDetailsPageP
   }
 
   const journalTitle = journal.title
+  const canEditJournalTitle = journal.ownerUserId === appUser.id
 
   const entries = await getJournalEntriesForJournal(appUser.id, journalId)
   const collaborators = await getCollaboratorsForJournal(appUser.id, journalId)
@@ -82,7 +85,12 @@ export default async function JournalDetailsPage({ params }: JournalDetailsPageP
             >
               Back to journals
             </Link>
-            <h1 className="text-3xl font-semibold tracking-tight">{journal.title}</h1>
+            <JournalTitleEditor
+              journalId={journalId}
+              title={journal.title}
+              canEdit={canEditJournalTitle}
+              action={updateJournalTitleAction}
+            />
             {journal.description ? (
               <p className="text-muted-foreground text-sm">{journal.description}</p>
             ) : null}

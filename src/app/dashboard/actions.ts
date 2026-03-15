@@ -4,6 +4,7 @@ import { z } from 'zod'
 
 import { createJournalForOwner, deleteJournalOwnedByUser } from '@/data/journals'
 import { getCurrentAppUser } from '@/lib/get-current-app-user'
+import { JOURNAL_TITLE_MAX_LENGTH } from '@/lib/journal-constants'
 
 export type CreateJournalInput = {
   title: string
@@ -25,7 +26,11 @@ export type DeleteJournalState = {
 }
 
 const createJournalSchema = z.object({
-  title: z.string().trim().min(1, 'Title is required.').max(180, 'Title must be 180 characters or less.'),
+  title: z
+    .string()
+    .trim()
+    .min(1, 'Title is required.')
+    .max(JOURNAL_TITLE_MAX_LENGTH, 'Title must be 180 characters or less.'),
   description: z.string().trim().max(2000, 'Description must be 2000 characters or less.'),
 })
 

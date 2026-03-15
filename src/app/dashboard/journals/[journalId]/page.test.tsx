@@ -9,6 +9,7 @@ const {
   getPendingInvitationsForOwnedJournalMock,
   notFoundMock,
   redirectMock,
+  useRouterMock,
 } = vi.hoisted(() => ({
   getCurrentAppUserMock: vi.fn(),
   getUserJournalByIdMock: vi.fn(),
@@ -21,11 +22,13 @@ const {
   redirectMock: vi.fn(() => {
     throw new Error('NEXT_REDIRECT')
   }),
+  useRouterMock: vi.fn(() => ({ refresh: vi.fn() })),
 }))
 
 vi.mock('next/navigation', () => ({
   notFound: notFoundMock,
   redirect: redirectMock,
+  useRouter: useRouterMock,
 }))
 
 vi.mock('@clerk/nextjs/server', () => ({
@@ -47,6 +50,7 @@ vi.mock('@/app/dashboard/delete-journal-button', () => ({
 vi.mock('@/app/dashboard/journals/[journalId]/actions', () => ({
   createEntryAction: vi.fn(),
   createInviteAction: vi.fn(),
+  updateJournalTitleAction: vi.fn(),
 }))
 
 vi.mock('@/lib/get-current-app-user', () => ({
@@ -92,6 +96,7 @@ describe('JournalDetailsPage', () => {
       id: 'journal-1',
       title: 'Family Journal',
       description: 'Shared notes and reflections',
+      ownerUserId: 'user-1',
       isOwner: true,
     })
     getCollaboratorsForJournalMock.mockResolvedValue([
@@ -146,6 +151,7 @@ describe('JournalDetailsPage', () => {
     expect(screen.getByRole('link', { name: 'Back to journals' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Family Journal' })).toBeInTheDocument()
     expect(screen.getByText('Shared notes and reflections')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Edit journal title' })).toBeInTheDocument()
 
     expect(screen.getByText('Collaborators (1)')).toBeInTheDocument()
 
@@ -160,6 +166,19 @@ describe('JournalDetailsPage', () => {
     expect(screen.getByTestId('create-entry-modal')).toBeInTheDocument()
     expect(screen.getByTestId('invite-user-modal')).toBeInTheDocument()
     expect(screen.getByTestId('delete-journal-button')).toBeInTheDocument()
+  })
+
+  it('hides the edit button when the user is not the journal owner', async () => {
+    getUserJournalByIdMock.mockResolvedValue({
+      id: 'journal-1',
+      title: 'Family Journal',
+      description: 'Shared notes and reflections',
+      ownerUserId: 'user-2',
+    })
+
+    await renderJournalDetailsPage()
+
+    expect(screen.queryByRole('button', { name: 'Edit journal title' })).not.toBeInTheDocument()
   })
 
   it('renders empty entries state when there are no journal entries', async () => {

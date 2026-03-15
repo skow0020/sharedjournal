@@ -47,6 +47,7 @@ export type UserJournalDetails = {
   id: string
   title: string
   description: string | null
+  ownerUserId: string
   isOwner: boolean
 }
 
@@ -68,6 +69,7 @@ export async function getUserJournalById(
       id: journals.id,
       title: journals.title,
       description: journals.description,
+      ownerUserId: journals.ownerUserId,
       isOwner: sql<boolean>`${journals.ownerUserId} = ${userId}`,
     })
     .from(journals)
@@ -112,6 +114,12 @@ type CreateJournalInput = {
   description: string | null
 }
 
+type UpdateJournalTitleInput = {
+  ownerUserId: string
+  journalId: string
+  title: string
+}
+
 export async function createJournalForOwner({
   ownerUserId,
   title,
@@ -140,4 +148,18 @@ export async function createJournalForOwner({
   }
 
   return createdJournal
+}
+
+export async function updateJournalTitleForOwner({
+  ownerUserId,
+  journalId,
+  title,
+}: UpdateJournalTitleInput): Promise<boolean> {
+  const [updatedJournal] = await db
+    .update(journals)
+    .set({ title })
+    .where(and(eq(journals.id, journalId), eq(journals.ownerUserId, ownerUserId)))
+    .returning({ id: journals.id })
+
+  return Boolean(updatedJournal)
 }

@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { JOURNAL_TITLE_MAX_LENGTH } from '@/lib/journal-constants'
 
 type CreateJournalModalProps = {
   action: (input: CreateJournalInput) => Promise<CreateJournalState>
@@ -71,7 +72,7 @@ export function CreateJournalModal({ action }: CreateJournalModalProps) {
               value={title}
               onChange={(event) => setTitle(event.target.value)}
               required
-              maxLength={180}
+              maxLength={JOURNAL_TITLE_MAX_LENGTH}
             />
           </div>
           <div className="space-y-2">
