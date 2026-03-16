@@ -8,6 +8,7 @@ import {
   deleteJournalOwnedByUser,
   getCollaboratorsForJournal,
   getUserJournalById,
+  getUserJournalCount,
   getUserJournals,
 } from '@/data/journals'
 
@@ -74,6 +75,7 @@ describe('getUserJournals', () => {
   let outsiderId: string
   let journalId1: string
   let journalId2: string
+  const extraJournalIds: string[] = []
 
   beforeEach(async () => {
     const owner = await createUser({ displayName: 'Owner' })
@@ -96,7 +98,8 @@ describe('getUserJournals', () => {
   })
 
   afterEach(async () => {
-    await deleteJournals([journalId1, journalId2])
+    await deleteJournals([journalId1, journalId2, ...extraJournalIds])
+    extraJournalIds.length = 0
     await deleteUsers([ownerId, memberId, outsiderId])
   })
 
@@ -135,6 +138,75 @@ describe('getUserJournals', () => {
     expect(found?.description).toBe('A description.')
 
     await deleteJournals([journalWithDesc.id])
+  })
+
+  it('supports limit and offset with updated_at ordering', async () => {
+    const journal3 = await createJournal(ownerId, 'Journal Three')
+    const journal4 = await createJournal(ownerId, 'Journal Four')
+    extraJournalIds.push(journal3.id, journal4.id)
+
+    await addMember(journal3.id, ownerId, 'owner')
+    await addMember(journal4.id, ownerId, 'owner')
+
+    await db.update(journals).set({ updatedAt: new Date('2026-03-01T00:00:00.000Z') }).where(eq(journals.id, journalId1))
+    await db.update(journals).set({ updatedAt: new Date('2026-03-02T00:00:00.000Z') }).where(eq(journals.id, journalId2))
+    await db.update(journals).set({ updatedAt: new Date('2026-03-03T00:00:00.000Z') }).where(eq(journals.id, journal3.id))
+    await db.update(journals).set({ updatedAt: new Date('2026-03-04T00:00:00.000Z') }).where(eq(journals.id, journal4.id))
+
+    const pageOne = await getUserJournals(ownerId, { limit: 2, offset: 0 })
+    const pageTwo = await getUserJournals(ownerId, { limit: 2, offset: 2 })
+
+    expect(pageOne.map((journal) => journal.id)).toEqual([journal4.id, journal3.id])
+    expect(pageTwo.map((journal) => journal.id)).toEqual([journalId2, journalId1])
+  })
+
+  it('returns empty results when offset is beyond available rows', async () => {
+    const result = await getUserJournals(ownerId, { limit: 5, offset: 50 })
+
+    expect(result).toEqual([])
+  })
+})
+
+describe('getUserJournalCount', () => {
+  let ownerId: string
+  let memberId: string
+  let outsiderId: string
+  let journalId1: string
+  let journalId2: string
+
+  beforeEach(async () => {
+    const owner = await createUser({ displayName: 'Owner' })
+    const member = await createUser({ displayName: 'Member' })
+    const outsider = await createUser({ displayName: 'Outsider' })
+
+    ownerId = owner.id
+    memberId = member.id
+    outsiderId = outsider.id
+
+    const journal1 = await createJournal(ownerId, 'Count Journal One')
+    const journal2 = await createJournal(ownerId, 'Count Journal Two')
+
+    journalId1 = journal1.id
+    journalId2 = journal2.id
+
+    await addMember(journalId1, ownerId, 'owner')
+    await addMember(journalId2, ownerId, 'owner')
+    await addMember(journalId1, memberId, 'editor')
+  })
+
+  afterEach(async () => {
+    await deleteJournals([journalId1, journalId2])
+    await deleteUsers([ownerId, memberId, outsiderId])
+  })
+
+  it('returns counts scoped by membership', async () => {
+    const ownerCount = await getUserJournalCount(ownerId)
+    const memberCount = await getUserJournalCount(memberId)
+    const outsiderCount = await getUserJournalCount(outsiderId)
+
+    expect(ownerCount).toBe(2)
+    expect(memberCount).toBe(1)
+    expect(outsiderCount).toBe(0)
   })
 })
 
