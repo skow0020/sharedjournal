@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useTransition } from 'react'
+import { useEffect, useRef, useTransition } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
 type JournalEntriesInfiniteLoaderProps = {
@@ -16,11 +16,11 @@ export function JournalEntriesInfiniteLoader({
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const triggerRef = useRef<HTMLDivElement | null>(null)
-  const [lastRequestedPage, setLastRequestedPage] = useState(currentPage)
+  const lastRequestedPageRef = useRef(currentPage)
   const [isPending, startTransition] = useTransition()
 
   useEffect(() => {
-    setLastRequestedPage(currentPage)
+    lastRequestedPageRef.current = currentPage
   }, [currentPage])
 
   useEffect(() => {
@@ -36,11 +36,13 @@ export function JournalEntriesInfiniteLoader({
 
         const nextPage = currentPage + 1
 
-        if (lastRequestedPage >= nextPage) {
+        if (lastRequestedPageRef.current >= nextPage) {
           return
         }
 
-        setLastRequestedPage(nextPage)
+        // Guard synchronously against repeated callbacks while intersecting.
+        lastRequestedPageRef.current = nextPage
+        observer.disconnect()
 
         startTransition(() => {
           const params = new URLSearchParams(searchParams.toString())
@@ -58,7 +60,7 @@ export function JournalEntriesInfiniteLoader({
     return () => {
       observer.disconnect()
     }
-  }, [currentPage, hasMore, lastRequestedPage, pathname, router, searchParams])
+  }, [currentPage, hasMore, pathname, router, searchParams])
 
   if (!hasMore) {
     return null
