@@ -1,4 +1,4 @@
-import { and, desc, eq, ne, sql } from 'drizzle-orm'
+import { and, desc, eq, inArray, ne, sql } from 'drizzle-orm'
 
 import { db } from '@/db'
 import { journalMembers, journals, users } from '@/db/schema'
@@ -88,6 +88,10 @@ export type JournalCollaborator = {
   role: 'owner' | 'editor' | 'viewer'
 }
 
+type JournalCollaboratorByJournal = JournalCollaborator & {
+  journalId: string
+}
+
 /**
  * Get a specific journal only if the user has access to it.
  */
@@ -137,6 +141,48 @@ export async function getCollaboratorsForJournal(
     .from(journalMembers)
     .innerJoin(users, eq(users.id, journalMembers.userId))
     .where(and(eq(journalMembers.journalId, journalId), ne(journalMembers.role, 'owner')))
+}
+
+/**
+ * Get non-owner collaborators for multiple journals in one query.
+ * This variant assumes journalIds are already access-scoped by the caller.
+ */
+export async function getCollaboratorsForJournals(
+  journalIds: string[],
+): Promise<Map<string, JournalCollaborator[]>> {
+  if (journalIds.length === 0) {
+    return new Map()
+  }
+
+  const collaboratorRows = await db
+    .select({
+      journalId: journalMembers.journalId,
+      id: users.id,
+      displayName: users.displayName,
+      role: journalMembers.role,
+    })
+    .from(journalMembers)
+    .innerJoin(users, eq(users.id, journalMembers.userId))
+    .where(
+      and(
+        inArray(journalMembers.journalId, journalIds),
+        ne(journalMembers.role, 'owner'),
+      ),
+    )
+
+  const collaboratorsByJournal = new Map<string, JournalCollaborator[]>()
+
+  for (const row of collaboratorRows as JournalCollaboratorByJournal[]) {
+    const collaborators = collaboratorsByJournal.get(row.journalId) ?? []
+    collaborators.push({
+      id: row.id,
+      displayName: row.displayName,
+      role: row.role,
+    })
+    collaboratorsByJournal.set(row.journalId, collaborators)
+  }
+
+  return collaboratorsByJournal
 }
 
 type CreateJournalInput = {

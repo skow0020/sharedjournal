@@ -12,7 +12,7 @@ const {
   getCurrentAppUserMock,
   getCurrentUserEmailMock,
   getPendingInvitationsForEmailMock,
-  getCollaboratorsForJournalMock,
+  getCollaboratorsForJournalsMock,
   getUserJournalCountMock,
   getUserJournalsMock,
   createJournalForOwnerMock,
@@ -20,7 +20,7 @@ const {
   getCurrentAppUserMock: vi.fn(),
   getCurrentUserEmailMock: vi.fn(),
   getPendingInvitationsForEmailMock: vi.fn(),
-  getCollaboratorsForJournalMock: vi.fn(),
+  getCollaboratorsForJournalsMock: vi.fn(),
   getUserJournalCountMock: vi.fn(),
   getUserJournalsMock: vi.fn(),
   createJournalForOwnerMock: vi.fn(),
@@ -51,7 +51,7 @@ vi.mock('@/data/invitations', () => ({
 }))
 
 vi.mock('@/data/journals', () => ({
-  getCollaboratorsForJournal: getCollaboratorsForJournalMock,
+  getCollaboratorsForJournals: getCollaboratorsForJournalsMock,
   getUserJournalCount: getUserJournalCountMock,
   getUserJournals: getUserJournalsMock,
   createJournalForOwner: createJournalForOwnerMock,
@@ -74,7 +74,7 @@ describe('DashboardPage', () => {
     getCurrentUserEmailMock.mockResolvedValue('owner@example.com')
     getUserJournalCountMock.mockResolvedValue(0)
     getUserJournalsMock.mockResolvedValue([])
-    getCollaboratorsForJournalMock.mockResolvedValue([])
+    getCollaboratorsForJournalsMock.mockResolvedValue(new Map())
     getPendingInvitationsForEmailMock.mockResolvedValue([])
   })
 
@@ -120,13 +120,20 @@ describe('DashboardPage', () => {
       },
     ])
     getUserJournalCountMock.mockResolvedValue(1)
-    getCollaboratorsForJournalMock.mockResolvedValue([
-      {
-        id: 'user-2',
-        displayName: 'Alex',
-        role: 'editor',
-      },
-    ])
+    getCollaboratorsForJournalsMock.mockResolvedValue(
+      new Map([
+        [
+          'journal-1',
+          [
+            {
+              id: 'user-2',
+              displayName: 'Alex',
+              role: 'editor',
+            },
+          ],
+        ],
+      ]),
+    )
 
     await renderDashboardPage()
 

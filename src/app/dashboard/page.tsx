@@ -13,10 +13,9 @@ import { JournalCard } from '@/app/dashboard/journal-card'
 import { Button } from '@/components/ui/button'
 import { getPendingInvitationsForEmail } from '@/data/invitations'
 import {
-  getCollaboratorsForJournal,
+  getCollaboratorsForJournals,
   getUserJournalCount,
   getUserJournals,
-  type JournalCollaborator,
 } from '@/data/journals'
 import { getCurrentAppUser } from '@/lib/get-current-app-user'
 import { getCurrentUserEmail } from '@/lib/get-current-user-email'
@@ -62,13 +61,8 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const pendingInvitations = currentUserEmail
     ? await getPendingInvitationsForEmail(currentUserEmail)
     : []
-  const collaboratorsByJournal = new Map<string, JournalCollaborator[]>(
-    await Promise.all(
-      userJournals.map(async (journal) => {
-        const collaborators = await getCollaboratorsForJournal(appUser.id, journal.id)
-        return [journal.id, collaborators] as const
-      }),
-    ),
+  const collaboratorsByJournal = await getCollaboratorsForJournals(
+    userJournals.map((journal) => journal.id),
   )
 
   return (
