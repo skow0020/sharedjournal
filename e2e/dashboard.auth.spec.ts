@@ -57,7 +57,7 @@ test('can create a journal, add an entry, and invite a collaborator', async ({ p
   await expect(page.getByText(journalTitle)).not.toBeVisible()
 })
 
-test('can edit journal name', async ({ page }) => {
+test('can edit journal name and delete on details page', async ({ page }) => {
   const journalTitle = `E2E Journal ${Date.now()}`
   const newJournalTitle = `Updated ${journalTitle}`
 
@@ -77,4 +77,10 @@ test('can edit journal name', async ({ page }) => {
   await page.getByRole('button', { name: 'Save journal title' }).click()
 
   await expect(page.getByRole('heading', { level: 1, name: newJournalTitle })).toBeVisible()
+
+  await page.getByRole('button', { name: 'Delete' }).click()
+  await page.getByRole('dialog', { name: 'Delete journal' }).getByRole('button', { name: 'Delete' }).click()
+
+  await expect(page).toHaveURL('/dashboard')
+  await expect(page.getByText(newJournalTitle)).not.toBeVisible()
 })
