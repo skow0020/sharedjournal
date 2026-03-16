@@ -10,11 +10,21 @@ export type UserJournal = {
   isOwner: boolean
 }
 
+type GetUserJournalsInput = {
+  limit?: number
+  offset?: number
+}
+
 /**
  * Get journals accessible to a specific user.
  */
-export async function getUserJournals(userId: string): Promise<UserJournal[]> {
-  return db
+export async function getUserJournals(
+  userId: string,
+  input: GetUserJournalsInput = {},
+): Promise<UserJournal[]> {
+  const { limit, offset } = input
+
+  const query = db
     .select({
       id: journals.id,
       title: journals.title,
@@ -26,6 +36,27 @@ export async function getUserJournals(userId: string): Promise<UserJournal[]> {
     .where(eq(journalMembers.userId, userId))
     .groupBy(journals.id, journals.title, journals.description, journals.updatedAt)
     .orderBy(desc(journals.updatedAt))
+
+  if (typeof limit === 'number') {
+    query.limit(limit)
+  }
+
+  if (typeof offset === 'number') {
+    query.offset(offset)
+  }
+
+  return query
+}
+
+export async function getUserJournalCount(userId: string): Promise<number> {
+  const [result] = await db
+    .select({
+      count: sql<number>`count(*)`.mapWith(Number),
+    })
+    .from(journalMembers)
+    .where(eq(journalMembers.userId, userId))
+
+  return result?.count ?? 0
 }
 
 /**

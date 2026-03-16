@@ -189,6 +189,11 @@ export async function createJournalInvitation({
       expiresAt: journalInvitations.expiresAt,
     })
 
+  await db
+    .update(journals)
+    .set({ updatedAt: new Date() })
+    .where(eq(journals.id, journalId))
+
   return {
     ok: true,
     invitationId: createdInvitation.invitationId,
@@ -331,6 +336,11 @@ export async function acceptJournalInvitation({
         eq(journalInvitations.status, 'pending'),
       ),
     )
+
+  await db
+    .update(journals)
+    .set({ updatedAt: new Date() })
+    .where(eq(journals.id, lookup.invitation.journalId))
 
   return {
     ok: true,

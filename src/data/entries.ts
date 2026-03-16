@@ -170,6 +170,11 @@ export async function createEntryForJournal({
     })
     .returning({ id: entries.id })
 
+  await db
+    .update(journals)
+    .set({ updatedAt: new Date() })
+    .where(eq(journals.id, journalId))
+
   return createdEntry
 }
 
@@ -256,6 +261,11 @@ export async function createEntryWithUploadedImagesForJournal(input: {
   if (tempStorageKeys.length > 0) {
     await del(tempStorageKeys)
   }
+
+  await db
+    .update(journals)
+    .set({ updatedAt: new Date() })
+    .where(eq(journals.id, input.journalId))
 
   return createdEntry
 }
