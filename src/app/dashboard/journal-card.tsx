@@ -1,4 +1,7 @@
-import Link from 'next/link'
+'use client'
+
+import type { KeyboardEvent, MouseEvent, ReactNode } from 'react'
+import { useRouter } from 'next/navigation'
 
 import { type DeleteJournalInput, type DeleteJournalState } from '@/app/dashboard/actions'
 import { DeleteJournalButton } from '@/app/dashboard/delete-journal-button'
@@ -18,15 +21,48 @@ type JournalCardProps = {
   deleteAction: (input: DeleteJournalInput) => Promise<DeleteJournalState>
 }
 
-export function JournalCard({ journal, collaborators, deleteAction }: JournalCardProps) {
+function stopPropagation(event: MouseEvent<HTMLDivElement> | KeyboardEvent<HTMLDivElement>) {
+  event.stopPropagation()
+}
+
+function InteractiveSection({ children }: { children: ReactNode }) {
   return (
-    <Card className="relative gap-3 transition-colors hover:bg-muted/40">
-      <Link
-        href={`/dashboard/journals/${journal.id}`}
-        aria-label={`Open ${journal.title}`}
-        className="focus-visible:ring-ring absolute inset-0 rounded-xl focus-visible:ring-2"
-      />
-      <CardHeader className="relative z-10 pointer-events-none">
+    <div
+      className="pointer-events-auto"
+      onClick={stopPropagation}
+      onKeyDown={stopPropagation}
+    >
+      {children}
+    </div>
+  )
+}
+
+export function JournalCard({ journal, collaborators, deleteAction }: JournalCardProps) {
+  const router = useRouter()
+
+  function handleNavigate() {
+    router.push(`/dashboard/journals/${journal.id}`)
+  }
+
+  function handleCardKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.key !== 'Enter' && event.key !== ' ') {
+      return
+    }
+
+    event.preventDefault()
+    handleNavigate()
+  }
+
+  return (
+    <Card
+      role="link"
+      tabIndex={0}
+      aria-label={`Open ${journal.title}`}
+      onClick={handleNavigate}
+      onKeyDown={handleCardKeyDown}
+      className="relative gap-3 cursor-pointer transition-colors hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-[var(--color-ring)] focus-visible:outline-none"
+    >
+      <CardHeader className="relative z-10">
         <CardTitle className="flex items-center gap-2">
           <span>{journal.title}</span>
           {!journal.isOwner ? (
@@ -37,15 +73,17 @@ export function JournalCard({ journal, collaborators, deleteAction }: JournalCar
         </CardTitle>
         <CardDescription>{journal.description || 'No description'}</CardDescription>
       </CardHeader>
-      <CardContent className="relative z-20 pt-0 pointer-events-none">
-        <div className="pointer-events-auto">
+      <CardContent className="relative z-20 pt-0">
+        <InteractiveSection>
           <CollaboratorsAccordion collaborators={collaborators} maxVisible={5} />
-        </div>
+        </InteractiveSection>
       </CardContent>
       {journal.isOwner ? (
-        <CardContent className="relative z-20 pt-0 pointer-events-none">
-          <div className="ml-auto w-fit pointer-events-auto">
-            <DeleteJournalButton journalId={journal.id} action={deleteAction} />
+        <CardContent className="relative z-20 pt-0">
+          <div className="ml-auto w-fit">
+            <InteractiveSection>
+              <DeleteJournalButton journalId={journal.id} action={deleteAction} />
+            </InteractiveSection>
           </div>
         </CardContent>
       ) : null}

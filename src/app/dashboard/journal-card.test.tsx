@@ -1,26 +1,65 @@
 import { render, screen } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import userEvent from '@testing-library/user-event'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const { collaboratorsAccordionMock } = vi.hoisted(() => ({
+const { collaboratorsAccordionMock, pushMock } = vi.hoisted(() => ({
   collaboratorsAccordionMock: vi.fn(),
+  pushMock: vi.fn(),
+}))
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: pushMock,
+  }),
 }))
 
 vi.mock('@/app/dashboard/delete-journal-button', () => ({
   DeleteJournalButton: ({ journalId }: { journalId: string }) => (
-    <div data-testid={`delete-journal-${journalId}`}>Delete</div>
+    <button type="button" data-testid={`delete-journal-${journalId}`}>
+      Delete
+    </button>
   ),
 }))
 
 vi.mock('@/app/dashboard/journals/collaborators-accordion', () => ({
   CollaboratorsAccordion: ({ collaborators, maxVisible }: { collaborators: unknown[], maxVisible?: number }) => {
     collaboratorsAccordionMock({ collaborators, maxVisible })
-    return <div data-testid="collaborators-accordion">Collaborators ({collaborators.length})</div>
+    return (
+      <button type="button" data-testid="collaborators-accordion">
+        Collaborators ({collaborators.length})
+      </button>
+    )
   },
 }))
 
 import { JournalCard } from '@/app/dashboard/journal-card'
 
 describe('JournalCard', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('navigates when the card is clicked', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <JournalCard
+        journal={{
+          id: 'journal-0',
+          title: 'Clickable Journal',
+          description: null,
+          isOwner: true,
+        }}
+        collaborators={[]}
+        deleteAction={vi.fn()}
+      />,
+    )
+
+    await user.click(screen.getByRole('link', { name: 'Open Clickable Journal' }))
+
+    expect(pushMock).toHaveBeenCalledWith('/dashboard/journals/journal-0')
+  })
+
   it('renders shared badge and hides delete button for non-owner journals', () => {
     render(
       <JournalCard
@@ -84,5 +123,47 @@ describe('JournalCard', () => {
       collaborators,
       maxVisible: 5,
     })
+  })
+
+  it('does not navigate when the collaborators accordion is clicked', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <JournalCard
+        journal={{
+          id: 'journal-4',
+          title: 'Team Journal',
+          description: 'Shared notes',
+          isOwner: true,
+        }}
+        collaborators={[]}
+        deleteAction={vi.fn()}
+      />,
+    )
+
+    await user.click(screen.getByTestId('collaborators-accordion'))
+
+    expect(pushMock).not.toHaveBeenCalled()
+  })
+
+  it('does not navigate when the delete button is clicked', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <JournalCard
+        journal={{
+          id: 'journal-5',
+          title: 'Owner Journal',
+          description: null,
+          isOwner: true,
+        }}
+        collaborators={[]}
+        deleteAction={vi.fn()}
+      />,
+    )
+
+    await user.click(screen.getByTestId('delete-journal-journal-5'))
+
+    expect(pushMock).not.toHaveBeenCalled()
   })
 })
