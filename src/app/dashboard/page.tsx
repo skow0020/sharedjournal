@@ -2,7 +2,6 @@ import { format } from 'date-fns'
 import Link from 'next/link'
 
 import {
-  CardContent,
   Card,
   CardDescription,
   CardHeader,
@@ -10,14 +9,12 @@ import {
 } from '@/components/ui/card'
 import { createJournalAction, deleteJournalAction } from '@/app/dashboard/actions'
 import { CreateJournalModal } from '@/app/dashboard/create-journal-modal'
-import { DeleteJournalButton } from '@/app/dashboard/delete-journal-button'
-import { CollaboratorsAccordion } from '@/app/dashboard/journals/collaborators-accordion'
+import { JournalCard } from '@/app/dashboard/journal-card'
 import { getPendingInvitationsForEmail } from '@/data/invitations'
 import {
   getCollaboratorsForJournal,
   getUserJournals,
   type JournalCollaborator,
-  type UserJournal,
 } from '@/data/journals'
 import { getCurrentAppUser } from '@/lib/get-current-app-user'
 import { getCurrentUserEmail } from '@/lib/get-current-user-email'
@@ -89,40 +86,13 @@ export default async function DashboardPage() {
           </CardHeader>
         </Card>
       ) : (
-        userJournals.map((journal: UserJournal) => (
-          <Card key={journal.id} className="relative gap-3 transition-colors hover:bg-muted/40">
-            <Link
-              href={`/dashboard/journals/${journal.id}`}
-              aria-label={`Open ${journal.title}`}
-              className="focus-visible:ring-ring absolute inset-0 rounded-xl focus-visible:ring-2"
-            />
-            <CardHeader className="relative z-10 pointer-events-none">
-              <CardTitle className="flex items-center gap-2">
-                <span>{journal.title}</span>
-                {!journal.isOwner ? (
-                  <span className="rounded-full border border-[#d4e6ff] bg-[#f5f9ff] px-2 py-0.5 text-xs font-medium text-[#1f4b7a]">
-                    Shared with you
-                  </span>
-                ) : null}
-              </CardTitle>
-              <CardDescription>{journal.description || 'No description'}</CardDescription>
-            </CardHeader>
-            <CardContent className="relative z-20 pt-0 pointer-events-none">
-              <div className="pointer-events-auto">
-                <CollaboratorsAccordion
-                  collaborators={collaboratorsByJournal.get(journal.id) ?? []}
-                  maxVisible={5}
-                />
-              </div>
-            </CardContent>
-            {journal.isOwner ? (
-              <CardContent className="relative z-20 pt-0 pointer-events-none">
-                <div className="ml-auto w-fit pointer-events-auto">
-                  <DeleteJournalButton journalId={journal.id} action={deleteJournalAction} />
-                </div>
-              </CardContent>
-            ) : null}
-          </Card>
+        userJournals.map((journal) => (
+          <JournalCard
+            key={journal.id}
+            journal={journal}
+            collaborators={collaboratorsByJournal.get(journal.id) ?? []}
+            deleteAction={deleteJournalAction}
+          />
         ))
       )}
     </main>
