@@ -1,4 +1,4 @@
-import { and, desc, eq, ne, sql } from 'drizzle-orm'
+import { and, desc, eq, inArray, ne, sql } from 'drizzle-orm'
 
 import { db } from '@/db'
 import { journalMembers, journals, users } from '@/db/schema'
@@ -10,11 +10,21 @@ export type UserJournal = {
   isOwner: boolean
 }
 
+type GetUserJournalsInput = {
+  limit?: number
+  offset?: number
+}
+
 /**
  * Get journals accessible to a specific user.
  */
-export async function getUserJournals(userId: string): Promise<UserJournal[]> {
-  return db
+export async function getUserJournals(
+  userId: string,
+  input: GetUserJournalsInput = {},
+): Promise<UserJournal[]> {
+  const { limit, offset } = input
+
+  const query = db
     .select({
       id: journals.id,
       title: journals.title,
@@ -26,6 +36,27 @@ export async function getUserJournals(userId: string): Promise<UserJournal[]> {
     .where(eq(journalMembers.userId, userId))
     .groupBy(journals.id, journals.title, journals.description, journals.updatedAt)
     .orderBy(desc(journals.updatedAt))
+
+  if (typeof limit === 'number') {
+    query.limit(limit)
+  }
+
+  if (typeof offset === 'number') {
+    query.offset(offset)
+  }
+
+  return query
+}
+
+export async function getUserJournalCount(userId: string): Promise<number> {
+  const [result] = await db
+    .select({
+      count: sql<number>`count(*)`.mapWith(Number),
+    })
+    .from(journalMembers)
+    .where(eq(journalMembers.userId, userId))
+
+  return result?.count ?? 0
 }
 
 /**
@@ -55,6 +86,10 @@ export type JournalCollaborator = {
   id: string
   displayName: string | null
   role: 'owner' | 'editor' | 'viewer'
+}
+
+type JournalCollaboratorByJournal = JournalCollaborator & {
+  journalId: string
 }
 
 /**
@@ -106,6 +141,48 @@ export async function getCollaboratorsForJournal(
     .from(journalMembers)
     .innerJoin(users, eq(users.id, journalMembers.userId))
     .where(and(eq(journalMembers.journalId, journalId), ne(journalMembers.role, 'owner')))
+}
+
+/**
+ * Get non-owner collaborators for multiple journals in one query.
+ * This variant assumes journalIds are already access-scoped by the caller.
+ */
+export async function getCollaboratorsForJournals(
+  journalIds: string[],
+): Promise<Map<string, JournalCollaborator[]>> {
+  if (journalIds.length === 0) {
+    return new Map()
+  }
+
+  const collaboratorRows = await db
+    .select({
+      journalId: journalMembers.journalId,
+      id: users.id,
+      displayName: users.displayName,
+      role: journalMembers.role,
+    })
+    .from(journalMembers)
+    .innerJoin(users, eq(users.id, journalMembers.userId))
+    .where(
+      and(
+        inArray(journalMembers.journalId, journalIds),
+        ne(journalMembers.role, 'owner'),
+      ),
+    )
+
+  const collaboratorsByJournal = new Map<string, JournalCollaborator[]>()
+
+  for (const row of collaboratorRows as JournalCollaboratorByJournal[]) {
+    const collaborators = collaboratorsByJournal.get(row.journalId) ?? []
+    collaborators.push({
+      id: row.id,
+      displayName: row.displayName,
+      role: row.role,
+    })
+    collaboratorsByJournal.set(row.journalId, collaborators)
+  }
+
+  return collaboratorsByJournal
 }
 
 type CreateJournalInput = {

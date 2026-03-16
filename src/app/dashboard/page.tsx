@@ -2,7 +2,6 @@ import { format } from 'date-fns'
 import Link from 'next/link'
 
 import {
-  CardContent,
   Card,
   CardDescription,
   CardHeader,
@@ -10,13 +9,26 @@ import {
 } from '@/components/ui/card'
 import { createJournalAction, deleteJournalAction } from '@/app/dashboard/actions'
 import { CreateJournalModal } from '@/app/dashboard/create-journal-modal'
-import { DeleteJournalButton } from '@/app/dashboard/delete-journal-button'
+import { JournalCard } from '@/app/dashboard/journal-card'
+import { Button } from '@/components/ui/button'
 import { getPendingInvitationsForEmail } from '@/data/invitations'
-import { getUserJournals, type UserJournal } from '@/data/journals'
+import {
+  getCollaboratorsForJournals,
+  getUserJournalCount,
+  getUserJournals,
+} from '@/data/journals'
 import { getCurrentAppUser } from '@/lib/get-current-app-user'
 import { getCurrentUserEmail } from '@/lib/get-current-user-email'
 
-export default async function DashboardPage() {
+const JOURNALS_PER_PAGE = 5
+
+type DashboardPageProps = {
+  searchParams?: Promise<{
+    page?: string
+  }>
+}
+
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
   const appUser = await getCurrentAppUser()
 
   if (!appUser) {
@@ -24,7 +36,7 @@ export default async function DashboardPage() {
       <main className="mx-auto w-full max-w-5xl px-6 py-8">
         <Card>
           <CardHeader>
-            <CardTitle>Journals</CardTitle>
+            <CardTitle>Your Journals</CardTitle>
             <CardDescription>Sign in to view your journals.</CardDescription>
           </CardHeader>
         </Card>
@@ -32,17 +44,32 @@ export default async function DashboardPage() {
     )
   }
 
-  const userJournals = await getUserJournals(appUser.id)
+  const resolvedSearchParams = searchParams ? await searchParams : undefined
+  const parsedPage = Number.parseInt(resolvedSearchParams?.page ?? '1', 10)
+  const currentPage = Number.isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage
+
+  const totalJournalCount = await getUserJournalCount(appUser.id)
+  const totalPages = Math.max(1, Math.ceil(totalJournalCount / JOURNALS_PER_PAGE))
+  const safePage = Math.min(currentPage, totalPages)
+  const offset = (safePage - 1) * JOURNALS_PER_PAGE
+
+  const userJournals = await getUserJournals(appUser.id, {
+    limit: JOURNALS_PER_PAGE,
+    offset,
+  })
   const currentUserEmail = await getCurrentUserEmail()
   const pendingInvitations = currentUserEmail
     ? await getPendingInvitationsForEmail(currentUserEmail)
     : []
+  const collaboratorsByJournal = await getCollaboratorsForJournals(
+    userJournals.map((journal) => journal.id),
+  )
 
   return (
     <main className="mx-auto w-full max-w-5xl space-y-6 px-6 py-8">
       <section className="space-y-4">
         <div className="flex items-start justify-between gap-4">
-          <h1 className="text-3xl font-semibold tracking-tight">Journals</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">Your Journals</h1>
           <CreateJournalModal action={createJournalAction} />
         </div>
       </section>
@@ -75,27 +102,43 @@ export default async function DashboardPage() {
           </CardHeader>
         </Card>
       ) : (
-        userJournals.map((journal: UserJournal) => (
-          <Card key={journal.id} className="relative gap-3 transition-colors hover:bg-muted/40">
-            <Link
-              href={`/dashboard/journals/${journal.id}`}
-              aria-label={`Open ${journal.title}`}
-              className="focus-visible:ring-ring absolute inset-0 rounded-xl focus-visible:ring-2"
-            />
-            <CardHeader className="relative z-10 pointer-events-none">
-              <CardTitle>{journal.title}</CardTitle>
-              <CardDescription>{journal.description || 'No description'}</CardDescription>
-            </CardHeader>
-            {journal.isOwner ? (
-              <CardContent className="relative z-20 pt-0 pointer-events-none">
-                <div className="ml-auto w-fit pointer-events-auto">
-                  <DeleteJournalButton journalId={journal.id} action={deleteJournalAction} />
-                </div>
-              </CardContent>
-            ) : null}
-          </Card>
+        userJournals.map((journal) => (
+          <JournalCard
+            key={journal.id}
+            journal={journal}
+            collaborators={collaboratorsByJournal.get(journal.id) ?? []}
+            deleteAction={deleteJournalAction}
+          />
         ))
       )}
+
+      {totalPages > 1 ? (
+        <section className="flex items-center justify-between gap-3 border-t pt-3">
+          <p className="text-muted-foreground text-sm">
+            Page {safePage} of {totalPages}
+          </p>
+          <div className="flex items-center gap-2">
+            {safePage > 1 ? (
+              <Button asChild variant="outline" size="sm">
+                <Link href={`/dashboard?page=${safePage - 1}`}>Previous</Link>
+              </Button>
+            ) : (
+              <Button type="button" variant="outline" size="sm" disabled>
+                Previous
+              </Button>
+            )}
+            {safePage < totalPages ? (
+              <Button asChild variant="outline" size="sm">
+                <Link href={`/dashboard?page=${safePage + 1}`}>Next</Link>
+              </Button>
+            ) : (
+              <Button type="button" variant="outline" size="sm" disabled>
+                Next
+              </Button>
+            )}
+          </div>
+        </section>
+      ) : null}
     </main>
   )
 }

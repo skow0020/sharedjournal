@@ -2,16 +2,26 @@ import type { ReactNode } from 'react'
 import { render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+  }),
+}))
+
 const {
   getCurrentAppUserMock,
   getCurrentUserEmailMock,
   getPendingInvitationsForEmailMock,
+  getCollaboratorsForJournalsMock,
+  getUserJournalCountMock,
   getUserJournalsMock,
   createJournalForOwnerMock,
 } = vi.hoisted(() => ({
   getCurrentAppUserMock: vi.fn(),
   getCurrentUserEmailMock: vi.fn(),
   getPendingInvitationsForEmailMock: vi.fn(),
+  getCollaboratorsForJournalsMock: vi.fn(),
+  getUserJournalCountMock: vi.fn(),
   getUserJournalsMock: vi.fn(),
   createJournalForOwnerMock: vi.fn(),
 }))
@@ -41,15 +51,19 @@ vi.mock('@/data/invitations', () => ({
 }))
 
 vi.mock('@/data/journals', () => ({
+  getCollaboratorsForJournals: getCollaboratorsForJournalsMock,
+  getUserJournalCount: getUserJournalCountMock,
   getUserJournals: getUserJournalsMock,
   createJournalForOwner: createJournalForOwnerMock,
 }))
 
 import DashboardPage from '@/app/dashboard/page'
 
-async function renderDashboardPage() {
-  const page = await DashboardPage()
-  render(page)
+async function renderDashboardPage(searchParams?: { page?: string }) {
+  const withParams = await DashboardPage({
+    searchParams: Promise.resolve(searchParams ?? {}),
+  })
+  render(withParams)
 }
 
 describe('DashboardPage', () => {
@@ -58,7 +72,9 @@ describe('DashboardPage', () => {
 
     getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
     getCurrentUserEmailMock.mockResolvedValue('owner@example.com')
+    getUserJournalCountMock.mockResolvedValue(0)
     getUserJournalsMock.mockResolvedValue([])
+    getCollaboratorsForJournalsMock.mockResolvedValue(new Map())
     getPendingInvitationsForEmailMock.mockResolvedValue([])
   })
 
@@ -67,7 +83,7 @@ describe('DashboardPage', () => {
 
     await renderDashboardPage()
 
-    expect(screen.getByText('Journals')).toBeInTheDocument()
+    expect(screen.getByText('Your Journals')).toBeInTheDocument()
     expect(screen.getByText('Sign in to view your journals.')).toBeInTheDocument()
     expect(getUserJournalsMock).not.toHaveBeenCalled()
   })
@@ -75,7 +91,7 @@ describe('DashboardPage', () => {
   it('renders empty journal state for signed in user with no journals', async () => {
     await renderDashboardPage()
 
-    expect(screen.getByRole('heading', { name: 'Journals' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Your Journals' })).toBeInTheDocument()
     expect(screen.getByText('No journals found')).toBeInTheDocument()
     expect(screen.getByText('You are not a member of any journals yet.')).toBeInTheDocument()
     expect(screen.getByTestId('create-journal-modal')).toBeInTheDocument()
@@ -103,6 +119,21 @@ describe('DashboardPage', () => {
         isOwner: true,
       },
     ])
+    getUserJournalCountMock.mockResolvedValue(1)
+    getCollaboratorsForJournalsMock.mockResolvedValue(
+      new Map([
+        [
+          'journal-1',
+          [
+            {
+              id: 'user-2',
+              displayName: 'Alex',
+              role: 'editor',
+            },
+          ],
+        ],
+      ]),
+    )
 
     await renderDashboardPage()
 
@@ -112,11 +143,13 @@ describe('DashboardPage', () => {
 
     expect(screen.getByText('Family Journal')).toBeInTheDocument()
     expect(screen.getByText('Daily family reflections')).toBeInTheDocument()
+    expect(screen.getByText('Collaborators (1)')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Open Family Journal' })).toBeInTheDocument()
     expect(screen.getByTestId('delete-journal-journal-1')).toBeInTheDocument()
   })
 
   it('renders delete button only for journals owned by current user', async () => {
+    getUserJournalCountMock.mockResolvedValue(2)
     getUserJournalsMock.mockResolvedValue([
       {
         id: 'journal-1',
@@ -146,5 +179,30 @@ describe('DashboardPage', () => {
     await renderDashboardPage()
 
     expect(getPendingInvitationsForEmailMock).not.toHaveBeenCalled()
+  })
+
+  it('renders pager and requests journals for the requested page', async () => {
+    getUserJournalCountMock.mockResolvedValue(7)
+    getUserJournalsMock.mockResolvedValue([
+      {
+        id: 'journal-6',
+        title: 'Page Two Journal 1',
+        description: null,
+        isOwner: true,
+      },
+      {
+        id: 'journal-7',
+        title: 'Page Two Journal 2',
+        description: null,
+        isOwner: false,
+      },
+    ])
+
+    await renderDashboardPage({ page: '2' })
+
+    expect(getUserJournalsMock).toHaveBeenCalledWith('user-1', { limit: 5, offset: 5 })
+    expect(screen.getByText('Page 2 of 2')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Previous' })).toHaveAttribute('href', '/dashboard?page=1')
+    expect(screen.getByRole('button', { name: 'Next' })).toBeDisabled()
   })
 })
