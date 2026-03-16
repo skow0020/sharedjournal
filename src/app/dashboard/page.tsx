@@ -11,8 +11,14 @@ import {
 import { createJournalAction, deleteJournalAction } from '@/app/dashboard/actions'
 import { CreateJournalModal } from '@/app/dashboard/create-journal-modal'
 import { DeleteJournalButton } from '@/app/dashboard/delete-journal-button'
+import { CollaboratorsAccordion } from '@/app/dashboard/journals/collaborators-accordion'
 import { getPendingInvitationsForEmail } from '@/data/invitations'
-import { getUserJournals, type UserJournal } from '@/data/journals'
+import {
+  getCollaboratorsForJournal,
+  getUserJournals,
+  type JournalCollaborator,
+  type UserJournal,
+} from '@/data/journals'
 import { getCurrentAppUser } from '@/lib/get-current-app-user'
 import { getCurrentUserEmail } from '@/lib/get-current-user-email'
 
@@ -37,6 +43,14 @@ export default async function DashboardPage() {
   const pendingInvitations = currentUserEmail
     ? await getPendingInvitationsForEmail(currentUserEmail)
     : []
+  const collaboratorsByJournal = new Map<string, JournalCollaborator[]>(
+    await Promise.all(
+      userJournals.map(async (journal) => {
+        const collaborators = await getCollaboratorsForJournal(appUser.id, journal.id)
+        return [journal.id, collaborators] as const
+      }),
+    ),
+  )
 
   return (
     <main className="mx-auto w-full max-w-5xl space-y-6 px-6 py-8">
@@ -93,6 +107,14 @@ export default async function DashboardPage() {
               </CardTitle>
               <CardDescription>{journal.description || 'No description'}</CardDescription>
             </CardHeader>
+            <CardContent className="relative z-20 pt-0 pointer-events-none">
+              <div className="pointer-events-auto">
+                <CollaboratorsAccordion
+                  collaborators={collaboratorsByJournal.get(journal.id) ?? []}
+                  maxVisible={5}
+                />
+              </div>
+            </CardContent>
             {journal.isOwner ? (
               <CardContent className="relative z-20 pt-0 pointer-events-none">
                 <div className="ml-auto w-fit pointer-events-auto">

@@ -6,12 +6,14 @@ const {
   getCurrentAppUserMock,
   getCurrentUserEmailMock,
   getPendingInvitationsForEmailMock,
+  getCollaboratorsForJournalMock,
   getUserJournalsMock,
   createJournalForOwnerMock,
 } = vi.hoisted(() => ({
   getCurrentAppUserMock: vi.fn(),
   getCurrentUserEmailMock: vi.fn(),
   getPendingInvitationsForEmailMock: vi.fn(),
+  getCollaboratorsForJournalMock: vi.fn(),
   getUserJournalsMock: vi.fn(),
   createJournalForOwnerMock: vi.fn(),
 }))
@@ -41,6 +43,7 @@ vi.mock('@/data/invitations', () => ({
 }))
 
 vi.mock('@/data/journals', () => ({
+  getCollaboratorsForJournal: getCollaboratorsForJournalMock,
   getUserJournals: getUserJournalsMock,
   createJournalForOwner: createJournalForOwnerMock,
 }))
@@ -59,6 +62,7 @@ describe('DashboardPage', () => {
     getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
     getCurrentUserEmailMock.mockResolvedValue('owner@example.com')
     getUserJournalsMock.mockResolvedValue([])
+    getCollaboratorsForJournalMock.mockResolvedValue([])
     getPendingInvitationsForEmailMock.mockResolvedValue([])
   })
 
@@ -67,7 +71,7 @@ describe('DashboardPage', () => {
 
     await renderDashboardPage()
 
-    expect(screen.getByText('Journals')).toBeInTheDocument()
+    expect(screen.getByText('Your Journals')).toBeInTheDocument()
     expect(screen.getByText('Sign in to view your journals.')).toBeInTheDocument()
     expect(getUserJournalsMock).not.toHaveBeenCalled()
   })
@@ -75,7 +79,7 @@ describe('DashboardPage', () => {
   it('renders empty journal state for signed in user with no journals', async () => {
     await renderDashboardPage()
 
-    expect(screen.getByRole('heading', { name: 'Journals' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Your Journals' })).toBeInTheDocument()
     expect(screen.getByText('No journals found')).toBeInTheDocument()
     expect(screen.getByText('You are not a member of any journals yet.')).toBeInTheDocument()
     expect(screen.getByTestId('create-journal-modal')).toBeInTheDocument()
@@ -103,6 +107,13 @@ describe('DashboardPage', () => {
         isOwner: true,
       },
     ])
+    getCollaboratorsForJournalMock.mockResolvedValue([
+      {
+        id: 'user-2',
+        displayName: 'Alex',
+        role: 'editor',
+      },
+    ])
 
     await renderDashboardPage()
 
@@ -112,6 +123,7 @@ describe('DashboardPage', () => {
 
     expect(screen.getByText('Family Journal')).toBeInTheDocument()
     expect(screen.getByText('Daily family reflections')).toBeInTheDocument()
+    expect(screen.getByText('Collaborators (1)')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Open Family Journal' })).toBeInTheDocument()
     expect(screen.getByTestId('delete-journal-journal-1')).toBeInTheDocument()
   })

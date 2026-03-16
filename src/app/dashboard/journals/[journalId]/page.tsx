@@ -10,17 +10,12 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion'
-import {
   cleanupEntryImageUploadsAction,
   createEntryAction,
   createInviteAction,
   updateJournalTitleAction,
 } from '@/app/dashboard/journals/[journalId]/actions'
+import { CollaboratorsAccordion } from '@/app/dashboard/journals/collaborators-accordion'
 import { deleteJournalAction } from '@/app/dashboard/actions'
 import { DeleteJournalButton } from '@/app/dashboard/delete-journal-button'
 import { CreateEntryModal } from '@/app/dashboard/journals/[journalId]/create-entry-modal'
@@ -98,24 +93,7 @@ export default async function JournalDetailsPage({ params }: JournalDetailsPageP
               <p className="text-muted-foreground text-sm">{journal.description}</p>
             ) : null}
             <div className="space-y-1">
-              <Accordion type="single" collapsible>
-                <AccordionItem value="collaborators" className="border-none">
-                  <AccordionTrigger className="text-muted-foreground py-1 text-sm font-medium hover:no-underline">
-                    Collaborators ({collaborators.length})
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    {collaborators.length > 0 ? (
-                      <ul className="text-muted-foreground space-y-1 text-sm">
-                        {collaborators.map((collaborator) => (
-                          <li key={collaborator.id}>{collaborator.displayName || 'Unnamed user'}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-muted-foreground text-sm">Not shared with anyone yet.</p>
-                    )}
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
+              <CollaboratorsAccordion collaborators={collaborators} />
             </div>
           </div>
           <div className="flex items-center gap-2">
