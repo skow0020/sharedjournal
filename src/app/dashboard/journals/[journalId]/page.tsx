@@ -77,10 +77,12 @@ export default async function JournalDetailsPage({ params, searchParams }: Journ
     ? 1
     : parsedEntriesPage
 
-  const totalEntryCount = await getJournalEntryCountForJournal(appUser.id, journalId)
-  const entries = await getJournalEntriesForJournal(appUser.id, journalId, {
-    limit: currentEntriesPage * ENTRIES_PER_PAGE,
-  })
+  const [totalEntryCount, entries] = await Promise.all([
+    getJournalEntryCountForJournal(appUser.id, journalId),
+    getJournalEntriesForJournal(appUser.id, journalId, {
+      limit: currentEntriesPage * ENTRIES_PER_PAGE,
+    }),
+  ])
   const collaborators = await getCollaboratorsForJournal(appUser.id, journalId)
   const pendingInvitations = await getPendingInvitationsForOwnedJournal({
     ownerUserId: appUser.id,
