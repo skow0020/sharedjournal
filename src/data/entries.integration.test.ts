@@ -5,6 +5,7 @@ import { db } from '@/db'
 import { entries, journalMembers, journals, users } from '@/db/schema'
 import {
   createEntryForJournal,
+  getJournalEntryCountForJournal,
   getJournalEntriesByDate,
   getJournalEntriesForJournal,
 } from '@/data/entries'
@@ -147,6 +148,80 @@ describe('getJournalEntriesForJournal', () => {
     const result = await getJournalEntriesForJournal(ownerId, journalId)
 
     expect(result[0].authorName).toBe('Owner')
+  })
+
+  it('supports limit and preserves newest-first ordering', async () => {
+    await createEntry(journalId, ownerId, {
+      title: 'Third Entry',
+      content: 'Another one.',
+      entryDate: '2026-03-03',
+    })
+    await createEntry(journalId, ownerId, {
+      title: 'Fourth Entry',
+      content: 'Latest entry.',
+      entryDate: '2026-03-04',
+    })
+
+    const result = await getJournalEntriesForJournal(ownerId, journalId, { limit: 2 })
+
+    expect(result).toHaveLength(2)
+    expect(result[0].title).toBe('Fourth Entry')
+    expect(result[1].title).toBe('Third Entry')
+  })
+
+  it('returns all rows when limit exceeds available entries', async () => {
+    const result = await getJournalEntriesForJournal(ownerId, journalId, { limit: 50 })
+
+    expect(result).toHaveLength(2)
+  })
+})
+
+describe('getJournalEntryCountForJournal', () => {
+  let ownerId: string
+  let memberId: string
+  let outsiderId: string
+  let journalId: string
+
+  beforeEach(async () => {
+    const owner = await createUser({ displayName: 'Owner' })
+    const member = await createUser({ displayName: 'Member' })
+    const outsider = await createUser({ displayName: 'Outsider' })
+
+    ownerId = owner.id
+    memberId = member.id
+    outsiderId = outsider.id
+
+    const journal = await createJournal(ownerId, 'Count Journal')
+    journalId = journal.id
+
+    await addMember(journalId, ownerId, 'owner')
+    await addMember(journalId, memberId, 'editor')
+
+    await createEntry(journalId, ownerId, { content: 'One', entryDate: '2026-03-01' })
+    await createEntry(journalId, ownerId, { content: 'Two', entryDate: '2026-03-02' })
+    await createEntry(journalId, ownerId, { content: 'Three', entryDate: '2026-03-03' })
+  })
+
+  afterEach(async () => {
+    await deleteJournals([journalId])
+    await deleteUsers([ownerId, memberId, outsiderId])
+  })
+
+  it('returns total count for members and zero for non-members', async () => {
+    const ownerCount = await getJournalEntryCountForJournal(ownerId, journalId)
+    const memberCount = await getJournalEntryCountForJournal(memberId, journalId)
+    const outsiderCount = await getJournalEntryCountForJournal(outsiderId, journalId)
+
+    expect(ownerCount).toBe(3)
+    expect(memberCount).toBe(3)
+    expect(outsiderCount).toBe(0)
+  })
+
+  it('matches list length returned by getJournalEntriesForJournal', async () => {
+    const count = await getJournalEntryCountForJournal(ownerId, journalId)
+    const list = await getJournalEntriesForJournal(ownerId, journalId)
+
+    expect(count).toBe(list.length)
   })
 })
 
