@@ -1,5 +1,5 @@
 import { copy, del } from '@vercel/blob'
-import { and, asc, desc, eq, inArray } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm'
 
 import { db } from '@/db'
 import { entries, entryPhotos, journalMembers, journals, users } from '@/db/schema'
@@ -86,8 +86,11 @@ export async function getJournalEntriesByDate(userId: string, date: string): Pro
 export async function getJournalEntriesForJournal(
   userId: string,
   journalId: string,
+  input: {
+    limit?: number
+  } = {},
 ): Promise<JournalEntryForJournal[]> {
-  const entryRows = await db
+  const query = db
     .select({
       id: entries.id,
       title: entries.title,
@@ -106,6 +109,12 @@ export async function getJournalEntriesForJournal(
       ),
     )
     .orderBy(desc(entries.entryDate), desc(entries.createdAt))
+
+  if (typeof input.limit === 'number') {
+    query.limit(input.limit)
+  }
+
+  const entryRows = await query
 
   if (entryRows.length === 0) {
     return []
@@ -137,6 +146,26 @@ export async function getJournalEntriesForJournal(
     ...entry,
     photos: photosByEntry.get(entry.id) ?? [],
   }))
+}
+
+export async function getJournalEntryCountForJournal(
+  userId: string,
+  journalId: string,
+): Promise<number> {
+  const [result] = await db
+    .select({
+      count: sql<number>`count(${entries.id})`.mapWith(Number),
+    })
+    .from(entries)
+    .innerJoin(journalMembers, eq(journalMembers.journalId, entries.journalId))
+    .where(
+      and(
+        eq(journalMembers.userId, userId),
+        eq(entries.journalId, journalId),
+      ),
+    )
+
+  return result?.count ?? 0
 }
 
 /**

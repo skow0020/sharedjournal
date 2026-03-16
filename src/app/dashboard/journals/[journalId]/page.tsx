@@ -20,8 +20,10 @@ import { deleteJournalAction } from '@/app/dashboard/actions'
 import { DeleteJournalButton } from '@/app/dashboard/delete-journal-button'
 import { CreateEntryModal } from '@/app/dashboard/journals/[journalId]/create-entry-modal'
 import { InviteUserModal } from '@/app/dashboard/journals/[journalId]/invite-user-modal'
+import { JournalEntriesInfiniteLoader } from '@/app/dashboard/journals/[journalId]/journal-entries-infinite-loader'
 import { JournalTitleEditor } from '@/app/dashboard/journals/[journalId]/journal-title-editor'
 import {
+  getJournalEntryCountForJournal,
   getJournalEntriesForJournal,
   type JournalEntryForJournal,
 } from '@/data/entries'
@@ -37,9 +39,14 @@ type JournalDetailsPageProps = {
   params: Promise<{
     journalId: string
   }>
+  searchParams?: Promise<{
+    entriesPage?: string
+  }>
 }
 
-export default async function JournalDetailsPage({ params }: JournalDetailsPageProps) {
+const ENTRIES_PER_PAGE = 10
+
+export default async function JournalDetailsPage({ params, searchParams }: JournalDetailsPageProps) {
   const appUser = await getCurrentAppUser()
 
   if (!appUser) {
@@ -64,13 +71,22 @@ export default async function JournalDetailsPage({ params }: JournalDetailsPageP
 
   const journalTitle = journal.title
   const canEditJournalTitle = journal.ownerUserId === appUser.id
+  const resolvedSearchParams = searchParams ? await searchParams : undefined
+  const parsedEntriesPage = Number.parseInt(resolvedSearchParams?.entriesPage ?? '1', 10)
+  const currentEntriesPage = Number.isNaN(parsedEntriesPage) || parsedEntriesPage < 1
+    ? 1
+    : parsedEntriesPage
 
-  const entries = await getJournalEntriesForJournal(appUser.id, journalId)
+  const totalEntryCount = await getJournalEntryCountForJournal(appUser.id, journalId)
+  const entries = await getJournalEntriesForJournal(appUser.id, journalId, {
+    limit: currentEntriesPage * ENTRIES_PER_PAGE,
+  })
   const collaborators = await getCollaboratorsForJournal(appUser.id, journalId)
   const pendingInvitations = await getPendingInvitationsForOwnedJournal({
     ownerUserId: appUser.id,
     journalId,
   })
+  const hasMoreEntries = entries.length < totalEntryCount
 
   return (
     <main className="mx-auto w-full max-w-5xl space-y-6 px-6 py-8">
@@ -142,29 +158,35 @@ export default async function JournalDetailsPage({ params }: JournalDetailsPageP
             </CardHeader>
           </Card>
         ) : (
-          <div className="grid gap-3">
-            {entries.map((entry: JournalEntryForJournal) => (
-              <Card key={entry.id}>
-                <CardHeader>
-                  <CardTitle>{entry.title || 'Untitled entry'}</CardTitle>
-                  <CardDescription>
-                    {format(parseISO(entry.entryDate), 'MMMM d, yyyy')} · {entry.authorName || 'Unknown author'}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm leading-6 whitespace-pre-wrap">{entry.content}</p>
-                  {entry.photos.length > 0 ? (
-                    <EntryPhotoGallery
-                      photos={entry.photos.map((photo) => ({
-                        id: photo.id,
-                        src: buildEntryPhotoProxyUrl(entry.id, photo.id),
-                      }))}
-                    />
-                  ) : null}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <>
+            <div className="grid gap-3">
+              {entries.map((entry: JournalEntryForJournal) => (
+                <Card key={entry.id}>
+                  <CardHeader>
+                    <CardTitle>{entry.title || 'Untitled entry'}</CardTitle>
+                    <CardDescription>
+                      {format(parseISO(entry.entryDate), 'MMMM d, yyyy')} · {entry.authorName || 'Unknown author'}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm leading-6 whitespace-pre-wrap">{entry.content}</p>
+                    {entry.photos.length > 0 ? (
+                      <EntryPhotoGallery
+                        photos={entry.photos.map((photo) => ({
+                          id: photo.id,
+                          src: buildEntryPhotoProxyUrl(entry.id, photo.id),
+                        }))}
+                      />
+                    ) : null}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            <JournalEntriesInfiniteLoader
+              currentPage={currentEntriesPage}
+              hasMore={hasMoreEntries}
+            />
+          </>
         )}
       </section>
     </main>

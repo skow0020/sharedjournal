@@ -5,6 +5,7 @@ const {
   getCurrentAppUserMock,
   getUserJournalByIdMock,
   getCollaboratorsForJournalMock,
+  getJournalEntryCountForJournalMock,
   getJournalEntriesForJournalMock,
   getPendingInvitationsForOwnedJournalMock,
   notFoundMock,
@@ -14,6 +15,7 @@ const {
   getCurrentAppUserMock: vi.fn(),
   getUserJournalByIdMock: vi.fn(),
   getCollaboratorsForJournalMock: vi.fn(),
+  getJournalEntryCountForJournalMock: vi.fn(),
   getJournalEntriesForJournalMock: vi.fn(),
   getPendingInvitationsForOwnedJournalMock: vi.fn(),
   notFoundMock: vi.fn(() => {
@@ -43,6 +45,14 @@ vi.mock('@/app/dashboard/journals/[journalId]/invite-user-modal', () => ({
   InviteUserModal: () => <div data-testid="invite-user-modal">Invite user modal</div>,
 }))
 
+vi.mock('@/app/dashboard/journals/[journalId]/journal-entries-infinite-loader', () => ({
+  JournalEntriesInfiniteLoader: ({ currentPage, hasMore }: { currentPage: number, hasMore: boolean }) => (
+    <div data-testid="journal-entries-infinite-loader">
+      Page {currentPage} loader {String(hasMore)}
+    </div>
+  ),
+}))
+
 vi.mock('@/app/dashboard/delete-journal-button', () => ({
   DeleteJournalButton: () => <div data-testid="delete-journal-button">Delete journal</div>,
 }))
@@ -64,6 +74,7 @@ vi.mock('@/data/journals', () => ({
 }))
 
 vi.mock('@/data/entries', () => ({
+  getJournalEntryCountForJournal: getJournalEntryCountForJournalMock,
   getJournalEntriesForJournal: getJournalEntriesForJournalMock,
   createEntryForJournal: vi.fn(),
 }))
@@ -80,9 +91,10 @@ vi.mock('@/lib/invitations/send-invite-email', () => ({
 
 import JournalDetailsPage from '@/app/dashboard/journals/[journalId]/page'
 
-async function renderJournalDetailsPage(journalId = 'journal-1') {
+async function renderJournalDetailsPage(journalId = 'journal-1', searchParams?: { entriesPage?: string }) {
   const page = await JournalDetailsPage({
     params: Promise.resolve({ journalId }),
+    searchParams: Promise.resolve(searchParams ?? {}),
   })
 
   render(page)
@@ -107,6 +119,7 @@ describe('JournalDetailsPage', () => {
         role: 'editor',
       },
     ])
+    getJournalEntryCountForJournalMock.mockResolvedValue(1)
     getJournalEntriesForJournalMock.mockResolvedValue([
       {
         id: 'entry-1',
@@ -164,6 +177,7 @@ describe('JournalDetailsPage', () => {
     expect(screen.getByRole('heading', { name: 'Journal entries' })).toBeInTheDocument()
     expect(screen.getByText('Morning Reflection')).toBeInTheDocument()
     expect(screen.getByText('Wrote about goals for the day.')).toBeInTheDocument()
+    expect(screen.getByTestId('journal-entries-infinite-loader')).toHaveTextContent('Page 1 loader false')
 
     expect(screen.getByTestId('create-entry-modal')).toBeInTheDocument()
     expect(screen.getByTestId('invite-user-modal')).toBeInTheDocument()
@@ -184,6 +198,7 @@ describe('JournalDetailsPage', () => {
   })
 
   it('renders empty entries state when there are no journal entries', async () => {
+    getJournalEntryCountForJournalMock.mockResolvedValue(0)
     getJournalEntriesForJournalMock.mockResolvedValue([])
     getPendingInvitationsForOwnedJournalMock.mockResolvedValue([])
 
@@ -206,5 +221,16 @@ describe('JournalDetailsPage', () => {
     await renderJournalDetailsPage()
 
     expect(screen.queryByTestId('delete-journal-button')).not.toBeInTheDocument()
+  })
+
+  it('loads entries cumulatively based on entriesPage search param', async () => {
+    getJournalEntryCountForJournalMock.mockResolvedValue(24)
+
+    await renderJournalDetailsPage('journal-1', { entriesPage: '2' })
+
+    expect(getJournalEntriesForJournalMock).toHaveBeenCalledWith('user-1', 'journal-1', {
+      limit: 20,
+    })
+    expect(screen.getByTestId('journal-entries-infinite-loader')).toHaveTextContent('Page 2 loader true')
   })
 })
