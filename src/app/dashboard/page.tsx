@@ -24,7 +24,7 @@ export default async function DashboardPage() {
       <main className="mx-auto w-full max-w-5xl px-6 py-8">
         <Card>
           <CardHeader>
-            <CardTitle>Journals</CardTitle>
+            <CardTitle>Your Journals</CardTitle>
             <CardDescription>Sign in to view your journals.</CardDescription>
           </CardHeader>
         </Card>
@@ -42,7 +42,7 @@ export default async function DashboardPage() {
     <main className="mx-auto w-full max-w-5xl space-y-6 px-6 py-8">
       <section className="space-y-4">
         <div className="flex items-start justify-between gap-4">
-          <h1 className="text-3xl font-semibold tracking-tight">Journals</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">Your Journals</h1>
           <CreateJournalModal action={createJournalAction} />
         </div>
       </section>
@@ -83,7 +83,14 @@ export default async function DashboardPage() {
               className="focus-visible:ring-ring absolute inset-0 rounded-xl focus-visible:ring-2"
             />
             <CardHeader className="relative z-10 pointer-events-none">
-              <CardTitle>{journal.title}</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <span>{journal.title}</span>
+                {!journal.isOwner ? (
+                  <span className="rounded-full border border-[#d4e6ff] bg-[#f5f9ff] px-2 py-0.5 text-xs font-medium text-[#1f4b7a]">
+                    Shared with you
+                  </span>
+                ) : null}
+              </CardTitle>
               <CardDescription>{journal.description || 'No description'}</CardDescription>
             </CardHeader>
             {journal.isOwner ? (
