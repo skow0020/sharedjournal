@@ -9,6 +9,7 @@ import {
   getJournalEntriesByDate,
   getJournalEntriesForJournal,
 } from '@/data/entries'
+import { isEncryptedEntryContent } from '@/lib/entry-content-crypto'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -319,7 +320,12 @@ describe('createEntryForJournal', () => {
       .from(entries)
       .where(and(eq(entries.id, result!.id), eq(entries.journalId, journalId)))
 
-    expect(row.content).toBe('Some thoughts.')
+    expect(row.content).not.toBe('Some thoughts.')
+    expect(isEncryptedEntryContent(row.content)).toBe(true)
+
+    const entriesForJournal = await getJournalEntriesForJournal(ownerId, journalId)
+
+    expect(entriesForJournal[0]?.content).toBe('Some thoughts.')
   })
 
   it('returns null and does not insert when user is not a member', async () => {

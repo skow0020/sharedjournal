@@ -3,6 +3,7 @@ import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm'
 
 import { db } from '@/db'
 import { entries, entryPhotos, journalMembers, journals, users } from '@/db/schema'
+import { decryptEntryContent, encryptEntryContent } from '@/lib/entry-content-crypto'
 import { buildFinalEntryImageStorageKey, isTempEntryImageStorageKeyForJournal } from '@/lib/entry-image-storage'
 
 export type JournalEntry = {
@@ -58,7 +59,7 @@ type CreateEntryForJournalInput = {
  * @param date - The date to filter entries by (format: YYYY-MM-DD)
  */
 export async function getJournalEntriesByDate(userId: string, date: string): Promise<JournalEntry[]> {
-  return db
+  const entryRows = await db
     .select({
       id: entries.id,
       title: entries.title,
@@ -78,6 +79,11 @@ export async function getJournalEntriesByDate(userId: string, date: string): Pro
       ),
     )
     .orderBy(desc(entries.createdAt))
+
+  return entryRows.map((entry) => ({
+    ...entry,
+    content: decryptEntryContent(entry.content),
+  }))
 }
 
 /**
@@ -144,6 +150,7 @@ export async function getJournalEntriesForJournal(
 
   return entryRows.map((entry) => ({
     ...entry,
+    content: decryptEntryContent(entry.content),
     photos: photosByEntry.get(entry.id) ?? [],
   }))
 }
@@ -194,7 +201,7 @@ export async function createEntryForJournal({
       journalId,
       authorUserId: userId,
       title,
-      content,
+      content: encryptEntryContent(content),
       ...(entryDate ? { entryDate } : {}),
     })
     .returning({ id: entries.id })
@@ -234,7 +241,7 @@ export async function createEntryWithUploadedImagesForJournal(input: {
       journalId: input.journalId,
       authorUserId: input.userId,
       title: input.title,
-      content: input.content,
+      content: encryptEntryContent(input.content),
       ...(input.entryDate ? { entryDate: input.entryDate } : {}),
     })
     .returning({ id: entries.id })
