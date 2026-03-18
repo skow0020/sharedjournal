@@ -3,8 +3,7 @@ import {
   ClerkProvider,
   SignInButton,
   SignUpButton,
-  SignedIn,
-  SignedOut,
+  Show,
   UserButton,
 } from '@clerk/nextjs'
 import { Geist, Geist_Mono } from 'next/font/google'
@@ -37,7 +36,7 @@ export default function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
           <header className="flex justify-end gap-3 p-4">
-            <SignedOut>
+            <Show when="signed-out">
               <SignInButton mode="modal" forceRedirectUrl="/dashboard">
                 <button className="rounded-full border border-zinc-300 px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-zinc-100">
                   Sign In
@@ -48,8 +47,8 @@ export default function RootLayout({
                   Sign Up
                 </button>
               </SignUpButton>
-            </SignedOut>
-            <SignedIn>
+            </Show>
+            <Show when="signed-in">
               <UserButton
                 appearance={{
                   elements: {
@@ -57,7 +56,7 @@ export default function RootLayout({
                   },
                 }}
               />
-            </SignedIn>
+            </Show>
           </header>
           {children}
         </body>
