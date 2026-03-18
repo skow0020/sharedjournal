@@ -30,6 +30,9 @@ CLERK_SECRET_KEY=sk_test_...
 # Database (Neon/PostgreSQL)
 DATABASE_URL=postgresql://user:password@host:port/database
 
+# Entry content encryption (base64-encoded 32-byte key)
+ENTRY_CONTENT_ENCRYPTION_KEY=replace-with-openssl-rand-base64-32
+
 # App URL (used in invite links)
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 
@@ -51,13 +54,14 @@ RESEND_FROM_EMAIL=SharedJournal <invites@notify.sharedjournal.app>
 1. Create a Neon account at [neon.tech](https://neon.tech/)
 2. Create a new project and copy your connection string
 3. Add the `DATABASE_URL` to `.env.local`
-4. Seed sample data (optional):
+4. Generate an entry encryption key, for example with `openssl rand -base64 32`, and add it as `ENTRY_CONTENT_ENCRYPTION_KEY`
+5. Seed sample data (optional):
 
 ```bash
 npm run db:seed
 ```
 
-5. Run schema migrations when pulling DB changes:
+6. Run schema migrations when pulling DB changes:
 
 ```bash
 npm run db:migrate
