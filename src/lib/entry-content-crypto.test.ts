@@ -43,7 +43,20 @@ describe('entry-content-crypto', () => {
     )
   })
 
-  it('throws when encrypted content is malformed', () => {
-    expect(() => decryptEntryContent('enc:v1:bad')).toThrow('Encrypted journal entry content is malformed.')
+  it('treats enc:v1-prefixed plaintext with wrong part count as legacy plaintext', () => {
+    const prefixedPlaintext = 'enc:v1:this is not encrypted content'
+
+    expect(isEncryptedEntryContent(prefixedPlaintext)).toBe(false)
+    expect(decryptEntryContent(prefixedPlaintext)).toBe(prefixedPlaintext)
+  })
+
+  it('throws when a structurally valid encrypted payload fails decryption', () => {
+    const encryptedValue = encryptEntryContent('Private journal entry.')
+
+    process.env.ENTRY_CONTENT_ENCRYPTION_KEY = Buffer.alloc(32, 99).toString('base64')
+
+    expect(() => decryptEntryContent(encryptedValue)).toThrow('Unable to decrypt journal entry content.')
+
+    process.env.ENTRY_CONTENT_ENCRYPTION_KEY = testEntryContentEncryptionKey
   })
 })

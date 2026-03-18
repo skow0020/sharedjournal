@@ -4,6 +4,7 @@ const ENTRY_CONTENT_PREFIX = 'enc:v1'
 const ENTRY_CONTENT_IV_BYTES = 12
 const ENTRY_CONTENT_AUTH_TAG_BYTES = 16
 const ENTRY_CONTENT_KEY_BYTES = 32
+const ENTRY_CONTENT_PARTS = 5
 
 function normalizeBase64(value: string): string {
   const normalizedValue = value.replace(/-/g, '+').replace(/_/g, '/')
@@ -43,7 +44,11 @@ function decodeRequiredPart(value: string, expectedLength: number, label: string
 }
 
 export function isEncryptedEntryContent(value: string): boolean {
-  return value.startsWith(`${ENTRY_CONTENT_PREFIX}:`)
+  if (!value.startsWith(`${ENTRY_CONTENT_PREFIX}:`)) {
+    return false
+  }
+
+  return value.split(':').length === ENTRY_CONTENT_PARTS
 }
 
 export function encryptEntryContent(plaintext: string): string {
@@ -61,14 +66,14 @@ export function encryptEntryContent(plaintext: string): string {
 }
 
 export function decryptEntryContent(value: string): string {
-  if (!isEncryptedEntryContent(value)) {
+  if (!value.startsWith(`${ENTRY_CONTENT_PREFIX}:`)) {
     return value
   }
 
   const parts = value.split(':')
 
-  if (parts.length !== 5 || parts[0] !== 'enc' || parts[1] !== 'v1') {
-    throw new Error('Encrypted journal entry content is malformed.')
+  if (parts.length !== ENTRY_CONTENT_PARTS) {
+    return value
   }
 
   try {
