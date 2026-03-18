@@ -62,7 +62,7 @@ test('can edit journal name and delete on details page', async ({ page }) => {
   const newJournalTitle = `Updated ${journalTitle}`
 
   await page.goto('/dashboard')
-  await expect(page.getByRole('heading', { level: 1, name: 'Journalsasdf' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: 'Journals' })).toBeVisible()
 
   await page.getByRole('button', { name: 'Add journal' }).click()
   await expect(page.getByRole('heading', { name: 'Create a journal' })).toBeVisible()
