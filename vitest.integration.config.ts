@@ -16,11 +16,6 @@ export default defineConfig({
     testTimeout: 30_000,
     // Run serially to avoid seed/teardown races across test files.
     pool: 'forks',
-    poolOptions: {
-      forks: {
-        singleFork: true,
-      },
-    },
     coverage: {
       include: ['src/data/**/*.{ts,tsx}'],
       exclude: [
