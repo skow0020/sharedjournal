@@ -21,7 +21,7 @@ function getEntryContentEncryptionKey(): Buffer {
   const encodedKey = process.env.ENTRY_CONTENT_ENCRYPTION_KEY
 
   if (!encodedKey) {
-    throw new Error('ENTRY_CONTENT_ENCRYPTION_KEY is required to access encrypted journal entries.')
+    throw new Error('ENTRY_CONTENT_ENCRYPTION_KEY is required to encrypt and decrypt journal entries.')
   }
 
   const key = Buffer.from(normalizeBase64(encodedKey), 'base64')

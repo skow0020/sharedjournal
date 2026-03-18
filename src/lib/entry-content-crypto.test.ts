@@ -39,7 +39,7 @@ describe('entry-content-crypto', () => {
     delete process.env.ENTRY_CONTENT_ENCRYPTION_KEY
 
     expect(() => encryptEntryContent('Missing key.')).toThrow(
-      'ENTRY_CONTENT_ENCRYPTION_KEY is required to access encrypted journal entries.',
+      'ENTRY_CONTENT_ENCRYPTION_KEY is required to encrypt and decrypt journal entries.',
     )
   })
 
