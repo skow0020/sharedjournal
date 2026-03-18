@@ -16,3 +16,7 @@ updates:
           - "react-dom"
           - "@types/react"
           - "@types/react-dom"
+      next-stack:
+        patterns:
+          - "next"
+          - "eslint-config-next"
