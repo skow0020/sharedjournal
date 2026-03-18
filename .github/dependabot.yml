@@ -9,3 +9,21 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
+    groups:
+      react-stack:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
+      next-stack:
+        patterns:
+          - "next"
+          - "eslint-config-next"
+      testing-stack:
+        patterns:
+          - "@testing-library/*"
+      vitest-stack:
+        patterns:
+          - "vitest"
+          - "@vitest/coverage-v8"
