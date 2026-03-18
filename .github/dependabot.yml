@@ -20,3 +20,10 @@ updates:
         patterns:
           - "next"
           - "eslint-config-next"
+      testing-stack:
+        patterns:
+          - "@testing-library/*"
+      vitest-stack:
+        patterns:
+          - "vitest"
+          - "@vitest/coverage-v8"
