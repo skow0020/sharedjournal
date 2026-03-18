@@ -80,10 +80,20 @@ export async function getJournalEntriesByDate(userId: string, date: string): Pro
     )
     .orderBy(desc(entries.createdAt))
 
-  return entryRows.map((entry) => ({
-    ...entry,
-    content: decryptEntryContent(entry.content),
-  }))
+     return entryRows.map((entry) => {
+     let decryptedContent: string
+     try {
+       decryptedContent = decryptEntryContent(entry.content)
+     } catch {
+       // If decryption fails for this entry, return a safe fallback
+       // so a single bad row does not break the entire listing.
+       decryptedContent = ''
+     }
+     return {
+       ...entry,
+       content: decryptedContent,
+     }
+   })
 }
 
 /**
