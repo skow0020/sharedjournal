@@ -158,11 +158,20 @@ export async function getJournalEntriesForJournal(
     photosByEntry.set(photo.entryId, current)
   }
 
-  return entryRows.map((entry) => ({
-    ...entry,
-    content: decryptEntryContent(entry.content),
-    photos: photosByEntry.get(entry.id) ?? [],
-  }))
+     const decryptedEntries: JournalEntryForJournal[] = []
+   for (const entry of entryRows) {
+     try {
+       decryptedEntries.push({
+         ...entry,
+         content: decryptEntryContent(entry.content),
+         photos: photosByEntry.get(entry.id) ?? [],
+       })
+     } catch (error) {
+       // Skip entries whose content cannot be decrypted to keep the list view resilient.
+       console.error('Failed to decrypt journal entry content', { entryId: entry.id, error })
+     }
+   }
+   return decryptedEntries
 }
 
 export async function getJournalEntryCountForJournal(
