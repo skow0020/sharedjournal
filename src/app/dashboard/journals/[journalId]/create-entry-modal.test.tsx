@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const {
   pushMock,
@@ -44,6 +44,9 @@ class MockImage {
   }
 }
 
+const originalCreateObjectURL = URL.createObjectURL
+const originalRevokeObjectURL = URL.revokeObjectURL
+
 describe('CreateEntryModal', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -63,6 +66,20 @@ describe('CreateEntryModal', () => {
     Object.defineProperty(URL, 'revokeObjectURL', {
       configurable: true,
       value: revokeObjectUrlMock,
+    })
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+
+    Object.defineProperty(URL, 'createObjectURL', {
+      configurable: true,
+      value: originalCreateObjectURL,
+    })
+
+    Object.defineProperty(URL, 'revokeObjectURL', {
+      configurable: true,
+      value: originalRevokeObjectURL,
     })
   })
 
