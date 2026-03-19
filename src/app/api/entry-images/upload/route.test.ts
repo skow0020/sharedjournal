@@ -30,6 +30,11 @@ vi.mock('@/lib/entry-image-storage', async () => {
 
 import { POST } from '@/app/api/entry-images/upload/route'
 
+type UploadHandlerOptions = {
+  onBeforeGenerateToken: (pathname: string, clientPayload: string | undefined) => Promise<unknown>
+  onUploadCompleted: () => Promise<unknown> | unknown
+}
+
 function makeRequest() {
   return new Request('http://localhost/api/entry-images/upload', {
     method: 'POST',
@@ -56,7 +61,7 @@ describe('entry image upload route', () => {
   })
 
   it('returns 400 when client payload is invalid', async () => {
-    handleUploadMock.mockImplementation(async (options: any) => {
+    handleUploadMock.mockImplementation(async (options: UploadHandlerOptions) => {
       await options.onBeforeGenerateToken('tmp/journals/journal-1/file.jpg', 'not-json')
       return { ok: true }
     })
@@ -68,7 +73,7 @@ describe('entry image upload route', () => {
   })
 
   it('returns 400 when client payload is empty', async () => {
-    handleUploadMock.mockImplementation(async (options: any) => {
+    handleUploadMock.mockImplementation(async (options: UploadHandlerOptions) => {
       await options.onBeforeGenerateToken('tmp/journals/journal-1/file.jpg', undefined)
       return { ok: true }
     })
@@ -82,7 +87,7 @@ describe('entry image upload route', () => {
   it('returns 400 when user cannot upload to journal', async () => {
     getUserJournalByIdMock.mockResolvedValue(null)
 
-    handleUploadMock.mockImplementation(async (options: any) => {
+    handleUploadMock.mockImplementation(async (options: UploadHandlerOptions) => {
       await options.onBeforeGenerateToken(
         'tmp/journals/journal-1/file.jpg',
         JSON.stringify({ journalId: 'journal-1' }),
@@ -101,7 +106,7 @@ describe('entry image upload route', () => {
   it('returns 400 when upload destination is invalid', async () => {
     isTempStorageKeyForJournalMock.mockReturnValue(false)
 
-    handleUploadMock.mockImplementation(async (options: any) => {
+    handleUploadMock.mockImplementation(async (options: UploadHandlerOptions) => {
       await options.onBeforeGenerateToken(
         'tmp/journals/journal-1/file.jpg',
         JSON.stringify({ journalId: 'journal-1' }),
@@ -116,7 +121,7 @@ describe('entry image upload route', () => {
   })
 
   it('returns upload metadata when upload setup succeeds', async () => {
-    handleUploadMock.mockImplementation(async (options: any) => {
+    handleUploadMock.mockImplementation(async (options: UploadHandlerOptions) => {
       const token = await options.onBeforeGenerateToken(
         'tmp/journals/journal-1/file.jpg',
         JSON.stringify({ journalId: 'journal-1' }),
