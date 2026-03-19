@@ -2,9 +2,10 @@ import { and, eq } from 'drizzle-orm'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { db } from '@/db'
-import { entries, journalMembers, journals, users } from '@/db/schema'
+import { entries, entryPhotos, journalMembers, journals, users } from '@/db/schema'
 import {
   createEntryForJournal,
+  getEntryPhotoForUser,
   getJournalEntryCountForJournal,
   getJournalEntriesByDate,
   getJournalEntriesForJournal,
@@ -364,5 +365,112 @@ describe('createEntryForJournal', () => {
       .where(eq(entries.id, result!.id))
 
     expect(row.title).toBeNull()
+  })
+})
+
+describe('getEntryPhotoForUser', () => {
+  let ownerId: string
+  let memberId: string
+  let outsiderId: string
+  let journalId: string
+  let entryId: string
+  let photoId: string
+  let otherEntryId: string
+
+  beforeEach(async () => {
+    const owner = await createUser({ displayName: 'Owner' })
+    const member = await createUser({ displayName: 'Member' })
+    const outsider = await createUser({ displayName: 'Outsider' })
+
+    ownerId = owner.id
+    memberId = member.id
+    outsiderId = outsider.id
+
+    const journal = await createJournal(ownerId, 'Photo Journal')
+    journalId = journal.id
+
+    await addMember(journalId, ownerId, 'owner')
+    await addMember(journalId, memberId, 'editor')
+
+    const entry1 = await createEntry(journalId, ownerId, { content: 'Entry with photo' })
+    entryId = entry1.id
+
+    const entry2 = await createEntry(journalId, ownerId, { content: 'Other entry' })
+    otherEntryId = entry2.id
+
+    const [photo] = await db
+      .insert(entryPhotos)
+      .values({
+        entryId: entryId,
+        uploaderUserId: ownerId,
+        storageKey: 'journals/photo-1.jpg',
+        imageUrl: 'https://example.com/photo-1.jpg',
+        mimeType: 'image/jpeg',
+        position: 0,
+      })
+      .returning({ id: entryPhotos.id })
+
+    photoId = photo.id
+  })
+
+  afterEach(async () => {
+    await deleteJournals([journalId])
+    await deleteUsers([ownerId, memberId, outsiderId])
+  })
+
+  it('returns photo details for a journal member', async () => {
+    const result = await getEntryPhotoForUser({
+      userId: ownerId,
+      entryId,
+      photoId,
+    })
+
+    expect(result).not.toBeNull()
+    expect(result?.id).toBe(photoId)
+    expect(result?.storageKey).toBe('journals/photo-1.jpg')
+    expect(result?.mimeType).toBe('image/jpeg')
+  })
+
+  it('allows editor members to access photos', async () => {
+    const result = await getEntryPhotoForUser({
+      userId: memberId,
+      entryId,
+      photoId,
+    })
+
+    expect(result).not.toBeNull()
+    expect(result?.id).toBe(photoId)
+  })
+
+  it('denies access to non-members', async () => {
+    const result = await getEntryPhotoForUser({
+      userId: outsiderId,
+      entryId,
+      photoId,
+    })
+
+    expect(result).toBeNull()
+  })
+
+  it('denies access when photoId mismatches the entryId', async () => {
+    const [otherPhoto] = await db
+      .insert(entryPhotos)
+      .values({
+        entryId: otherEntryId,
+        uploaderUserId: ownerId,
+        storageKey: 'journals/photo-2.jpg',
+        imageUrl: 'https://example.com/photo-2.jpg',
+        mimeType: 'image/jpeg',
+        position: 0,
+      })
+      .returning({ id: entryPhotos.id })
+
+    const result = await getEntryPhotoForUser({
+      userId: ownerId,
+      entryId,
+      photoId: otherPhoto.id,
+    })
+
+    expect(result).toBeNull()
   })
 })
