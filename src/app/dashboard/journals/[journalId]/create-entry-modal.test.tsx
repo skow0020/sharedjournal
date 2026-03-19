@@ -206,7 +206,8 @@ describe('CreateEntryModal', () => {
     expect(screen.getByText('Only JPEG, PNG, and WebP images are supported.')).toBeInTheDocument()
 
     const tooLargeSize = ENTRY_IMAGE_MAX_FILE_BYTES + 1024
-    const tooLargeFile = new File([new Uint8Array(tooLargeSize)], 'large.jpg', { type: 'image/jpeg' })
+    const tooLargeFile = new File(['x'], 'large.jpg', { type: 'image/jpeg' })
+    Object.defineProperty(tooLargeFile, 'size', { configurable: true, value: tooLargeSize })
     await user.upload(getFileInput(), tooLargeFile)
     expect(screen.getByText(/Each image must be/)).toBeInTheDocument()
   }, 15000)
