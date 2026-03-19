@@ -8,6 +8,8 @@ on:
       - src/data/**
       - src/db/**
       - drizzle/**
+      - vitest.integration.config.ts
+      - src/test/setup.integration.ts
 
 jobs:
   integration:
