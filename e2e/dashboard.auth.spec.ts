@@ -1,4 +1,6 @@
 import { expect, test } from '@playwright/test'
+import { DashboardPage } from './pages/dashboard.page'
+import { JournalDetailPage } from './pages/journal-detail.page'
 
 test('can create a journal, add an entry, and invite a collaborator', async ({ page }) => {
   const journalTitle = `E2E Journal ${Date.now()}`
@@ -7,80 +9,82 @@ test('can create a journal, add an entry, and invite a collaborator', async ({ p
   const entryContent = 'Entry content written by Playwright for lifecycle coverage.'
   const inviteeEmail = `invitee+${Date.now()}@example.com`
 
-  await page.goto('/dashboard')
-  await expect(page.getByRole('heading', { level: 1, name: 'Journals' })).toBeVisible()
+  const dashboardPage = new DashboardPage(page)
+  await dashboardPage.goto()
+  await expect(dashboardPage.heading()).toBeVisible()
 
-  await page.getByRole('button', { name: 'Add journal' }).click()
-  await expect(page.getByRole('heading', { name: 'Create a journal' })).toBeVisible()
-  await page.getByLabel('Title').fill(journalTitle)
-  await page.getByLabel('Description').fill(journalDescription)
-  await page.getByRole('button', { name: 'Create journal' }).click()
+  const createJournalModal = await dashboardPage.openCreateJournalModal()
+  await expect(createJournalModal.heading()).toBeVisible()
+  await createJournalModal.fillTitle(journalTitle)
+  await createJournalModal.fillDescription(journalDescription)
+  await createJournalModal.submit()
 
+  const journalDetailPage = new JournalDetailPage(page)
   await expect(page).toHaveURL(/\/dashboard\/journals\/[a-z0-9-]+$/i)
-  await expect(page.getByRole('heading', { level: 1, name: journalTitle })).toBeVisible()
-  await expect(page.getByText(journalDescription)).toBeVisible()
+  await expect(journalDetailPage.heading(journalTitle)).toBeVisible()
+  await expect(journalDetailPage.descriptionText(journalDescription)).toBeVisible()
 
-  await page.getByRole('button', { name: 'Add entry' }).click()
-  await expect(page.getByRole('heading', { name: 'Create an entry' })).toBeVisible()
-  await page.getByRole('dialog', {name: 'Create an entry'}).getByLabel('Title').fill(entryTitle)
-  await page.getByLabel('Content').fill(entryContent)
-  await page.getByLabel('Entry date').fill('2026-03-10')
-  await page.getByRole('button', { name: 'Create entry' }).click()
+  const createEntryModal = await journalDetailPage.openCreateEntryModal()
+  await expect(createEntryModal.heading()).toBeVisible()
+  await createEntryModal.fillTitle(entryTitle)
+  await createEntryModal.fillContent(entryContent)
+  await createEntryModal.fillEntryDate('2026-03-10')
+  await createEntryModal.submit()
 
-  await expect(page.getByRole('heading', { name: 'Journal entries' })).toBeVisible()
-  await expect(page.getByText(entryTitle)).toBeVisible()
-  await expect(page.getByText(entryContent)).toBeVisible()
+  await expect(journalDetailPage.entriesHeading()).toBeVisible()
+  await expect(journalDetailPage.entryTitle(entryTitle)).toBeVisible()
+  await expect(journalDetailPage.entryContent(entryContent)).toBeVisible()
 
-  await page.getByRole('button', { name: 'Invite' }).click()
-  await expect(page.getByRole('heading', { name: 'Invite a user' })).toBeVisible()
-  await page.getByLabel('Email').fill(inviteeEmail)
-  await page.getByRole('button', { name: 'Send invite' }).click()
+  const inviteUserModal = await journalDetailPage.openInviteUserModal()
+  await expect(inviteUserModal.heading()).toBeVisible()
+  await inviteUserModal.fillEmail(inviteeEmail)
+  await inviteUserModal.submit()
 
-  await expect(
-    page.getByText(new RegExp(`Invitation (sent to|created for) invitee+`, 'i')),
-  ).toBeVisible()
-  await expect(page.getByText('Invite link:', { exact: false })).toBeVisible()
-  
-  await page.getByRole('button', {name: 'Cancel'}).click()
+  await expect(inviteUserModal.invitationSentText('invitee+')).toBeVisible()
+  await expect(inviteUserModal.inviteLinkText()).toBeVisible()
+
+  await inviteUserModal.cancel()
   await page.reload()
 
-  await expect(page.getByRole('heading', { name: 'Pending invites' })).toBeVisible()
-  await expect(page.getByText(inviteeEmail)).toBeVisible()
+  await expect(journalDetailPage.pendingInvitesHeading()).toBeVisible()
+  await expect(journalDetailPage.pendingInviteEmail(inviteeEmail)).toBeVisible()
 
-  await page.getByRole('button', { name: 'Collaborators (0)' }).click()
-  await expect(page.getByText('Not shared with anyone yet.')).toBeVisible()
+  await journalDetailPage.openCollaboratorsPanel()
+  await expect(journalDetailPage.noCollaboratorsText()).toBeVisible()
 
-  await page.getByRole('button', { name: 'Delete' }).click()
-  await page.getByRole('dialog', { name: 'Delete journal' }).getByRole('button', { name: 'Delete' }).click()
+  const deleteJournalDialog = await journalDetailPage.openDeleteJournalDialog()
+  await deleteJournalDialog.confirm()
 
   await expect(page).toHaveURL('/dashboard')
-  await expect(page.getByText(journalTitle)).not.toBeVisible()
+  await expect(dashboardPage.journalCard(journalTitle)).not.toBeVisible()
 })
 
 test('can edit journal name and delete on details page', async ({ page }) => {
   const journalTitle = `E2E Journal ${Date.now()}`
   const newJournalTitle = `Updated ${journalTitle}`
 
-  await page.goto('/dashboard')
-  await expect(page.getByRole('heading', { level: 1, name: 'Journals' })).toBeVisible()
+  const dashboardPage = new DashboardPage(page)
+  await dashboardPage.goto()
+  await expect(dashboardPage.heading()).toBeVisible()
 
-  await page.getByRole('button', { name: 'Add journal' }).click()
-  await expect(page.getByRole('heading', { name: 'Create a journal' })).toBeVisible()
-  await page.getByLabel('Title').fill(journalTitle)
-  await page.getByRole('button', { name: 'Create journal' }).click()
+  const createJournalModal = await dashboardPage.openCreateJournalModal()
+  await expect(createJournalModal.heading()).toBeVisible()
+  await createJournalModal.fillTitle(journalTitle)
+  await createJournalModal.submit()
 
+  const journalDetailPage = new JournalDetailPage(page)
   await expect(page).toHaveURL(/\/dashboard\/journals\/[a-z0-9-]+$/i)
-  await expect(page.getByRole('heading', { level: 1, name: journalTitle })).toBeVisible()
+  await expect(journalDetailPage.heading(journalTitle)).toBeVisible()
 
-  await page.getByRole('button', { name: 'Edit journal' }).click()
-  await page.getByRole('textbox', { name: 'Journal title' }).fill(newJournalTitle)
-  await page.getByRole('button', { name: 'Save journal title' }).click()
+  await journalDetailPage.openEditJournalTitle()
+  await journalDetailPage.setJournalTitle(newJournalTitle)
+  await journalDetailPage.saveJournalTitle()
 
-  await expect(page.getByRole('heading', { level: 1, name: newJournalTitle })).toBeVisible()
+  await expect(journalDetailPage.heading(newJournalTitle)).toBeVisible()
 
-  await page.getByRole('button', { name: 'Delete' }).click()
-  await page.getByRole('dialog', { name: 'Delete journal' }).getByRole('button', { name: 'Delete' }).click()
+  const deleteJournalDialog = await journalDetailPage.openDeleteJournalDialog()
+  await deleteJournalDialog.confirm()
 
   await expect(page).toHaveURL('/dashboard')
-  await expect(page.getByText(newJournalTitle)).not.toBeVisible()
+  await expect(dashboardPage.journalCard(newJournalTitle)).not.toBeVisible()
 })

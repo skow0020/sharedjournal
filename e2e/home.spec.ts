@@ -1,21 +1,23 @@
 import { expect, test } from '@playwright/test'
+import { HomePage } from './pages/home.page'
+import { InvitationPage } from './pages/invitation.page'
 
 test('shows public home content and feature cards', async ({ page }) => {
-  await page.goto('/')
+  const homePage = new HomePage(page)
+  await homePage.goto()
 
   await expect(page).toHaveTitle(/SharedJournal/i)
-  await expect(page.getByText('Everything in one journal workflow')).toBeVisible()
+  await expect(homePage.headline()).toBeVisible()
 
-  await expect(page.getByText('Personal journals')).toBeVisible()
-  await expect(page.getByText('Shared entries')).toBeVisible()
-  await expect(page.getByText('Photo support')).toBeVisible()
+  await expect(homePage.featureCard('Personal journals')).toBeVisible()
+  await expect(homePage.featureCard('Shared entries')).toBeVisible()
+  await expect(homePage.featureCard('Photo support')).toBeVisible()
 })
 
 test('shows invitation not found for an invalid token', async ({ page }) => {
-  await page.goto('/invitations/e2e-invalid-token')
+  const invitationPage = new InvitationPage(page)
+  await invitationPage.goto('e2e-invalid-token')
 
-  await expect(page.getByText('Invitation not found')).toBeVisible()
-  await expect(
-    page.getByText('This invitation link is invalid or no longer exists.'),
-  ).toBeVisible()
+  await expect(invitationPage.notFoundHeading()).toBeVisible()
+  await expect(invitationPage.notFoundMessage()).toBeVisible()
 })
