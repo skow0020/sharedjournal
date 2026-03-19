@@ -23,19 +23,19 @@ export default defineConfig({
     {
       name: 'setup',
       testMatch: /.*\.setup\.ts/,
-      use: { ...devices['Desktop Chrome'] },
+      use: { ...devices['Desktop Firefox'] },
     },
     {
       name: 'public',
       testIgnore: [/.*\.setup\.ts/, /.*\.auth\.spec\.ts/],
-      use: { ...devices['Desktop Chrome'] },
+      use: { ...devices['Desktop Firefox'] },
     },
     {
       name: 'authenticated',
       testMatch: /.*\.auth\.spec\.ts/,
       dependencies: ['setup'],
       use: {
-        ...devices['Desktop Chrome'],
+        ...devices['Desktop Firefox'],
         storageState: authFile,
       },
     },
