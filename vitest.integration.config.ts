@@ -14,7 +14,6 @@ export default defineConfig({
     clearMocks: true,
     // Integration tests hit a real database — allow generous per-test time.
     testTimeout: 30_000,
-    // Run serially to avoid seed/teardown races across test files.
     pool: 'forks',
     coverage: {
       include: ['src/data/**/*.{ts,tsx}'],

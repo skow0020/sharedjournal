@@ -166,4 +166,50 @@ describe('JournalCard', () => {
 
     expect(pushMock).not.toHaveBeenCalled()
   })
+
+  it('navigates when Enter is pressed on the card', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <JournalCard
+        journal={{
+          id: 'journal-6',
+          title: 'Keyboard Journal',
+          description: null,
+          isOwner: true,
+        }}
+        collaborators={[]}
+        deleteAction={vi.fn()}
+      />,
+    )
+
+    const card = screen.getByRole('link', { name: 'Open Keyboard Journal' })
+    card.focus()
+    await user.keyboard('{Enter}')
+
+    expect(pushMock).toHaveBeenCalledWith('/dashboard/journals/journal-6')
+  })
+
+  it('does not navigate for non-activation keys', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <JournalCard
+        journal={{
+          id: 'journal-7',
+          title: 'Arrow Key Journal',
+          description: null,
+          isOwner: true,
+        }}
+        collaborators={[]}
+        deleteAction={vi.fn()}
+      />,
+    )
+
+    const card = screen.getByRole('link', { name: 'Open Arrow Key Journal' })
+    card.focus()
+    await user.keyboard('{ArrowDown}')
+
+    expect(pushMock).not.toHaveBeenCalled()
+  })
 })
