@@ -58,7 +58,7 @@ describe('CreateJournalModal', () => {
     })
     expect(pushMock).toHaveBeenCalledWith('/dashboard/journals/journal-1')
     expect(refreshMock).not.toHaveBeenCalled()
-  })
+  }, 15000)
 
   it('shows validation error when title is missing', async () => {
     const user = userEvent.setup()

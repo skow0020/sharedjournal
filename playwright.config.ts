@@ -3,6 +3,8 @@ import { defineConfig, devices } from '@playwright/test'
 
 const authFile = 'playwright/.auth/user.json'
 
+const browser = process.env.CI ? 'Desktop Chrome' : 'Desktop Firefox'
+
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
@@ -23,19 +25,19 @@ export default defineConfig({
     {
       name: 'setup',
       testMatch: /.*\.setup\.ts/,
-      use: { ...devices['Desktop Chrome'] },
+      use: { ...devices[browser] },
     },
     {
       name: 'public',
       testIgnore: [/.*\.setup\.ts/, /.*\.auth\.spec\.ts/],
-      use: { ...devices['Desktop Chrome'] },
+      use: { ...devices[browser] },
     },
     {
       name: 'authenticated',
       testMatch: /.*\.auth\.spec\.ts/,
       dependencies: ['setup'],
       use: {
-        ...devices['Desktop Chrome'],
+        ...devices[browser],
         storageState: authFile,
       },
     },

@@ -8,6 +8,7 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
+  DialogDescription,
   DialogTitle,
 } from '@/components/ui/dialog'
 
@@ -68,6 +69,9 @@ export function EntryPhotoGallery({ photos }: EntryPhotoGalleryProps) {
           <DialogTitle className="sr-only">
             {openIndex !== null ? `Image ${openIndex + 1} of ${photos.length}` : 'Image'}
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            View journal entry image in a larger preview. Use left and right arrow keys to navigate photos.
+          </DialogDescription>
           {openIndex !== null && (
             <div className="relative flex items-center justify-center">
               <DialogClose asChild>

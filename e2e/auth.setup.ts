@@ -1,6 +1,8 @@
 import { expect, test } from '@playwright/test'
 import { mkdir } from 'node:fs/promises'
 import path from 'node:path'
+import { HomePage } from './pages/home.page'
+import { SignInPage } from './pages/sign-in.page'
 
 const authDir = path.join(process.cwd(), 'playwright', '.auth')
 const authFile = path.join(authDir, 'user.json')
@@ -11,32 +13,21 @@ test('authenticate test user', async ({ page }) => {
 
   test.fail(!email || !password, 'Set E2E_CLERK_EMAIL and E2E_CLERK_PASSWORD to run auth setup.')
 
-  await page.goto('/')
-
+  const homePage = new HomePage(page)
+  await homePage.goto()
   await expect(page).toHaveTitle(/SharedJournal/i)
-  await page.getByRole('button', { name: 'Sign In' }).click()
+  await homePage.clickSignIn()
 
-  const emailInput = page
-    .locator('input[name="identifier"], input[name="emailAddress"], input[type="email"]')
-    .first()
-  await expect(emailInput).toBeVisible()
-  await emailInput.fill(email!)
+  const signInPage = new SignInPage(page)
+  await expect(signInPage.emailInput()).toBeVisible()
+  await signInPage.fillEmail(email!)
+  await signInPage.clickContinue()
 
-  await page
-    .getByRole('button', { name: 'Continue', exact: true })
-    .first()
-    .click()
+  await expect(signInPage.passwordInput()).toBeVisible()
+  await signInPage.fillPassword(password!)
+  await signInPage.clickContinue()
 
-  const passwordInput = page.locator('input[type="password"]').first()
-  await expect(passwordInput).toBeVisible()
-  await passwordInput.fill(password!)
-
-  await page
-    .getByRole('button', { name: 'Continue', exact: true })
-    .first()
-    .click()
-
-  await expect(page.getByRole('button', { name: 'Sign In' })).toHaveCount(0)
+  await expect(homePage.signInButton()).toHaveCount(0)
   await mkdir(authDir, { recursive: true })
   await page.context().storageState({ path: authFile })
 })
