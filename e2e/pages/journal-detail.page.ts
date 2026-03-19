@@ -38,7 +38,7 @@ export class JournalDetailPage {
   }
 
   async openEditJournalTitle() {
-    await this.page.getByRole('button', { name: 'Edit journal' }).click()
+    await this.page.getByRole('button', { name: 'Edit journal title' }).click()
   }
 
   async setJournalTitle(title: string) {
