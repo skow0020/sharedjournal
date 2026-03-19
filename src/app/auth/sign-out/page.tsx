@@ -31,7 +31,7 @@ export default function SignOutTransitionPage() {
   }, [isLoaded, isSignedIn, router])
 
   return (
-    <main className="mx-auto flex min-h-[calc(100vh-72px)] w-full max-w-4xl items-center justify-center px-6 py-8">
+    <main className="mx-auto flex min-h-screen w-full max-w-4xl items-center justify-center px-6 py-8">
       <Card className="w-full max-w-md border-[#d9efe9] bg-white/95 shadow-lg">
         <CardHeader className="space-y-2 text-center">
           <CardTitle className="text-xl">Signing you out</CardTitle>
