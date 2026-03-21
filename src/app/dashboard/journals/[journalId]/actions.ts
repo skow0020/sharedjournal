@@ -3,6 +3,7 @@
 import { del } from '@vercel/blob'
 import { currentUser as getClerkCurrentUser } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
+import { headers } from 'next/headers'
 import { z } from 'zod'
 
 import { createEntryWithUploadedImagesForJournal } from '@/data/entries'
@@ -117,9 +118,43 @@ const updateJournalTitleSchema = z.object({
     .max(JOURNAL_TITLE_MAX_LENGTH, 'Title must be 180 characters or less.'),
 })
 
-function getAppBaseUrl(): string {
-  if (process.env.NEXT_PUBLIC_APP_URL) {
-    return process.env.NEXT_PUBLIC_APP_URL
+function normalizeBaseUrl(value: string): string {
+  const trimmed = value.trim()
+
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    return trimmed.replace(/\/$/, '')
+  }
+
+  return `https://${trimmed}`.replace(/\/$/, '')
+}
+
+async function getAppBaseUrl(): Promise<string> {
+  const configuredBaseUrl = process.env.NEXT_PUBLIC_APP_URL ?? process.env.APP_URL
+
+  if (configuredBaseUrl) {
+    return normalizeBaseUrl(configuredBaseUrl)
+  }
+
+  const requestHeaders = await headers()
+  const requestOrigin = requestHeaders.get('origin')
+
+  if (requestOrigin) {
+    return normalizeBaseUrl(requestOrigin)
+  }
+
+  const requestHost = requestHeaders.get('x-forwarded-host') ?? requestHeaders.get('host')
+
+  if (requestHost) {
+    const requestProtocol = requestHeaders.get('x-forwarded-proto')
+      ?? (requestHost.includes('localhost') ? 'http' : 'https')
+
+    return `${requestProtocol}://${requestHost}`
+  }
+
+  const vercelBaseUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL ?? process.env.VERCEL_URL
+
+  if (vercelBaseUrl) {
+    return normalizeBaseUrl(vercelBaseUrl)
   }
 
   if (process.env.NODE_ENV === 'production') {
@@ -271,7 +306,7 @@ export async function createInviteAction(
   }
 
   const inviteLinkPath = `/invitations/${result.inviteToken}`
-  const inviteLink = `${getAppBaseUrl()}${inviteLinkPath}`
+  const inviteLink = `${await getAppBaseUrl()}${inviteLinkPath}`
   const clerkUser = await getClerkCurrentUser()
   const inviterName = clerkUser?.fullName ?? clerkUser?.username ?? null
 
