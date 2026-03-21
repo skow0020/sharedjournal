@@ -69,6 +69,53 @@ describe('sendInviteEmail', () => {
     })
   })
 
+  it('auto-detects resend when credentials are configured without provider env', async () => {
+    process.env.RESEND_API_KEY = 'test-api-key'
+    process.env.RESEND_FROM_EMAIL = 'noreply@example.com'
+
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    const result = await sendInviteEmail({
+      toEmail: 'invitee@example.com',
+      inviteLink: 'https://example.com/invitations/token',
+      journalTitle: 'Test Journal',
+      inviterName: 'Inviter',
+    })
+
+    expect(result).toEqual({
+      delivered: true,
+      provider: 'resend',
+      message: 'Invitation email sent via Resend.',
+    })
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('respects explicit none provider even when resend credentials exist', async () => {
+    process.env.INVITE_EMAIL_PROVIDER = 'none'
+    process.env.RESEND_API_KEY = 'test-api-key'
+    process.env.RESEND_FROM_EMAIL = 'noreply@example.com'
+
+    const fetchMock = vi.fn()
+    vi.stubGlobal('fetch', fetchMock)
+
+    const result = await sendInviteEmail({
+      toEmail: 'invitee@example.com',
+      inviteLink: 'https://example.com/invitations/token',
+      journalTitle: 'Test Journal',
+      inviterName: 'Inviter',
+    })
+
+    expect(result).toEqual({
+      delivered: false,
+      provider: 'none',
+      message: 'Invite email provider is not configured.',
+    })
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
   it('returns generic message when resend responds with non-2xx', async () => {
     process.env.INVITE_EMAIL_PROVIDER = 'resend'
     process.env.RESEND_API_KEY = 'test-api-key'

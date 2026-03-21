@@ -1,6 +1,6 @@
 import { format, parseISO } from 'date-fns'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 
 import {
   Card,
@@ -50,16 +50,7 @@ export default async function JournalDetailsPage({ params, searchParams }: Journ
   const appUser = await getCurrentAppUser()
 
   if (!appUser) {
-    return (
-      <main className="mx-auto w-full max-w-5xl px-6 py-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Journal</CardTitle>
-            <CardDescription>Sign in to view this journal.</CardDescription>
-          </CardHeader>
-        </Card>
-      </main>
-    )
+    redirect('/sign-in')
   }
 
   const { journalId } = await params
@@ -84,10 +75,12 @@ export default async function JournalDetailsPage({ params, searchParams }: Journ
     }),
   ])
   const collaborators = await getCollaboratorsForJournal(appUser.id, journalId)
-  const pendingInvitations = await getPendingInvitationsForOwnedJournal({
-    ownerUserId: appUser.id,
-    journalId,
-  })
+  const pendingInvitations = journal.isOwner
+    ? await getPendingInvitationsForOwnedJournal({
+        ownerUserId: appUser.id,
+        journalId,
+      })
+    : []
   const hasMoreEntries = entries.length < totalEntryCount
 
   return (
@@ -127,7 +120,13 @@ export default async function JournalDetailsPage({ params, searchParams }: Journ
               action={createEntryAction}
               cleanupAction={cleanupEntryImageUploadsAction}
             />
-            <InviteUserModal journalId={journalId} journalTitle={journalTitle} action={createInviteAction} />
+            {journal.isOwner ? (
+              <InviteUserModal
+                journalId={journalId}
+                journalTitle={journalTitle}
+                action={createInviteAction}
+              />
+            ) : null}
           </div>
         </div>
       </section>
