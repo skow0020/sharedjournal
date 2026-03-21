@@ -1,4 +1,3 @@
-import { format } from 'date-fns'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
@@ -8,9 +7,15 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { createJournalAction, deleteJournalAction } from '@/app/dashboard/actions'
+import {
+  acceptDashboardInvitationAction,
+  createJournalAction,
+  declineDashboardInvitationAction,
+  deleteJournalAction,
+} from '@/app/dashboard/actions'
 import { CreateJournalModal } from '@/app/dashboard/create-journal-modal'
 import { JournalCard } from '@/app/dashboard/journal-card'
+import { PendingInvitationRow } from '@/app/dashboard/pending-invitation-row'
 import { Button } from '@/components/ui/button'
 import { getPendingInvitationsForEmail } from '@/data/invitations'
 import {
@@ -67,20 +72,18 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       </section>
 
       {pendingInvitations.length > 0 ? (
-        <section className="space-y-3">
-          <h2 className="text-xl font-semibold tracking-tight">Pending invites</h2>
+        <section className="space-y-2">
+          <h2 className="text-muted-foreground text-sm font-medium uppercase tracking-wide">
+            Pending invites
+          </h2>
           <div className="grid gap-3">
             {pendingInvitations.map((invitation) => (
-              <Link key={invitation.id} href={`/invitations/${invitation.inviteToken}`} className="block">
-                <Card className="transition-colors hover:bg-muted/40">
-                  <CardHeader>
-                    <CardTitle>{invitation.journalTitle}</CardTitle>
-                    <CardDescription>
-                      Invited as {invitation.role} · Expires {format(invitation.expiresAt, 'MMMM d, yyyy')}
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
-              </Link>
+              <PendingInvitationRow
+                key={invitation.id}
+                invitation={invitation}
+                acceptAction={acceptDashboardInvitationAction}
+                declineAction={declineDashboardInvitationAction}
+              />
             ))}
           </div>
         </section>

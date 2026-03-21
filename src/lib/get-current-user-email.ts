@@ -1,6 +1,8 @@
 import { currentUser } from '@clerk/nextjs/server'
 
-import { normalizeEmail } from '@/data/invitations'
+function normalizeEmail(value: string): string {
+  return value.trim().toLowerCase()
+}
 
 export async function getCurrentUserEmail(): Promise<string | null> {
   const clerkUser = await currentUser()
