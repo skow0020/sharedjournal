@@ -33,10 +33,10 @@ export function PendingInvitationRow({
   const [pending, startTransition] = useTransition()
 
   function handleAccept() {
-    startTransition(async () => {
-      setError(null)
-      setActiveAction('accept')
+    setError(null)
+    setActiveAction('accept')
 
+    startTransition(async () => {
       const result = await acceptAction({ token: invitation.inviteToken })
 
       if (result.error) {
@@ -54,10 +54,10 @@ export function PendingInvitationRow({
   }
 
   function handleDecline() {
-    startTransition(async () => {
-      setError(null)
-      setActiveAction('decline')
+    setError(null)
+    setActiveAction('decline')
 
+    startTransition(async () => {
       const result = await declineAction({ token: invitation.inviteToken })
 
       if (result.error) {
