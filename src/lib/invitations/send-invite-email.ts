@@ -20,6 +20,14 @@ function getInviteEmailProvider(): InviteEmailProvider {
     return 'resend'
   }
 
+  if (configuredProvider === 'none') {
+    return 'none'
+  }
+
+  if (process.env.RESEND_API_KEY && process.env.RESEND_FROM_EMAIL) {
+    return 'resend'
+  }
+
   return 'none'
 }
 
