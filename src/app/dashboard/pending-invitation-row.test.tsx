@@ -120,6 +120,32 @@ describe('PendingInvitationRow', () => {
     expect(refreshMock).not.toHaveBeenCalled()
   })
 
+  it('navigates when accept action returns redirectTo even with an error', async () => {
+    const user = userEvent.setup()
+    const acceptAction = vi.fn(async () => ({
+      error: 'You must be signed in with the invited email to accept this invitation.',
+      redirectTo: '/invitations/invite-token',
+    }))
+    const declineAction = vi.fn(async () => ({ error: null, success: true }))
+
+    render(
+      <PendingInvitationRow
+        invitation={buildInvitation({ inviteToken: 'invite-token' })}
+        acceptAction={acceptAction}
+        declineAction={declineAction}
+      />,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Accept' }))
+
+    await waitFor(() => {
+      expect(acceptAction).toHaveBeenCalledWith({ token: 'invite-token' })
+    })
+
+    expect(pushMock).toHaveBeenCalledWith('/invitations/invite-token')
+    expect(screen.queryByText('You must be signed in with the invited email to accept this invitation.')).not.toBeInTheDocument()
+  })
+
   it('shows decline error and does not refresh', async () => {
     const user = userEvent.setup()
     const acceptAction = vi.fn(async () => ({ error: null, redirectTo: '/dashboard/journals/journal-1' }))

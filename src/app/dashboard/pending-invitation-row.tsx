@@ -39,14 +39,16 @@ export function PendingInvitationRow({
     startTransition(async () => {
       const result = await acceptAction({ token: invitation.inviteToken })
 
-      if (result.error) {
-        setError(result.error)
+      if (result.redirectTo) {
+        router.push(result.redirectTo)
         setActiveAction(null)
         return
       }
 
-      if (result.redirectTo) {
-        router.push(result.redirectTo)
+      if (result.error) {
+        setError(result.error)
+        setActiveAction(null)
+        return
       }
 
       setActiveAction(null)
