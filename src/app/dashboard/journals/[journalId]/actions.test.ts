@@ -470,6 +470,45 @@ describe('createInviteAction', () => {
     })
   })
 
+  it('uses the first forwarded host and protocol when headers contain proxy lists', async () => {
+    delete process.env.NEXT_PUBLIC_APP_URL
+    headersMock.mockResolvedValue(
+      new Headers({
+        'x-forwarded-host': 'preview.sharedjournal.app, internal.proxy.local',
+        'x-forwarded-proto': 'https, http',
+      }),
+    )
+    getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
+    createJournalInvitationMock.mockResolvedValue({
+      ok: true,
+      invitationId: 'inv-1',
+      inviteToken: 'token-123',
+      inviteeEmail: 'friend@example.com',
+      expiresAt: new Date('2026-03-21T00:00:00.000Z'),
+    })
+    getClerkCurrentUserMock.mockResolvedValue({
+      fullName: 'Pat Smith',
+      username: 'pat',
+    })
+    sendInviteEmailMock.mockResolvedValue({
+      delivered: false,
+      provider: 'none',
+      message: 'Invite email provider is not configured.',
+    })
+
+    const result = await createInviteAction({
+      journalId: 'journal-1',
+      journalTitle: 'Family Journal',
+      email: 'friend@example.com',
+    })
+
+    expect(result).toEqual({
+      error: null,
+      successMessage: 'Invitation created for friend@example.com. Copy the link below to share.',
+      inviteLink: 'https://preview.sharedjournal.app/invitations/token-123',
+    })
+  })
+
   it('builds the invite link from vercel env when no app url or request host is available', async () => {
     delete process.env.NEXT_PUBLIC_APP_URL
     process.env.VERCEL_URL = 'sharedjournal-preview.vercel.app'

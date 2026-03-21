@@ -128,6 +128,16 @@ function normalizeBaseUrl(value: string): string {
   return `https://${trimmed}`.replace(/\/$/, '')
 }
 
+function getFirstHeaderValue(value: string | null): string | null {
+  if (!value) {
+    return null
+  }
+
+  const firstValue = value.split(',')[0]?.trim()
+
+  return firstValue || null
+}
+
 async function getAppBaseUrl(): Promise<string> {
   const configuredBaseUrl = process.env.NEXT_PUBLIC_APP_URL ?? process.env.APP_URL
 
@@ -142,10 +152,11 @@ async function getAppBaseUrl(): Promise<string> {
     return normalizeBaseUrl(requestOrigin)
   }
 
-  const requestHost = requestHeaders.get('x-forwarded-host') ?? requestHeaders.get('host')
+  const requestHost = getFirstHeaderValue(requestHeaders.get('x-forwarded-host'))
+    ?? getFirstHeaderValue(requestHeaders.get('host'))
 
   if (requestHost) {
-    const requestProtocol = requestHeaders.get('x-forwarded-proto')
+    const requestProtocol = getFirstHeaderValue(requestHeaders.get('x-forwarded-proto'))
       ?? (requestHost.includes('localhost') ? 'http' : 'https')
 
     return `${requestProtocol}://${requestHost}`
