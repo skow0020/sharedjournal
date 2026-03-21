@@ -142,10 +142,10 @@ describe('PendingInvitationRow', () => {
 
   it('shows Accepting... while accept action is in flight', async () => {
     const user = userEvent.setup()
-    let resolveAccept: ((value: { error: null; redirectTo: string }) => void) | null = null
+    let resolveAccept: ((value: { error: null, redirectTo: string }) => void) | null = null
     const acceptAction = vi.fn(
       () =>
-        new Promise<{ error: null; redirectTo: string }>((resolve) => {
+        new Promise<{ error: null, redirectTo: string }>((resolve) => {
           resolveAccept = resolve
         }),
     )
@@ -164,7 +164,8 @@ describe('PendingInvitationRow', () => {
     expect(screen.getByRole('button', { name: 'Accepting...' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Decline' })).toBeDisabled()
 
-    resolveAccept?.({ error: null, redirectTo: '/dashboard/journals/journal-1' })
+    expect(resolveAccept).not.toBeNull()
+    resolveAccept!({ error: null, redirectTo: '/dashboard/journals/journal-1' })
 
     await waitFor(() => {
       expect(pushMock).toHaveBeenCalledWith('/dashboard/journals/journal-1')
@@ -173,11 +174,11 @@ describe('PendingInvitationRow', () => {
 
   it('shows Declining... while decline action is in flight', async () => {
     const user = userEvent.setup()
-    let resolveDecline: ((value: { error: null; success: true }) => void) | null = null
+    let resolveDecline: ((value: { error: null, success: true }) => void) | null = null
     const acceptAction = vi.fn(async () => ({ error: null, redirectTo: '/dashboard/journals/journal-1' }))
     const declineAction = vi.fn(
       () =>
-        new Promise<{ error: null; success: true }>((resolve) => {
+        new Promise<{ error: null, success: true }>((resolve) => {
           resolveDecline = resolve
         }),
     )
@@ -195,7 +196,8 @@ describe('PendingInvitationRow', () => {
     expect(screen.getByRole('button', { name: 'Declining...' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Accept' })).toBeDisabled()
 
-    resolveDecline?.({ error: null, success: true })
+    expect(resolveDecline).not.toBeNull()
+    resolveDecline!({ error: null, success: true })
 
     await waitFor(() => {
       expect(refreshMock).toHaveBeenCalled()

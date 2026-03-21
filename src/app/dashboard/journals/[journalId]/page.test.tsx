@@ -222,6 +222,22 @@ describe('JournalDetailsPage', () => {
     expect(screen.queryByTestId('delete-journal-button')).not.toBeInTheDocument()
   })
 
+  it('does not render invite controls for journals shared with the user', async () => {
+    getUserJournalByIdMock.mockResolvedValue({
+      id: 'journal-1',
+      title: 'Family Journal',
+      description: 'Shared notes and reflections',
+      ownerUserId: 'user-2',
+      isOwner: false,
+    })
+
+    await renderJournalDetailsPage()
+
+    expect(screen.queryByTestId('invite-user-modal')).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Pending invites' })).not.toBeInTheDocument()
+    expect(getPendingInvitationsForOwnedJournalMock).not.toHaveBeenCalled()
+  })
+
   it('loads entries cumulatively based on entriesPage search param', async () => {
     getJournalEntryCountForJournalMock.mockResolvedValue(24)
 

@@ -75,10 +75,12 @@ export default async function JournalDetailsPage({ params, searchParams }: Journ
     }),
   ])
   const collaborators = await getCollaboratorsForJournal(appUser.id, journalId)
-  const pendingInvitations = await getPendingInvitationsForOwnedJournal({
-    ownerUserId: appUser.id,
-    journalId,
-  })
+  const pendingInvitations = journal.isOwner
+    ? await getPendingInvitationsForOwnedJournal({
+        ownerUserId: appUser.id,
+        journalId,
+      })
+    : []
   const hasMoreEntries = entries.length < totalEntryCount
 
   return (
@@ -118,7 +120,13 @@ export default async function JournalDetailsPage({ params, searchParams }: Journ
               action={createEntryAction}
               cleanupAction={cleanupEntryImageUploadsAction}
             />
-            <InviteUserModal journalId={journalId} journalTitle={journalTitle} action={createInviteAction} />
+            {journal.isOwner ? (
+              <InviteUserModal
+                journalId={journalId}
+                journalTitle={journalTitle}
+                action={createInviteAction}
+              />
+            ) : null}
           </div>
         </div>
       </section>
