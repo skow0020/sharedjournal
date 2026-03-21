@@ -1,5 +1,6 @@
 import { format } from 'date-fns'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 
 import {
   Card,
@@ -32,16 +33,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const appUser = await getCurrentAppUser()
 
   if (!appUser) {
-    return (
-      <main className="mx-auto w-full max-w-5xl px-6 py-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Your Journals</CardTitle>
-            <CardDescription>Sign in to view your journals.</CardDescription>
-          </CardHeader>
-        </Card>
-      </main>
-    )
+    redirect('/sign-in')
   }
 
   const resolvedSearchParams = searchParams ? await searchParams : undefined

@@ -2,12 +2,6 @@ import type { ReactNode } from 'react'
 import { render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-vi.mock('next/navigation', () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-  }),
-}))
-
 const {
   getCurrentAppUserMock,
   getCurrentUserEmailMock,
@@ -16,6 +10,7 @@ const {
   getUserJournalCountMock,
   getUserJournalsMock,
   createJournalForOwnerMock,
+  redirectMock,
 } = vi.hoisted(() => ({
   getCurrentAppUserMock: vi.fn(),
   getCurrentUserEmailMock: vi.fn(),
@@ -24,6 +19,16 @@ const {
   getUserJournalCountMock: vi.fn(),
   getUserJournalsMock: vi.fn(),
   createJournalForOwnerMock: vi.fn(),
+  redirectMock: vi.fn(() => {
+    throw new Error('NEXT_REDIRECT')
+  }),
+}))
+
+vi.mock('next/navigation', () => ({
+  redirect: redirectMock,
+  useRouter: () => ({
+    push: vi.fn(),
+  }),
 }))
 
 vi.mock('@/app/dashboard/create-journal-modal', () => ({
@@ -78,13 +83,12 @@ describe('DashboardPage', () => {
     getPendingInvitationsForEmailMock.mockResolvedValue([])
   })
 
-  it('renders sign-in prompt when no app user exists', async () => {
+  it('redirects to sign-in when no app user exists', async () => {
     getCurrentAppUserMock.mockResolvedValue(null)
 
-    await renderDashboardPage()
+    await expect(renderDashboardPage()).rejects.toThrow('NEXT_REDIRECT')
 
-    expect(screen.getByText('Your Journals')).toBeInTheDocument()
-    expect(screen.getByText('Sign in to view your journals.')).toBeInTheDocument()
+    expect(redirectMock).toHaveBeenCalledWith('/sign-in')
     expect(getUserJournalsMock).not.toHaveBeenCalled()
   })
 

@@ -143,13 +143,12 @@ describe('JournalDetailsPage', () => {
     ])
   })
 
-  it('renders sign-in prompt when user is not authenticated', async () => {
+  it('redirects to sign-in when user is not authenticated', async () => {
     getCurrentAppUserMock.mockResolvedValue(null)
 
-    await renderJournalDetailsPage()
+    await expect(renderJournalDetailsPage()).rejects.toThrow('NEXT_REDIRECT')
 
-    expect(screen.getByText('Journal')).toBeInTheDocument()
-    expect(screen.getByText('Sign in to view this journal.')).toBeInTheDocument()
+    expect(redirectMock).toHaveBeenCalledWith('/sign-in')
     expect(getUserJournalByIdMock).not.toHaveBeenCalled()
   })
 
