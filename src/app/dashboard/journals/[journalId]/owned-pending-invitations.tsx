@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useEffect, useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 
 import {
   type CancelPendingInvitationInput,
@@ -28,10 +29,15 @@ export function OwnedPendingInvitations({
   journalId,
   cancelAction,
 }: OwnedPendingInvitationsProps) {
+  const router = useRouter()
   const [visibleInvitations, setVisibleInvitations] = useState(invitations)
   const [errorByInvitationId, setErrorByInvitationId] = useState<Record<string, string | null>>({})
   const [activeInvitationId, setActiveInvitationId] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
+
+  useEffect(() => {
+    setVisibleInvitations(invitations)
+  }, [invitations])
 
   function handleCancel(invitationId: string) {
     setActiveInvitationId(invitationId)
@@ -64,6 +70,7 @@ export function OwnedPendingInvitations({
         return nextErrors
       })
       setActiveInvitationId(null)
+      router.refresh()
     })
   }
 

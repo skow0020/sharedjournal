@@ -5,6 +5,16 @@ import { describe, expect, it, vi } from 'vitest'
 import type { PendingJournalInvitation } from '@/data/invitations'
 import { OwnedPendingInvitations } from '@/app/dashboard/journals/[journalId]/owned-pending-invitations'
 
+const { refreshMock } = vi.hoisted(() => ({
+  refreshMock: vi.fn(),
+}))
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    refresh: refreshMock,
+  }),
+}))
+
 function buildInvitation(overrides?: Partial<PendingJournalInvitation>): PendingJournalInvitation {
   return {
     id: 'invite-1',
@@ -18,6 +28,31 @@ function buildInvitation(overrides?: Partial<PendingJournalInvitation>): Pending
 }
 
 describe('OwnedPendingInvitations', () => {
+  it('syncs visible invitations when invitations prop changes', () => {
+    const cancelAction = vi.fn(async () => ({ error: null, success: true }))
+
+    const { rerender } = render(
+      <OwnedPendingInvitations
+        invitations={[buildInvitation()]}
+        journalId="journal-1"
+        cancelAction={cancelAction}
+      />,
+    )
+
+    expect(screen.getByText('friend@example.com')).toBeInTheDocument()
+
+    rerender(
+      <OwnedPendingInvitations
+        invitations={[buildInvitation({ id: 'invite-2', inviteeEmail: 'updated@example.com' })]}
+        journalId="journal-1"
+        cancelAction={cancelAction}
+      />,
+    )
+
+    expect(screen.queryByText('friend@example.com')).not.toBeInTheDocument()
+    expect(screen.getByText('updated@example.com')).toBeInTheDocument()
+  })
+
   it('renders pending invitations with cancel buttons', () => {
     const cancelAction = vi.fn(async () => ({ error: null, success: true }))
 
@@ -37,6 +72,7 @@ describe('OwnedPendingInvitations', () => {
   it('removes an invitation from the list after a successful cancel', async () => {
     const user = userEvent.setup()
     const cancelAction = vi.fn(async () => ({ error: null, success: true }))
+    refreshMock.mockClear()
 
     render(
       <OwnedPendingInvitations
@@ -62,6 +98,7 @@ describe('OwnedPendingInvitations', () => {
       expect(screen.queryByText('friend@example.com')).not.toBeInTheDocument()
     })
 
+    expect(refreshMock).toHaveBeenCalledTimes(1)
     expect(screen.getByText('second@example.com')).toBeInTheDocument()
   })
 
