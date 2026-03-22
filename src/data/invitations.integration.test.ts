@@ -606,6 +606,39 @@ describe('revokeJournalInvitationByOwner', () => {
     if (result.ok) return
     expect(result.error).toBe('FORBIDDEN')
   })
+
+  it('returns NOT_FOUND when invitation id does not exist for the journal', async () => {
+    const result = await revokeJournalInvitationByOwner({
+      ownerUserId: ownerId,
+      journalId,
+      invitationId: crypto.randomUUID(),
+    })
+
+    expect(result.ok).toBe(false)
+    if (result.ok) return
+    expect(result.error).toBe('NOT_FOUND')
+    expect(result.message).toBe('Invitation not found.')
+  })
+
+  it('returns NOT_PENDING when invitation exists but is not pending', async () => {
+    const invitation = await createInvitation({
+      journalId,
+      inviterUserId: ownerId,
+      inviteeEmail: 'already-revoked@example.com',
+      status: 'revoked',
+    })
+
+    const result = await revokeJournalInvitationByOwner({
+      ownerUserId: ownerId,
+      journalId,
+      invitationId: invitation.id,
+    })
+
+    expect(result.ok).toBe(false)
+    if (result.ok) return
+    expect(result.error).toBe('NOT_PENDING')
+    expect(result.message).toBe('This invitation is no longer pending.')
+  })
 })
 
 describe('getPendingInvitationsForEmail', () => {
