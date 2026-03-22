@@ -3,7 +3,7 @@
 import { upload } from '@vercel/blob/client'
 import { format } from 'date-fns'
 import { usePathname, useRouter } from 'next/navigation'
-import { useRef, useState, useTransition } from 'react'
+import { useEffect, useRef, useState, useTransition } from 'react'
 
 import {
   type CleanupEntryImageUploadsInput,
@@ -93,8 +93,14 @@ export function CreateEntryModal({ journalId, action, cleanupAction }: CreateEnt
     redirectTo: null,
   })
   const [uploadError, setUploadError] = useState<string | null>(null)
+  const [isMobile, setIsMobile] = useState(false)
   const [pending, startTransition] = useTransition()
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const cameraInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    setIsMobile(window.matchMedia('(pointer: coarse)').matches)
+  }, [])
 
   async function cleanupUploadedTempImages(storageKeys: string[]) {
     if (storageKeys.length === 0) {
@@ -392,16 +398,40 @@ export function CreateEntryModal({ journalId, action, cleanupAction }: CreateEnt
               tabIndex={-1}
               aria-hidden
             />
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="sr-only"
+              onChange={handleImageSelection}
+              disabled={pending}
+              tabIndex={-1}
+              aria-hidden
+            />
             {selectedImages.length < ENTRY_IMAGE_MAX_FILES ? (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={pending}
-                onClick={() => fileInputRef.current?.click()}
-              >
-                Browse images
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={pending}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  Browse images
+                </Button>
+                {isMobile ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={pending}
+                    onClick={() => cameraInputRef.current?.click()}
+                  >
+                    Take photo
+                  </Button>
+                ) : null}
+              </div>
             ) : null}
             <p className="text-muted-foreground text-xs">
               Up to {ENTRY_IMAGE_MAX_FILES} images, {formatFileSize(ENTRY_IMAGE_MAX_FILE_BYTES)} each.

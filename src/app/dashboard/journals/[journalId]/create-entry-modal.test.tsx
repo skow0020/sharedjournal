@@ -48,8 +48,37 @@ const originalCreateObjectURL = URL.createObjectURL
 const originalRevokeObjectURL = URL.revokeObjectURL
 
 describe('CreateEntryModal', () => {
+  function mockMatchMedia(matches: boolean) {
+    Object.defineProperty(window, 'matchMedia', {
+      configurable: true,
+      writable: true,
+      value: vi.fn().mockImplementation((query: string) => ({
+        matches: query === '(pointer: coarse)' ? matches : false,
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    })
+  }
+
+  function getCameraInput(): HTMLInputElement {
+    const input = document.querySelector('input[type="file"][capture]')
+
+    if (!(input instanceof HTMLInputElement)) {
+      throw new Error('Camera input not found')
+    }
+
+    return input
+  }
+
   beforeEach(() => {
     vi.clearAllMocks()
+
+    mockMatchMedia(false)
 
     createObjectUrlMock
       .mockReturnValueOnce('blob:preview-1')
@@ -323,4 +352,127 @@ describe('CreateEntryModal', () => {
     expect(await screen.findByText('Failed to discard draft image.')).toBeInTheDocument()
     expect(screen.getByText('Create an entry')).toBeInTheDocument()
   }, 15000)
+
+  it('does not show Take photo button on non-mobile devices', async () => {
+    const user = userEvent.setup()
+
+    mockMatchMedia(false)
+
+    const action = vi.fn(async () => ({ error: null, redirectTo: null }))
+    const cleanupAction = vi.fn(async () => ({ error: null }))
+
+    render(<CreateEntryModal journalId="journal-1" action={action} cleanupAction={cleanupAction} />)
+
+    await user.click(screen.getByRole('button', { name: 'Add entry' }))
+
+    expect(screen.getByRole('button', { name: 'Browse images' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Take photo' })).not.toBeInTheDocument()
+  })
+
+  it('shows Take photo button on mobile devices', async () => {
+    const user = userEvent.setup()
+
+    mockMatchMedia(true)
+
+    const action = vi.fn(async () => ({ error: null, redirectTo: null }))
+    const cleanupAction = vi.fn(async () => ({ error: null }))
+
+    render(<CreateEntryModal journalId="journal-1" action={action} cleanupAction={cleanupAction} />)
+
+    await user.click(screen.getByRole('button', { name: 'Add entry' }))
+
+    expect(screen.getByRole('button', { name: 'Browse images' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Take photo' })).toBeInTheDocument()
+  })
+
+  it('camera input has capture attribute targeting rear camera', async () => {
+    const user = userEvent.setup()
+
+    mockMatchMedia(true)
+
+    const action = vi.fn(async () => ({ error: null, redirectTo: null }))
+    const cleanupAction = vi.fn(async () => ({ error: null }))
+
+    render(<CreateEntryModal journalId="journal-1" action={action} cleanupAction={cleanupAction} />)
+
+    await user.click(screen.getByRole('button', { name: 'Add entry' }))
+
+    const cameraInput = getCameraInput()
+    expect(cameraInput.getAttribute('capture')).toBe('environment')
+    expect(cameraInput.getAttribute('accept')).toBe('image/*')
+  })
+
+  it('uploads photo taken via camera and includes it in submitted payload', async () => {
+    const user = userEvent.setup()
+
+    mockMatchMedia(true)
+
+    uploadMock.mockResolvedValue({
+      pathname: 'tmp/journals/journal-1/camera-photo.jpg',
+    })
+
+    const action = vi.fn(async () => ({
+      error: null,
+      redirectTo: '/dashboard/journals/journal-1',
+    }))
+    const cleanupAction = vi.fn(async () => ({ error: null }))
+
+    render(<CreateEntryModal journalId="journal-1" action={action} cleanupAction={cleanupAction} />)
+
+    await user.click(screen.getByRole('button', { name: 'Add entry' }))
+    await user.type(screen.getByLabelText('Title'), 'Camera entry')
+    await user.type(screen.getByLabelText('Content'), 'Taken with camera')
+
+    const photo = new File(['binary'], 'camera-photo.jpg', { type: 'image/jpeg' })
+    await user.upload(getCameraInput(), photo)
+
+    expect(await screen.findByText('Uploaded')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Create entry' }))
+
+    await waitFor(() => {
+      expect(action).toHaveBeenCalled()
+    })
+
+    expect(action).toHaveBeenCalledWith(
+      expect.objectContaining({
+        uploadedImages: [
+          expect.objectContaining({
+            tempStorageKey: 'tmp/journals/journal-1/camera-photo.jpg',
+            fileName: 'camera-photo.jpg',
+            mimeType: 'image/jpeg',
+          }),
+        ],
+      }),
+    )
+  }, 15000)
+
+  it('hides both image buttons on mobile when max files are selected', async () => {
+    const user = userEvent.setup()
+
+    mockMatchMedia(true)
+
+    uploadMock.mockImplementation(async (_storageKey: string, file: File) => ({
+      pathname: `tmp/journals/journal-1/${file.name}`,
+    }))
+
+    const action = vi.fn(async () => ({ error: null, redirectTo: null }))
+    const cleanupAction = vi.fn(async () => ({ error: null }))
+
+    render(<CreateEntryModal journalId="journal-1" action={action} cleanupAction={cleanupAction} />)
+
+    await user.click(screen.getByRole('button', { name: 'Add entry' }))
+
+    const files = Array.from({ length: ENTRY_IMAGE_MAX_FILES }, (_, index) =>
+      new File([`f${index}`], `img-${index}.jpg`, { type: 'image/jpeg' }),
+    )
+
+    for (const file of files) {
+      await user.upload(getFileInput(), file)
+      await screen.findAllByText('Uploaded')
+    }
+
+    expect(screen.queryByRole('button', { name: 'Browse images' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Take photo' })).not.toBeInTheDocument()
+  }, 30000)
 })
