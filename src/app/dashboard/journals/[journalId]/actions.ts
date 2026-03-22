@@ -9,6 +9,7 @@ import { z } from 'zod'
 import { createEntryWithUploadedImagesForJournal } from '@/data/entries'
 import {
   createJournalInvitation,
+  revokeJournalInvitationByOwner,
   setInvitationEmailDeliveryFlag,
 } from '@/data/invitations'
 import { getUserJournalById, updateJournalTitleForOwner } from '@/data/journals'
@@ -59,6 +60,11 @@ export type UpdateJournalTitleInput = {
   title: string
 }
 
+export type CancelPendingInvitationInput = {
+  journalId: string
+  invitationId: string
+}
+
 export type InviteActionState = {
   error: string | null
   successMessage: string | null
@@ -67,6 +73,11 @@ export type InviteActionState = {
 
 export type UpdateJournalTitleState = {
   error: string | null
+}
+
+export type CancelPendingInvitationState = {
+  error: string | null
+  success: boolean
 }
 
 const createEntrySchema = z.object({
@@ -116,6 +127,11 @@ const updateJournalTitleSchema = z.object({
     .trim()
     .min(1, 'Title is required.')
     .max(JOURNAL_TITLE_MAX_LENGTH, 'Title must be 180 characters or less.'),
+})
+
+const cancelPendingInvitationSchema = z.object({
+  journalId: z.string().trim().min(1, 'Journal is required.'),
+  invitationId: z.string().trim().min(1, 'Invitation is required.'),
 })
 
 function normalizeBaseUrl(value: string): string {
@@ -379,5 +395,47 @@ export async function updateJournalTitleAction(
 
   return {
     error: null,
+  }
+}
+
+export async function cancelPendingInvitationAction(
+  input: CancelPendingInvitationInput,
+): Promise<CancelPendingInvitationState> {
+  const currentUser = await getCurrentAppUser()
+
+  if (!currentUser) {
+    return {
+      error: 'You must be signed in to cancel invitations.',
+      success: false,
+    }
+  }
+
+  const parsedInput = cancelPendingInvitationSchema.safeParse(input)
+
+  if (!parsedInput.success) {
+    return {
+      error: parsedInput.error.issues[0]?.message ?? 'Unable to cancel invitation.',
+      success: false,
+    }
+  }
+
+  const result = await revokeJournalInvitationByOwner({
+    ownerUserId: currentUser.id,
+    journalId: parsedInput.data.journalId,
+    invitationId: parsedInput.data.invitationId,
+  })
+
+  if (!result.ok) {
+    return {
+      error: result.message,
+      success: false,
+    }
+  }
+
+  revalidatePath(`/dashboard/journals/${parsedInput.data.journalId}`)
+
+  return {
+    error: null,
+    success: true,
   }
 }

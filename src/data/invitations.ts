@@ -86,6 +86,16 @@ type DeclineJournalInvitationSuccess = {
   ok: true
 }
 
+export type RevokeJournalInvitationResult =
+  | {
+      ok: true
+    }
+  | {
+      ok: false
+      error: 'FORBIDDEN' | 'NOT_FOUND' | 'NOT_PENDING'
+      message: string
+    }
+
 export type PendingInvitation = {
   id: string
   journalId: string
@@ -397,6 +407,82 @@ export async function declineJournalInvitation({
     )
 
   return { ok: true }
+}
+
+export async function revokeJournalInvitationByOwner({
+  ownerUserId,
+  journalId,
+  invitationId,
+}: {
+  ownerUserId: string
+  journalId: string
+  invitationId: string
+}): Promise<RevokeJournalInvitationResult> {
+  const [ownerMembership] = await db
+    .select({ id: journalMembers.id })
+    .from(journalMembers)
+    .where(
+      and(
+        eq(journalMembers.journalId, journalId),
+        eq(journalMembers.userId, ownerUserId),
+        eq(journalMembers.role, 'owner'),
+      ),
+    )
+    .limit(1)
+
+  if (!ownerMembership) {
+    return {
+      ok: false,
+      error: 'FORBIDDEN',
+      message: 'Only journal owners can cancel pending invitations.',
+    }
+  }
+
+  const [updatedInvitation] = await db
+    .update(journalInvitations)
+    .set({ status: 'revoked' })
+    .where(
+      and(
+        eq(journalInvitations.id, invitationId),
+        eq(journalInvitations.journalId, journalId),
+        eq(journalInvitations.status, 'pending'),
+      ),
+    )
+    .returning({ id: journalInvitations.id })
+
+  if (updatedInvitation) {
+    await db
+      .update(journals)
+      .set({ updatedAt: new Date() })
+      .where(eq(journals.id, journalId))
+
+    return { ok: true }
+  }
+
+  const [invitation] = await db
+    .select({ id: journalInvitations.id, status: journalInvitations.status })
+    .from(journalInvitations)
+    .where(
+      and(
+        eq(journalInvitations.id, invitationId),
+        eq(journalInvitations.journalId, journalId),
+      ),
+    )
+    .limit(1)
+
+  if (!invitation) {
+    return {
+      ok: false,
+      error: 'NOT_FOUND',
+      message: 'Invitation not found.',
+    }
+  }
+
+  return {
+    ok: false,
+    error: 'NOT_PENDING',
+    message: 'This invitation is no longer pending.',
+  }
 }
 
 export async function getPendingInvitationsForEmail(email: string): Promise<PendingInvitation[]> {

@@ -144,6 +144,7 @@ describe('DashboardPage', () => {
     expect(screen.getByRole('heading', { name: 'Pending invites' })).toBeInTheDocument()
     expect(screen.getByText('Shared Travel Notes')).toBeInTheDocument()
     expect(screen.getByText(/Invited as editor/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeDisabled()
 
     expect(screen.getByText('Family Journal')).toBeInTheDocument()
     expect(screen.getByText('Daily family reflections')).toBeInTheDocument()

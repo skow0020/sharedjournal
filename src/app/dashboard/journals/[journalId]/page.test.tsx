@@ -62,6 +62,7 @@ vi.mock('@/app/dashboard/delete-journal-button', () => ({
 }))
 
 vi.mock('@/app/dashboard/journals/[journalId]/actions', () => ({
+  cancelPendingInvitationAction: vi.fn(async () => ({ error: null, success: true })),
   cleanupEntryImageUploadsAction: vi.fn(),
   createEntryAction: vi.fn(),
   createInviteAction: vi.fn(),
@@ -176,6 +177,7 @@ describe('JournalDetailsPage', () => {
     expect(screen.getByRole('heading', { name: 'Pending invites' })).toBeInTheDocument()
     expect(screen.getByText('friend@example.com')).toBeInTheDocument()
     expect(screen.getByText(/email delivered/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument()
 
     expect(screen.getByRole('heading', { name: 'Journal entries' })).toBeInTheDocument()
     expect(screen.getByText('Morning Reflection')).toBeInTheDocument()
