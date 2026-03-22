@@ -113,7 +113,7 @@ describe('CreateEntryModal', () => {
   })
 
   function getFileInput(): HTMLInputElement {
-    const input = document.querySelector('input[type="file"]')
+    const input = document.querySelector('input[type="file"]:not([capture])')
 
     if (!(input instanceof HTMLInputElement)) {
       throw new Error('File input not found')
