@@ -34,6 +34,7 @@ export function InviteUserModal({ journalId, journalTitle, action }: InviteUserM
     inviteLink: null,
   })
   const [pending, startTransition] = useTransition()
+  const [sent, setSent] = useState(false)
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -46,6 +47,9 @@ export function InviteUserModal({ journalId, journalTitle, action }: InviteUserM
       })
 
       setState(nextState)
+      if (!nextState.error) {
+        setSent(true)
+      }
     })
   }
 
@@ -83,7 +87,13 @@ export function InviteUserModal({ journalId, journalTitle, action }: InviteUserM
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={pending}>{pending ? 'Sending...' : 'Send invite'}</Button>
+            <Button 
+              type="submit" 
+              disabled={pending}
+              className={sent ? 'bg-green-600 hover:bg-green-700' : ''}
+            >
+              {pending ? 'Sending...' : sent ? 'Invite sent!' : 'Send invite'}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
