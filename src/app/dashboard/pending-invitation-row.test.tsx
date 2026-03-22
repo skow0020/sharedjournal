@@ -50,6 +50,7 @@ describe('PendingInvitationRow', () => {
 
     expect(screen.getByText('Team Notes')).toBeInTheDocument()
     expect(screen.getByText(/Invited as editor/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Accept' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Decline' })).toBeInTheDocument()
   })
@@ -188,6 +189,7 @@ describe('PendingInvitationRow', () => {
     await user.click(screen.getByRole('button', { name: 'Accept' }))
 
     expect(screen.getByRole('button', { name: 'Accepting...' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Decline' })).toBeDisabled()
 
     expect(resolveAccept).not.toBeNull()
@@ -220,6 +222,7 @@ describe('PendingInvitationRow', () => {
     await user.click(screen.getByRole('button', { name: 'Decline' }))
 
     expect(screen.getByRole('button', { name: 'Declining...' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Accept' })).toBeDisabled()
 
     expect(resolveDecline).not.toBeNull()
