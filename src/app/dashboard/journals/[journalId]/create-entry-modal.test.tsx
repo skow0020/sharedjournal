@@ -369,6 +369,26 @@ describe('CreateEntryModal', () => {
     expect(screen.queryByRole('button', { name: 'Take photo' })).not.toBeInTheDocument()
   })
 
+  it('defaults to non-mobile behavior when matchMedia is unavailable', async () => {
+    const user = userEvent.setup()
+
+    Object.defineProperty(window, 'matchMedia', {
+      configurable: true,
+      writable: true,
+      value: undefined,
+    })
+
+    const action = vi.fn(async () => ({ error: null, redirectTo: null }))
+    const cleanupAction = vi.fn(async () => ({ error: null }))
+
+    render(<CreateEntryModal journalId="journal-1" action={action} cleanupAction={cleanupAction} />)
+
+    await user.click(screen.getByRole('button', { name: 'Add entry' }))
+
+    expect(screen.getByRole('button', { name: 'Browse images' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Take photo' })).not.toBeInTheDocument()
+  })
+
   it('shows Take photo button on mobile devices', async () => {
     const user = userEvent.setup()
 

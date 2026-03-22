@@ -99,6 +99,11 @@ export function CreateEntryModal({ journalId, action, cleanupAction }: CreateEnt
   const cameraInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+      setIsMobile(false)
+      return
+    }
+
     setIsMobile(window.matchMedia('(pointer: coarse)').matches)
   }, [])
 
