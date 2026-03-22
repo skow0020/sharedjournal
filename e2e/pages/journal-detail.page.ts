@@ -65,6 +65,15 @@ export class JournalDetailPage {
     return this.page.getByText(email)
   }
 
+  async cancelPendingInvite(email: string) {
+    const inviteCard = this.page
+      .locator('[data-slot="card"]')
+      .filter({ has: this.page.getByText(email) })
+      .first()
+
+    await inviteCard.getByRole('button', { name: 'Cancel' }).click()
+  }
+
   entriesHeading() {
     return this.page.getByRole('heading', { name: 'Journal entries' })
   }
