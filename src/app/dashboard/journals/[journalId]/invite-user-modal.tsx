@@ -1,5 +1,6 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 
 import {
@@ -26,6 +27,7 @@ type InviteUserModalProps = {
 }
 
 export function InviteUserModal({ journalId, journalTitle, action }: InviteUserModalProps) {
+  const router = useRouter()
   const [open, setOpen] = useState(false)
   const [email, setEmail] = useState('')
   const [state, setState] = useState<InviteActionState>({
@@ -35,6 +37,31 @@ export function InviteUserModal({ journalId, journalTitle, action }: InviteUserM
   })
   const [pending, startTransition] = useTransition()
   const [sent, setSent] = useState(false)
+
+  function resetModalState() {
+    setEmail('')
+    setState({
+      error: null,
+      successMessage: null,
+      inviteLink: null,
+    })
+    setSent(false)
+  }
+
+  function handleOpenChange(nextOpen: boolean) {
+    if (nextOpen) {
+      setOpen(true)
+      return
+    }
+
+    setOpen(false)
+
+    if (sent) {
+      router.refresh()
+    }
+
+    resetModalState()
+  }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -54,7 +81,7 @@ export function InviteUserModal({ journalId, journalTitle, action }: InviteUserM
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button size="sm" variant="outline">Invite</Button>
       </DialogTrigger>
@@ -84,7 +111,7 @@ export function InviteUserModal({ journalId, journalTitle, action }: InviteUserM
             <p className="text-muted-foreground text-sm break-all">Invite link: {state.inviteLink}</p>
           ) : null}
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
               Cancel
             </Button>
             <Button 
