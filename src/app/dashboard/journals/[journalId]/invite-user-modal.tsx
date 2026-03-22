@@ -34,7 +34,7 @@ export function InviteUserModal({ journalId, journalTitle, action }: InviteUserM
     inviteLink: null,
   })
   const [pending, startTransition] = useTransition()
-  const [sent, setSent] = useState(false);
+  const [sent, setSent] = useState(false)
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
