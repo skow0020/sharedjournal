@@ -406,7 +406,7 @@ export function CreateEntryModal({ journalId, action, cleanupAction }: CreateEnt
             <input
               ref={cameraInputRef}
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/webp"
               capture="environment"
               className="sr-only"
               onChange={handleImageSelection}

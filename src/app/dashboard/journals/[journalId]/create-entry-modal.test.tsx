@@ -419,7 +419,7 @@ describe('CreateEntryModal', () => {
 
     const cameraInput = getCameraInput()
     expect(cameraInput.getAttribute('capture')).toBe('environment')
-    expect(cameraInput.getAttribute('accept')).toBe('image/*')
+    expect(cameraInput.getAttribute('accept')).toBe('image/jpeg,image/png,image/webp')
   })
 
   it('uploads photo taken via camera and includes it in submitted payload', async () => {
