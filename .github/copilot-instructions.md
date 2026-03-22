@@ -47,6 +47,7 @@
 - `npm run build` to create a production build.
 - `npm start` to run the production server.
 - `npm run lint` for ESLint checks.
+- `npm run test:coverage` for running tests with coverage reporting.
 - `npx tsc --noEmit` for TypeScript type-checking.
 
 ## Quality Checks
