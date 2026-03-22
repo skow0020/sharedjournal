@@ -467,9 +467,12 @@ describe('CreateEntryModal', () => {
       new File([`f${index}`], `img-${index}.jpg`, { type: 'image/jpeg' }),
     )
 
-    for (const file of files) {
+    for (const [index, file] of files.entries()) {
       await user.upload(getFileInput(), file)
-      await screen.findAllByText('Uploaded')
+
+      await waitFor(() => {
+        expect(screen.getAllByText('Uploaded')).toHaveLength(index + 1)
+      })
     }
 
     expect(screen.queryByRole('button', { name: 'Browse images' })).not.toBeInTheDocument()
