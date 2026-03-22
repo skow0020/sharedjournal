@@ -84,6 +84,9 @@ export function PendingInvitationRow({
         </div>
 
         <div className="flex items-center gap-2">
+          <Button type="button" size="sm" variant="outline" disabled className="disabled:opacity-100">
+            Cancel
+          </Button>
           <Button
             type="button"
             size="sm"

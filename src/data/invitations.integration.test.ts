@@ -10,6 +10,7 @@ import {
   getPendingInvitationsForEmail,
   getPendingInvitationsForOwnedJournal,
   getInvitationByToken,
+  revokeJournalInvitationByOwner,
   setInvitationEmailDeliveryFlag,
 } from '@/data/invitations'
 
@@ -537,6 +538,106 @@ describe('declineJournalInvitation', () => {
     expect(result.ok).toBe(false)
     if (result.ok) return
     expect(result.error).toBe('EMAIL_MISMATCH')
+  })
+})
+
+describe('revokeJournalInvitationByOwner', () => {
+  let ownerId: string
+  let otherUserId: string
+  let journalId: string
+
+  beforeEach(async () => {
+    const owner = await createUser({ displayName: 'Owner' })
+    const otherUser = await createUser({ displayName: 'Other User' })
+
+    ownerId = owner.id
+    otherUserId = otherUser.id
+
+    const journal = await createJournal(ownerId, 'Cancel Invite Journal')
+    journalId = journal.id
+
+    await addMember(journalId, ownerId, 'owner')
+  })
+
+  afterEach(async () => {
+    await deleteJournals([journalId])
+    await deleteUsers([ownerId, otherUserId])
+  })
+
+  it('revokes a pending invitation for the journal owner', async () => {
+    const invitation = await createInvitation({
+      journalId,
+      inviterUserId: ownerId,
+      inviteeEmail: 'pending@example.com',
+      status: 'pending',
+    })
+
+    const result = await revokeJournalInvitationByOwner({
+      ownerUserId: ownerId,
+      journalId,
+      invitationId: invitation.id,
+    })
+
+    expect(result).toEqual({ ok: true })
+
+    const [row] = await db
+      .select({ status: journalInvitations.status })
+      .from(journalInvitations)
+      .where(eq(journalInvitations.id, invitation.id))
+
+    expect(row.status).toBe('revoked')
+  })
+
+  it('returns FORBIDDEN when the current user is not the journal owner', async () => {
+    const invitation = await createInvitation({
+      journalId,
+      inviterUserId: ownerId,
+      inviteeEmail: 'pending@example.com',
+      status: 'pending',
+    })
+
+    const result = await revokeJournalInvitationByOwner({
+      ownerUserId: otherUserId,
+      journalId,
+      invitationId: invitation.id,
+    })
+
+    expect(result.ok).toBe(false)
+    if (result.ok) return
+    expect(result.error).toBe('FORBIDDEN')
+  })
+
+  it('returns NOT_FOUND when invitation id does not exist for the journal', async () => {
+    const result = await revokeJournalInvitationByOwner({
+      ownerUserId: ownerId,
+      journalId,
+      invitationId: crypto.randomUUID(),
+    })
+
+    expect(result.ok).toBe(false)
+    if (result.ok) return
+    expect(result.error).toBe('NOT_FOUND')
+    expect(result.message).toBe('Invitation not found.')
+  })
+
+  it('returns NOT_PENDING when invitation exists but is not pending', async () => {
+    const invitation = await createInvitation({
+      journalId,
+      inviterUserId: ownerId,
+      inviteeEmail: 'already-revoked@example.com',
+      status: 'revoked',
+    })
+
+    const result = await revokeJournalInvitationByOwner({
+      ownerUserId: ownerId,
+      journalId,
+      invitationId: invitation.id,
+    })
+
+    expect(result.ok).toBe(false)
+    if (result.ok) return
+    expect(result.error).toBe('NOT_PENDING')
+    expect(result.message).toBe('This invitation is no longer pending.')
   })
 })
 

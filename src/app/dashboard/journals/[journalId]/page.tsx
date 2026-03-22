@@ -9,7 +9,9 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { OwnedPendingInvitations } from '@/app/dashboard/journals/[journalId]/owned-pending-invitations'
 import {
+  cancelPendingInvitationAction,
   cleanupEntryImageUploadsAction,
   createEntryAction,
   createInviteAction,
@@ -147,18 +149,11 @@ export default async function JournalDetailsPage({ params, searchParams }: Journ
       {pendingInvitations.length > 0 ? (
         <section className="space-y-3">
           <h2 className="text-xl font-semibold tracking-tight">Pending invites</h2>
-          <div className="grid gap-3">
-            {pendingInvitations.map((invitation) => (
-              <Card key={invitation.id}>
-                <CardHeader>
-                  <CardTitle className="text-base">{invitation.inviteeEmail}</CardTitle>
-                  <CardDescription>
-                    {invitation.role} · {invitation.emailDelivered ? 'email delivered' : 'manual share needed'}
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            ))}
-          </div>
+          <OwnedPendingInvitations
+            invitations={pendingInvitations}
+            journalId={journalId}
+            cancelAction={cancelPendingInvitationAction}
+          />
         </section>
       ) : null}
 
