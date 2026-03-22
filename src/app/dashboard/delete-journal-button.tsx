@@ -1,5 +1,6 @@
 'use client'
 
+import type { ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 
@@ -22,9 +23,10 @@ type DeleteJournalButtonProps = {
   journalId: string
   action: (input: DeleteJournalInput) => Promise<DeleteJournalState>
   successRedirectTo?: string
+  trigger?: ReactNode
 }
 
-export function DeleteJournalButton({ journalId, action, successRedirectTo }: DeleteJournalButtonProps) {
+export function DeleteJournalButton({ journalId, action, successRedirectTo, trigger }: DeleteJournalButtonProps) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [state, setState] = useState<DeleteJournalState>({
@@ -53,11 +55,17 @@ export function DeleteJournalButton({ journalId, action, successRedirectTo }: De
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button type="button" size="sm" variant="outline" className="text-destructive hover:text-destructive">
-          Delete
-        </Button>
-      </DialogTrigger>
+      {trigger ? (
+        <DialogTrigger asChild>
+          {trigger}
+        </DialogTrigger>
+      ) : (
+        <DialogTrigger asChild>
+          <Button type="button" size="sm" variant="outline" className="text-destructive hover:text-destructive">
+            Delete
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Delete journal</DialogTitle>

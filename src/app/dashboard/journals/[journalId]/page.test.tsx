@@ -45,6 +45,10 @@ vi.mock('@/app/dashboard/journals/[journalId]/invite-user-modal', () => ({
   InviteUserModal: () => <div data-testid="invite-user-modal">Invite user modal</div>,
 }))
 
+vi.mock('@/app/dashboard/journals/[journalId]/mobile-owner-actions-menu', () => ({
+  MobileOwnerActionsMenu: () => <div data-testid="mobile-owner-actions-menu">Mobile owner actions menu</div>,
+}))
+
 vi.mock('@/app/dashboard/journals/[journalId]/journal-entries-infinite-loader', () => ({
   JournalEntriesInfiniteLoader: ({ currentPage, hasMore }: { currentPage: number, hasMore: boolean }) => (
     <div data-testid="journal-entries-infinite-loader">
@@ -181,6 +185,7 @@ describe('JournalDetailsPage', () => {
     expect(screen.getByTestId('create-entry-modal')).toBeInTheDocument()
     expect(screen.getByTestId('invite-user-modal')).toBeInTheDocument()
     expect(screen.getByTestId('delete-journal-button')).toBeInTheDocument()
+    expect(screen.getByTestId('mobile-owner-actions-menu')).toBeInTheDocument()
   })
 
   it('hides the edit button when the user is not the journal owner', async () => {
@@ -220,6 +225,7 @@ describe('JournalDetailsPage', () => {
     await renderJournalDetailsPage()
 
     expect(screen.queryByTestId('delete-journal-button')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('mobile-owner-actions-menu')).not.toBeInTheDocument()
   })
 
   it('does not render invite controls for journals shared with the user', async () => {
