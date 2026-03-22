@@ -37,7 +37,8 @@ ENTRY_CONTENT_ENCRYPTION_KEY=replace-with-openssl-rand-base64-32
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 # Invite Email Provider (optional)
-# Set to 'resend' to enable real invite emails, otherwise leave unset.
+# Resend is auto-detected when RESEND_API_KEY and RESEND_FROM_EMAIL are set.
+# Optionally set INVITE_EMAIL_PROVIDER=resend explicitly, or INVITE_EMAIL_PROVIDER=none to disable email sending.
 INVITE_EMAIL_PROVIDER=resend
 RESEND_API_KEY=re_...
 RESEND_FROM_EMAIL=SharedJournal <invites@notify.sharedjournal.app>
@@ -95,8 +96,9 @@ Notes:
 1. Create a [Resend](https://resend.com/) account.
 2. Verify a sending domain in Resend (required for production).
 3. Create an API key in Resend.
-4. Add `INVITE_EMAIL_PROVIDER=resend`, `RESEND_API_KEY`, and `RESEND_FROM_EMAIL` to `.env.local`.
-5. Set `NEXT_PUBLIC_APP_URL` to your app origin so invite links are correct.
+4. Add `RESEND_API_KEY` and `RESEND_FROM_EMAIL` to `.env.local`.
+5. Optionally set `INVITE_EMAIL_PROVIDER=resend` explicitly, or `INVITE_EMAIL_PROVIDER=none` to disable invite email sending.
+6. Set `NEXT_PUBLIC_APP_URL` (or `APP_URL`) to your app origin for deterministic invite links across environments.
 
 If invite email env vars are missing, invitations are still created and the UI shows the invite link for manual sharing.
 
@@ -120,14 +122,20 @@ In Vercel DNS, add the records provided by Resend for `notify.sharedjournal.app`
 Important notes:
 
 - The domain in Resend, DNS records in Vercel, and `RESEND_FROM_EMAIL` must all match the same `.app` domain family.
-- In development, keep `NEXT_PUBLIC_APP_URL=http://localhost:3000`.
-- In production, set `NEXT_PUBLIC_APP_URL=https://sharedjournal.app` so invite links in emails point to your live app.
+- In development, keep `NEXT_PUBLIC_APP_URL=http://localhost:3000` (or set `APP_URL` similarly).
+- In production, set `NEXT_PUBLIC_APP_URL=https://sharedjournal.app` (or `APP_URL=https://sharedjournal.app`) so invite links in emails always point to your canonical domain.
 
 ### Journal Invite Link Behavior
 
 - When an owner invites a user, SharedJournal creates a tokenized link at `/invitations/[token]`.
-- Invite links are generated from `NEXT_PUBLIC_APP_URL`.
-- If email delivery is configured and successful, the invite is sent via Resend.
+- Invite links are generated from this base URL resolution order:
+  1. `NEXT_PUBLIC_APP_URL`
+  2. `APP_URL`
+  3. Request `origin` header
+  4. Request host headers (`x-forwarded-host`, then `host`) with protocol from `x-forwarded-proto` (or inferred as `http` for localhost, `https` otherwise)
+  5. Vercel env (`VERCEL_PROJECT_PRODUCTION_URL`, then `VERCEL_URL`)
+  6. Final fallback: `https://sharedjournal.app` in production, `http://localhost:3000` otherwise
+- If Resend credentials are configured and delivery succeeds, the invite is sent via Resend.
 - If email is not configured or fails, the invite record is still created and the UI shows the invite link for manual sharing.
 
 ### Implementation Details

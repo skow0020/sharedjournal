@@ -143,13 +143,12 @@ describe('JournalDetailsPage', () => {
     ])
   })
 
-  it('renders sign-in prompt when user is not authenticated', async () => {
+  it('redirects to sign-in when user is not authenticated', async () => {
     getCurrentAppUserMock.mockResolvedValue(null)
 
-    await renderJournalDetailsPage()
+    await expect(renderJournalDetailsPage()).rejects.toThrow('NEXT_REDIRECT')
 
-    expect(screen.getByText('Journal')).toBeInTheDocument()
-    expect(screen.getByText('Sign in to view this journal.')).toBeInTheDocument()
+    expect(redirectMock).toHaveBeenCalledWith('/sign-in')
     expect(getUserJournalByIdMock).not.toHaveBeenCalled()
   })
 
@@ -221,6 +220,22 @@ describe('JournalDetailsPage', () => {
     await renderJournalDetailsPage()
 
     expect(screen.queryByTestId('delete-journal-button')).not.toBeInTheDocument()
+  })
+
+  it('does not render invite controls for journals shared with the user', async () => {
+    getUserJournalByIdMock.mockResolvedValue({
+      id: 'journal-1',
+      title: 'Family Journal',
+      description: 'Shared notes and reflections',
+      ownerUserId: 'user-2',
+      isOwner: false,
+    })
+
+    await renderJournalDetailsPage()
+
+    expect(screen.queryByTestId('invite-user-modal')).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Pending invites' })).not.toBeInTheDocument()
+    expect(getPendingInvitationsForOwnedJournalMock).not.toHaveBeenCalled()
   })
 
   it('loads entries cumulatively based on entriesPage search param', async () => {

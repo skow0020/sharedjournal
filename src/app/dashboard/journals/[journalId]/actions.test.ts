@@ -11,6 +11,7 @@ const {
   getUserJournalByIdMock,
   sendInviteEmailMock,
   revalidatePathMock,
+  headersMock,
 } = vi.hoisted(() => ({
   getClerkCurrentUserMock: vi.fn(),
   createEntryWithUploadedImagesForJournalMock: vi.fn(),
@@ -22,6 +23,7 @@ const {
   getUserJournalByIdMock: vi.fn(),
   sendInviteEmailMock: vi.fn(),
   revalidatePathMock: vi.fn(),
+  headersMock: vi.fn(),
 }))
 
 vi.mock('@clerk/nextjs/server', () => ({
@@ -58,6 +60,10 @@ vi.mock('next/cache', () => ({
   revalidatePath: revalidatePathMock,
 }))
 
+vi.mock('next/headers', () => ({
+  headers: headersMock,
+}))
+
 import {
   cleanupEntryImageUploadsAction,
   createEntryAction,
@@ -66,6 +72,9 @@ import {
 } from '@/app/dashboard/journals/[journalId]/actions'
 
 const originalAppUrl = process.env.NEXT_PUBLIC_APP_URL
+const originalServerAppUrl = process.env.APP_URL
+const originalVercelUrl = process.env.VERCEL_URL
+const originalVercelProductionUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
 
 describe('createEntryAction', () => {
   beforeEach(() => {
@@ -246,6 +255,10 @@ describe('createInviteAction', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     process.env.NEXT_PUBLIC_APP_URL = 'https://sharedjournal.test'
+    delete process.env.APP_URL
+    delete process.env.VERCEL_URL
+    delete process.env.VERCEL_PROJECT_PRODUCTION_URL
+    headersMock.mockResolvedValue(new Headers())
   })
 
   afterEach(() => {
@@ -253,6 +266,24 @@ describe('createInviteAction', () => {
       delete process.env.NEXT_PUBLIC_APP_URL
     } else {
       process.env.NEXT_PUBLIC_APP_URL = originalAppUrl
+    }
+
+    if (originalServerAppUrl === undefined) {
+      delete process.env.APP_URL
+    } else {
+      process.env.APP_URL = originalServerAppUrl
+    }
+
+    if (originalVercelUrl === undefined) {
+      delete process.env.VERCEL_URL
+    } else {
+      process.env.VERCEL_URL = originalVercelUrl
+    }
+
+    if (originalVercelProductionUrl === undefined) {
+      delete process.env.VERCEL_PROJECT_PRODUCTION_URL
+    } else {
+      process.env.VERCEL_PROJECT_PRODUCTION_URL = originalVercelProductionUrl
     }
   })
 
@@ -392,6 +423,124 @@ describe('createInviteAction', () => {
       error: null,
       successMessage: 'Invitation created for friend@example.com. Copy the link below to share.',
       inviteLink: 'https://sharedjournal.test/invitations/token-123',
+    })
+  })
+
+  it('builds the invite link from the request host when app url is not configured', async () => {
+    delete process.env.NEXT_PUBLIC_APP_URL
+    headersMock.mockResolvedValue(
+      new Headers({
+        'x-forwarded-host': 'preview.sharedjournal.app',
+        'x-forwarded-proto': 'https',
+      }),
+    )
+    getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
+    createJournalInvitationMock.mockResolvedValue({
+      ok: true,
+      invitationId: 'inv-1',
+      inviteToken: 'token-123',
+      inviteeEmail: 'friend@example.com',
+      expiresAt: new Date('2026-03-21T00:00:00.000Z'),
+    })
+    getClerkCurrentUserMock.mockResolvedValue({
+      fullName: 'Pat Smith',
+      username: 'pat',
+    })
+    sendInviteEmailMock.mockResolvedValue({
+      delivered: false,
+      provider: 'none',
+      message: 'Invite email provider is not configured.',
+    })
+
+    const result = await createInviteAction({
+      journalId: 'journal-1',
+      journalTitle: 'Family Journal',
+      email: 'friend@example.com',
+    })
+
+    expect(sendInviteEmailMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        inviteLink: 'https://preview.sharedjournal.app/invitations/token-123',
+      }),
+    )
+    expect(result).toEqual({
+      error: null,
+      successMessage: 'Invitation created for friend@example.com. Copy the link below to share.',
+      inviteLink: 'https://preview.sharedjournal.app/invitations/token-123',
+    })
+  })
+
+  it('uses the first forwarded host and protocol when headers contain proxy lists', async () => {
+    delete process.env.NEXT_PUBLIC_APP_URL
+    headersMock.mockResolvedValue(
+      new Headers({
+        'x-forwarded-host': 'preview.sharedjournal.app, internal.proxy.local',
+        'x-forwarded-proto': 'https, http',
+      }),
+    )
+    getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
+    createJournalInvitationMock.mockResolvedValue({
+      ok: true,
+      invitationId: 'inv-1',
+      inviteToken: 'token-123',
+      inviteeEmail: 'friend@example.com',
+      expiresAt: new Date('2026-03-21T00:00:00.000Z'),
+    })
+    getClerkCurrentUserMock.mockResolvedValue({
+      fullName: 'Pat Smith',
+      username: 'pat',
+    })
+    sendInviteEmailMock.mockResolvedValue({
+      delivered: false,
+      provider: 'none',
+      message: 'Invite email provider is not configured.',
+    })
+
+    const result = await createInviteAction({
+      journalId: 'journal-1',
+      journalTitle: 'Family Journal',
+      email: 'friend@example.com',
+    })
+
+    expect(result).toEqual({
+      error: null,
+      successMessage: 'Invitation created for friend@example.com. Copy the link below to share.',
+      inviteLink: 'https://preview.sharedjournal.app/invitations/token-123',
+    })
+  })
+
+  it('builds the invite link from vercel env when no app url or request host is available', async () => {
+    delete process.env.NEXT_PUBLIC_APP_URL
+    process.env.VERCEL_URL = 'sharedjournal-preview.vercel.app'
+    headersMock.mockResolvedValue(new Headers())
+    getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
+    createJournalInvitationMock.mockResolvedValue({
+      ok: true,
+      invitationId: 'inv-1',
+      inviteToken: 'token-123',
+      inviteeEmail: 'friend@example.com',
+      expiresAt: new Date('2026-03-21T00:00:00.000Z'),
+    })
+    getClerkCurrentUserMock.mockResolvedValue({
+      fullName: 'Pat Smith',
+      username: 'pat',
+    })
+    sendInviteEmailMock.mockResolvedValue({
+      delivered: false,
+      provider: 'none',
+      message: 'Invite email provider is not configured.',
+    })
+
+    const result = await createInviteAction({
+      journalId: 'journal-1',
+      journalTitle: 'Family Journal',
+      email: 'friend@example.com',
+    })
+
+    expect(result).toEqual({
+      error: null,
+      successMessage: 'Invitation created for friend@example.com. Copy the link below to share.',
+      inviteLink: 'https://sharedjournal-preview.vercel.app/invitations/token-123',
     })
   })
 })

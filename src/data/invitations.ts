@@ -2,6 +2,7 @@ import { and, desc, eq } from 'drizzle-orm'
 
 import { db } from '@/db'
 import { journalInvitations, journalMembers, journals, users } from '@/db/schema'
+import { normalizeEmail } from '@/lib/normalize-email'
 
 export type CreateJournalInvitationInput = {
   inviterUserId: string
@@ -103,10 +104,6 @@ export type PendingJournalInvitation = {
   expiresAt: Date
   createdAt: Date
   emailDelivered: boolean
-}
-
-export function normalizeEmail(value: string): string {
-  return value.trim().toLowerCase()
 }
 
 function isValidEmail(value: string): boolean {

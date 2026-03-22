@@ -1,16 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const { currentUserMock, normalizeEmailMock } = vi.hoisted(() => ({
+const { currentUserMock } = vi.hoisted(() => ({
   currentUserMock: vi.fn(),
-  normalizeEmailMock: vi.fn((value: string) => value.trim().toLowerCase()),
 }))
 
 vi.mock('@clerk/nextjs/server', () => ({
   currentUser: currentUserMock,
-}))
-
-vi.mock('@/data/invitations', () => ({
-  normalizeEmail: normalizeEmailMock,
 }))
 
 import { getCurrentUserEmail } from '@/lib/get-current-user-email'
@@ -26,7 +21,6 @@ describe('getCurrentUserEmail', () => {
     const result = await getCurrentUserEmail()
 
     expect(result).toBeNull()
-    expect(normalizeEmailMock).not.toHaveBeenCalled()
   })
 
   it('returns normalized primary email when primaryEmailAddressId exists', async () => {
@@ -40,7 +34,6 @@ describe('getCurrentUserEmail', () => {
 
     const result = await getCurrentUserEmail()
 
-    expect(normalizeEmailMock).toHaveBeenCalledWith('  USER@Example.com  ')
     expect(result).toBe('user@example.com')
   })
 
@@ -55,7 +48,6 @@ describe('getCurrentUserEmail', () => {
 
     const result = await getCurrentUserEmail()
 
-    expect(normalizeEmailMock).toHaveBeenCalledWith('first@example.com')
     expect(result).toBe('first@example.com')
   })
 
@@ -68,7 +60,6 @@ describe('getCurrentUserEmail', () => {
     const result = await getCurrentUserEmail()
 
     expect(result).toBeNull()
-    expect(normalizeEmailMock).not.toHaveBeenCalled()
   })
 
   it('returns null when user has no email addresses', async () => {
@@ -80,6 +71,5 @@ describe('getCurrentUserEmail', () => {
     const result = await getCurrentUserEmail()
 
     expect(result).toBeNull()
-    expect(normalizeEmailMock).not.toHaveBeenCalled()
   })
 })
