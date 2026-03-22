@@ -16,6 +16,7 @@ SharedJournal is a Next.js 16 application using the App Router architecture. It 
 - `npm run build` - Build production bundle
 - `npm start` - Start production server
 - `npm run lint` - Run ESLint
+- `npm run test:coverage` - Run component and unit tests
 - `npx tsc --noEmit` - Run TypeScript typecheck (no errors currently)
 
 ## Architecture

@@ -22,6 +22,7 @@ import { CreateEntryModal } from '@/app/dashboard/journals/[journalId]/create-en
 import { InviteUserModal } from '@/app/dashboard/journals/[journalId]/invite-user-modal'
 import { JournalEntriesInfiniteLoader } from '@/app/dashboard/journals/[journalId]/journal-entries-infinite-loader'
 import { JournalTitleEditor } from '@/app/dashboard/journals/[journalId]/journal-title-editor'
+import { MobileOwnerActionsMenu } from '@/app/dashboard/journals/[journalId]/mobile-owner-actions-menu'
 import {
   getJournalEntryCountForJournal,
   getJournalEntriesForJournal,
@@ -86,20 +87,30 @@ export default async function JournalDetailsPage({ params, searchParams }: Journ
   return (
     <main className="mx-auto w-full max-w-5xl space-y-6 px-6 py-8">
       <section className="space-y-2">
-        <div className="flex items-start justify-between gap-4">
-          <div className="space-y-2">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0 flex-1 space-y-2">
             <Link
               href="/dashboard"
               className="text-muted-foreground mb-2 inline-block text-sm underline-offset-4 hover:underline"
             >
               Back to journals
             </Link>
-            <JournalTitleEditor
-              journalId={journalId}
-              title={journal.title}
-              canEdit={canEditJournalTitle}
-              action={updateJournalTitleAction}
-            />
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0 flex-1">
+                <JournalTitleEditor
+                  journalId={journalId}
+                  title={journal.title}
+                  canEdit={canEditJournalTitle}
+                  action={updateJournalTitleAction}
+                />
+              </div>
+              {journal.isOwner ? (
+                <MobileOwnerActionsMenu
+                  journalId={journalId}
+                  action={deleteJournalAction}
+                />
+              ) : null}
+            </div>
             {journal.description ? (
               <p className="text-muted-foreground text-sm">{journal.description}</p>
             ) : null}
@@ -107,14 +118,7 @@ export default async function JournalDetailsPage({ params, searchParams }: Journ
               <CollaboratorsAccordion collaborators={collaborators} />
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            {journal.isOwner ? (
-              <DeleteJournalButton
-                journalId={journalId}
-                action={deleteJournalAction}
-                successRedirectTo="/dashboard"
-              />
-            ) : null}
+          <div className="flex w-full items-center justify-end gap-2 sm:w-auto sm:justify-end">
             <CreateEntryModal
               journalId={journalId}
               action={createEntryAction}
@@ -126,6 +130,15 @@ export default async function JournalDetailsPage({ params, searchParams }: Journ
                 journalTitle={journalTitle}
                 action={createInviteAction}
               />
+            ) : null}
+            {journal.isOwner ? (
+              <div className="hidden sm:block">
+                <DeleteJournalButton
+                  journalId={journalId}
+                  action={deleteJournalAction}
+                  successRedirectTo="/dashboard"
+                />
+              </div>
             ) : null}
           </div>
         </div>
@@ -190,6 +203,7 @@ export default async function JournalDetailsPage({ params, searchParams }: Journ
           </>
         )}
       </section>
+
     </main>
   )
 }
