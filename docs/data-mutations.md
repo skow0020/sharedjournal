@@ -8,6 +8,8 @@
 - Do **NOT** perform inserts, updates, or deletes in Client Components.
 - Do **NOT** use route handlers for application data mutations.
 - Do **NOT** define mutation logic inline inside page files.
+- Do **NOT** call `redirect()` inside Server Actions.
+- Handle redirects on the client after a Server Action resolves.
 
 ## Colocated `actions.ts` Files
 
