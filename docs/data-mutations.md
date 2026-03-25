@@ -36,7 +36,7 @@
 ## Mutation Logic Lives In `src/data`
 
 - All database writes must be implemented in helper functions inside `src/data`.
-- Server Actions orchestrate auth, validation, and redirects or returned state.
+- Server Actions orchestrate auth, validation, and returned state (including redirect intent like `redirectTo`).
 - `src/data` helpers own the actual database mutation logic.
 - Do **NOT** call `db.insert`, `db.update`, `db.delete`, or other raw database operations directly from Server Actions, pages, or components.
 
@@ -55,9 +55,9 @@
 
 ## Recommended Responsibility Split
 
-- `actions.ts`: auth checks, Zod validation, invoking typed `src/data` helpers, and returning UI state or redirecting.
+- `actions.ts`: auth checks, Zod validation, invoking typed `src/data` helpers, and returning UI state/navigation intent (for example, `redirectTo`).
 - `src/data/*`: Drizzle-based inserts, updates, deletes, and permission-aware mutation rules.
-- UI files: rendering forms and invoking typed actions, but not parsing mutation payloads into database calls.
+- UI files: rendering forms and invoking typed actions, handling navigation from returned action state, and not parsing mutation payloads into database calls.
 
 ## Rationale
 
