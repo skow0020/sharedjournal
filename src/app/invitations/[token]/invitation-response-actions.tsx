@@ -29,7 +29,6 @@ export function InvitationResponseActions({
     startTransition(async () => {
       const result = await action({ token })
       router.push(result.redirectTo)
-      router.refresh()
     })
   }
 

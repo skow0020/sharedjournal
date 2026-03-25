@@ -39,7 +39,8 @@ describe('InvitationResponseActions', () => {
     await waitFor(() => {
       expect(acceptAction).toHaveBeenCalledWith({ token: 'invite-token' })
       expect(pushMock).toHaveBeenCalledWith('/dashboard/journals/journal-1')
-      expect(refreshMock).toHaveBeenCalled()
     })
+
+    expect(refreshMock).not.toHaveBeenCalled()
   })
 })
