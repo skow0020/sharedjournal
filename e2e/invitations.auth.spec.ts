@@ -26,7 +26,7 @@ test('can create a journal, send an invite, and cancel it', async ({ page }) => 
   await inviteUserModal.submit()
 
   await expect(inviteUserModal.invitationSentText('invitee+')).toBeVisible()
-  await inviteUserModal.cancel()
+  await inviteUserModal.close()
 
   await expect(journalDetailPage.pendingInvitesHeading()).toBeVisible()
   await expect(journalDetailPage.pendingInviteEmail(inviteeEmail)).toBeVisible()

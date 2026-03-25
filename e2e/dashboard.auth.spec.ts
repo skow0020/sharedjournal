@@ -43,7 +43,7 @@ test('can create a journal, add an entry, and invite a collaborator', async ({ p
   await expect(inviteUserModal.invitationSentText('invitee+')).toBeVisible()
   await expect(inviteUserModal.inviteLinkText()).toBeVisible()
 
-  await inviteUserModal.cancel()
+  await inviteUserModal.close()
   await page.reload()
 
   await expect(journalDetailPage.pendingInvitesHeading()).toBeVisible()
