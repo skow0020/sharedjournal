@@ -25,7 +25,7 @@ export class InviteUserModal {
     return this.page.getByText('Invite link:', { exact: false })
   }
 
-  async cancel() {
-    await this.page.getByRole('button', { name: 'Cancel' }).click()
+  async close() {
+    await this.page.getByRole('button', { name: 'Close' }).click()
   }
 }

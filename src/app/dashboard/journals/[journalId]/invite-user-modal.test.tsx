@@ -64,7 +64,7 @@ describe('InviteUserModal', () => {
       expect(screen.getByText(/Invite link:/)).toBeInTheDocument()
     })
 
-    await user.click(screen.getByRole('button', { name: 'Cancel' }))
+    await user.click(screen.getByRole('button', { name: 'Close' }))
 
     expect(refreshMock).toHaveBeenCalledTimes(1)
   })
