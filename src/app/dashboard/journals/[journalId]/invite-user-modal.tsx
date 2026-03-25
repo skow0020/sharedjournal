@@ -112,11 +112,11 @@ export function InviteUserModal({ journalId, journalTitle, action }: InviteUserM
           ) : null}
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
-              Cancel
+              {sent ? 'Close' : 'Cancel'}
             </Button>
             <Button 
               type="submit" 
-              disabled={pending}
+              disabled={pending || sent}
               className={sent ? 'bg-green-600 hover:bg-green-700' : ''}
             >
               {pending ? 'Sending...' : sent ? 'Invite sent!' : 'Send invite'}
