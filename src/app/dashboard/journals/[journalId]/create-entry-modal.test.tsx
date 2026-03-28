@@ -31,6 +31,49 @@ vi.mock('next/navigation', () => ({
 import { CreateEntryModal } from '@/app/dashboard/journals/[journalId]/create-entry-modal'
 import { ENTRY_IMAGE_MAX_FILE_BYTES, ENTRY_IMAGE_MAX_FILES } from '@/lib/entry-image-constants'
 
+type MockRecognitionResult = {
+  0: { transcript: string }
+  isFinal: boolean
+}
+
+class MockSpeechRecognition {
+  static instances: MockSpeechRecognition[] = []
+
+  lang = 'en-US'
+  interimResults = false
+  continuous = false
+  onstart: ((event: Event) => void) | null = null
+  onend: ((event: Event) => void) | null = null
+  onresult: ((event: Event & { resultIndex?: number, results?: ArrayLike<MockRecognitionResult> }) => void) | null = null
+  onerror: ((event: Event & { error?: string }) => void) | null = null
+
+  constructor() {
+    MockSpeechRecognition.instances.push(this)
+  }
+
+  start() {
+    this.onstart?.(new Event('start'))
+  }
+
+  stop() {
+    this.onend?.(new Event('end'))
+  }
+
+  emitFinalTranscript(transcript: string) {
+    const resultEvent = Object.assign(new Event('result'), {
+      resultIndex: 0,
+      results: [
+        {
+          0: { transcript },
+          isFinal: true,
+        },
+      ] satisfies ArrayLike<MockRecognitionResult>,
+    }) as Event & { resultIndex?: number, results?: ArrayLike<MockRecognitionResult> }
+
+    this.onresult?.(resultEvent)
+  }
+}
+
 class MockImage {
   onload: null | (() => void) = null
   onerror: null | (() => void) = null
@@ -75,10 +118,27 @@ describe('CreateEntryModal', () => {
     return input
   }
 
+  function mockSpeechRecognition(supported: boolean) {
+    MockSpeechRecognition.instances = []
+
+    Object.defineProperty(window, 'SpeechRecognition', {
+      configurable: true,
+      writable: true,
+      value: supported ? MockSpeechRecognition : undefined,
+    })
+
+    Object.defineProperty(window, 'webkitSpeechRecognition', {
+      configurable: true,
+      writable: true,
+      value: undefined,
+    })
+  }
+
   beforeEach(() => {
     vi.clearAllMocks()
 
     mockMatchMedia(false)
+    mockSpeechRecognition(false)
 
     createObjectUrlMock
       .mockReturnValueOnce('blob:preview-1')
@@ -403,6 +463,66 @@ describe('CreateEntryModal', () => {
 
     expect(screen.getByRole('button', { name: 'Browse images' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Take photo' })).toBeInTheDocument()
+  })
+
+  it('shows Speak entry button on mobile when speech recognition is supported', async () => {
+    const user = userEvent.setup()
+
+    mockMatchMedia(true)
+    mockSpeechRecognition(true)
+
+    const action = vi.fn(async () => ({ error: null, redirectTo: null }))
+    const cleanupAction = vi.fn(async () => ({ error: null }))
+
+    render(<CreateEntryModal journalId="journal-1" action={action} cleanupAction={cleanupAction} />)
+
+    await user.click(screen.getByRole('button', { name: 'Add entry' }))
+
+    expect(screen.getByRole('button', { name: 'Speak entry' })).toBeInTheDocument()
+  })
+
+  it('hides Speak entry button on mobile when speech recognition is unavailable', async () => {
+    const user = userEvent.setup()
+
+    mockMatchMedia(true)
+    mockSpeechRecognition(false)
+
+    const action = vi.fn(async () => ({ error: null, redirectTo: null }))
+    const cleanupAction = vi.fn(async () => ({ error: null }))
+
+    render(<CreateEntryModal journalId="journal-1" action={action} cleanupAction={cleanupAction} />)
+
+    await user.click(screen.getByRole('button', { name: 'Add entry' }))
+
+    expect(screen.queryByRole('button', { name: 'Speak entry' })).not.toBeInTheDocument()
+  })
+
+  it('appends recognized speech to entry content', async () => {
+    const user = userEvent.setup()
+
+    mockMatchMedia(true)
+    mockSpeechRecognition(true)
+
+    const action = vi.fn(async () => ({ error: null, redirectTo: null }))
+    const cleanupAction = vi.fn(async () => ({ error: null }))
+
+    render(<CreateEntryModal journalId="journal-1" action={action} cleanupAction={cleanupAction} />)
+
+    await user.click(screen.getByRole('button', { name: 'Add entry' }))
+    await user.type(screen.getByLabelText('Content'), 'Started writing')
+    await user.click(screen.getByRole('button', { name: 'Speak entry' }))
+
+    const recognition = MockSpeechRecognition.instances[0]
+
+    if (!recognition) {
+      throw new Error('Speech recognition instance not found')
+    }
+
+    recognition.emitFinalTranscript('using my voice')
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Content')).toHaveValue('Started writing using my voice')
+    })
   })
 
   it('camera input has capture attribute targeting rear camera', async () => {

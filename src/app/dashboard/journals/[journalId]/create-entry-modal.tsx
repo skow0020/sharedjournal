@@ -50,6 +50,34 @@ type CreateEntryModalProps = {
   cleanupAction: (input: CleanupEntryImageUploadsInput) => Promise<CleanupEntryImageUploadsState>
 }
 
+type BrowserSpeechRecognitionResult = {
+  0?: { transcript?: string }
+  isFinal?: boolean
+}
+
+type BrowserSpeechRecognitionEvent = Event & {
+  resultIndex?: number
+  results?: ArrayLike<BrowserSpeechRecognitionResult>
+}
+
+type BrowserSpeechRecognitionErrorEvent = Event & {
+  error?: string
+}
+
+type BrowserSpeechRecognition = {
+  lang: string
+  interimResults: boolean
+  continuous: boolean
+  onstart: ((event: Event) => void) | null
+  onend: ((event: Event) => void) | null
+  onresult: ((event: BrowserSpeechRecognitionEvent) => void) | null
+  onerror: ((event: BrowserSpeechRecognitionErrorEvent) => void) | null
+  start: () => void
+  stop: () => void
+}
+
+type BrowserSpeechRecognitionConstructor = new () => BrowserSpeechRecognition
+
 async function readImageDimensions(file: File): Promise<{ width: number | null, height: number | null }> {
   return new Promise((resolve) => {
     const imageUrl = URL.createObjectURL(file)
@@ -94,9 +122,13 @@ export function CreateEntryModal({ journalId, action, cleanupAction }: CreateEnt
   })
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [isMobile, setIsMobile] = useState(false)
+  const [isSpeechRecognitionSupported, setIsSpeechRecognitionSupported] = useState(false)
+  const [isListening, setIsListening] = useState(false)
+  const [speechError, setSpeechError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
+  const speechRecognitionRef = useRef<BrowserSpeechRecognition | null>(null)
 
   useEffect(() => {
     if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
@@ -106,6 +138,121 @@ export function CreateEntryModal({ journalId, action, cleanupAction }: CreateEnt
 
     setIsMobile(window.matchMedia('(pointer: coarse)').matches)
   }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      setIsSpeechRecognitionSupported(false)
+      return
+    }
+
+    const speechWindow = window as Window & {
+      SpeechRecognition?: BrowserSpeechRecognitionConstructor
+      webkitSpeechRecognition?: BrowserSpeechRecognitionConstructor
+    }
+
+    const SpeechRecognitionApi = speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition
+
+    if (!SpeechRecognitionApi) {
+      setIsSpeechRecognitionSupported(false)
+      return
+    }
+
+    const recognition = new SpeechRecognitionApi()
+
+    recognition.lang = 'en-US'
+    recognition.interimResults = true
+    recognition.continuous = true
+    recognition.onstart = () => {
+      setSpeechError(null)
+      setIsListening(true)
+    }
+    recognition.onend = () => {
+      setIsListening(false)
+    }
+    recognition.onerror = (event) => {
+      setIsListening(false)
+
+      if (event.error === 'not-allowed') {
+        setSpeechError('Microphone access is blocked. Enable it to use voice input.')
+        return
+      }
+
+      if (event.error === 'no-speech') {
+        setSpeechError('No speech was detected. Try speaking again.')
+        return
+      }
+
+      setSpeechError('Voice input is unavailable right now. Please try again.')
+    }
+    recognition.onresult = (event) => {
+      const results = event.results
+
+      if (!results) {
+        return
+      }
+
+      const startIndex = typeof event.resultIndex === 'number' ? event.resultIndex : 0
+      const transcripts: string[] = []
+
+      for (let index = startIndex; index < results.length; index += 1) {
+        const result = results[index]
+
+        if (!result || result.isFinal === false) {
+          continue
+        }
+
+        const transcript = result[0]?.transcript?.trim()
+
+        if (transcript) {
+          transcripts.push(transcript)
+        }
+      }
+
+      if (transcripts.length === 0) {
+        return
+      }
+
+      const nextTranscript = transcripts.join(' ')
+
+      setContent((previousContent) => {
+        if (previousContent.trim().length === 0) {
+          return nextTranscript
+        }
+
+        return `${previousContent.trimEnd()} ${nextTranscript}`
+      })
+    }
+
+    speechRecognitionRef.current = recognition
+    setIsSpeechRecognitionSupported(true)
+
+    return () => {
+      recognition.stop()
+      speechRecognitionRef.current = null
+      setIsListening(false)
+    }
+  }, [])
+
+  function stopVoiceInput() {
+    speechRecognitionRef.current?.stop()
+  }
+
+  function startVoiceInput() {
+    setSpeechError(null)
+
+    const recognition = speechRecognitionRef.current
+
+    if (!recognition) {
+      setSpeechError('Voice input is not supported on this device.')
+      return
+    }
+
+    try {
+      recognition.start()
+    } catch {
+      setSpeechError('Voice input is unavailable right now. Please try again.')
+    }
+  }
 
   async function cleanupUploadedTempImages(storageKeys: string[]) {
     if (storageKeys.length === 0) {
@@ -121,11 +268,13 @@ export function CreateEntryModal({ journalId, action, cleanupAction }: CreateEnt
   }
 
   function resetModalState() {
+    stopVoiceInput()
     setTitle('')
     setContent('')
     setEntryDate(format(new Date(), 'yyyy-MM-dd'))
     setState({ error: null, redirectTo: null })
     setUploadError(null)
+    setSpeechError(null)
     setSelectedImages((previousImages) => {
       revokePreviewUrls(previousImages)
       return []
@@ -133,6 +282,8 @@ export function CreateEntryModal({ journalId, action, cleanupAction }: CreateEnt
   }
 
   async function closeAndDiscardDraft() {
+    stopVoiceInput()
+
     const uploadedStorageKeys = selectedImages
       .filter((image) => image.status === 'uploaded' && image.tempStorageKey)
       .map((image) => image.tempStorageKey as string)
@@ -280,6 +431,7 @@ export function CreateEntryModal({ journalId, action, cleanupAction }: CreateEnt
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    stopVoiceInput()
 
     if (selectedImages.some((image) => image.status === 'uploading')) {
       setState({
@@ -376,6 +528,28 @@ export function CreateEntryModal({ journalId, action, cleanupAction }: CreateEnt
               onChange={(event) => setContent(event.target.value)}
               required
             />
+            {isMobile && isSpeechRecognitionSupported ? (
+              <div className="space-y-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={pending}
+                  onClick={() => {
+                    if (isListening) {
+                      stopVoiceInput()
+                      return
+                    }
+
+                    startVoiceInput()
+                  }}
+                >
+                  {isListening ? 'Stop listening' : 'Speak entry'}
+                </Button>
+                {isListening ? <p className="text-muted-foreground text-xs">Listening for your voice...</p> : null}
+              </div>
+            ) : null}
+            {speechError ? <p className="text-destructive text-sm">{speechError}</p> : null}
           </div>
           <div className="space-y-2">
             <label htmlFor="entry-date" className="text-sm font-medium">
