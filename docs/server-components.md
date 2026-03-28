@@ -1,8 +1,8 @@
 # Server Components Coding Standards
 
-**CRITICAL:** In App Router Server Components, route `params` are asynchronous and must be awaited before use.
+**CRITICAL:** In this codebase, App Router Server Components treat route `params` as asynchronous and await them before use.
 
-## Params Are Async
+## Params Handling Standard
 
 - For dynamic routes, type `params` as a `Promise<...>` in the page or layout props.
 - Await `params` at the top of the Server Component before reading any fields.
@@ -50,7 +50,7 @@ export default async function Page({ params }: {
 
 ## Rationale
 
-- Awaiting `params` follows current Next.js App Router behavior for async route props.
+- Typing `params` as `Promise<...>` and awaiting once at the top is a repository convention for consistency and type-safety.
 - A single top-level await keeps the component predictable and easy to review.
 - Consistent typing prevents accidental misuse and runtime errors.
 
