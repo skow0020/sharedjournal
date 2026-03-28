@@ -18,6 +18,18 @@ export class CreateEntryModal {
     await this.page.getByLabel('Content').fill(content)
   }
 
+  contentInput() {
+    return this.page.getByLabel('Content')
+  }
+
+  speakEntryButton() {
+    return this.page.getByRole('button', { name: 'Speak entry' })
+  }
+
+  async startVoiceInput() {
+    await this.speakEntryButton().click()
+  }
+
   async fillEntryDate(date: string) {
     await this.page.getByLabel('Entry date').fill(date)
   }

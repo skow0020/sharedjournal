@@ -43,6 +43,14 @@ describe('entry-content-crypto', () => {
     )
   })
 
+  it('throws when the encryption key is not exactly 32 bytes after base64 decode', () => {
+    process.env.ENTRY_CONTENT_ENCRYPTION_KEY = Buffer.alloc(31, 9).toString('base64')
+
+    expect(() => encryptEntryContent('Wrong key length.')).toThrow(
+      'ENTRY_CONTENT_ENCRYPTION_KEY must decode to exactly 32 bytes.',
+    )
+  })
+
   it('treats enc:v1-prefixed plaintext with wrong part count as legacy plaintext', () => {
     const prefixedPlaintext = 'enc:v1:this is not encrypted content'
 
@@ -58,5 +66,17 @@ describe('entry-content-crypto', () => {
     expect(() => decryptEntryContent(encryptedValue)).toThrow('Unable to decrypt journal entry content.')
 
     process.env.ENTRY_CONTENT_ENCRYPTION_KEY = testEntryContentEncryptionKey
+  })
+
+  it('throws when encrypted payload has an invalid IV segment length', () => {
+    const invalidIvPayload = ['enc', 'v1', Buffer.alloc(4).toString('base64url'), Buffer.alloc(16).toString('base64url'), Buffer.from('secret').toString('base64url')].join(':')
+
+    expect(() => decryptEntryContent(invalidIvPayload)).toThrow('Unable to decrypt journal entry content.')
+  })
+
+  it('throws when encrypted payload has an invalid auth tag segment length', () => {
+    const invalidAuthTagPayload = ['enc', 'v1', Buffer.alloc(12).toString('base64url'), Buffer.alloc(8).toString('base64url'), Buffer.from('secret').toString('base64url')].join(':')
+
+    expect(() => decryptEntryContent(invalidAuthTagPayload)).toThrow('Unable to decrypt journal entry content.')
   })
 })
