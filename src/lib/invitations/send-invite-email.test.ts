@@ -164,6 +164,28 @@ describe('sendInviteEmail', () => {
     })
   })
 
+  it('returns generic message when resend fetch throws a non-Error value', async () => {
+    process.env.INVITE_EMAIL_PROVIDER = 'resend'
+    process.env.RESEND_API_KEY = 'test-api-key'
+    process.env.RESEND_FROM_EMAIL = 'noreply@example.com'
+
+    const fetchMock = vi.fn().mockRejectedValue('network down')
+    vi.stubGlobal('fetch', fetchMock)
+
+    const result = await sendInviteEmail({
+      toEmail: 'invitee@example.com',
+      inviteLink: 'https://example.com/invitations/token',
+      journalTitle: 'Test Journal',
+      inviterName: 'Inviter',
+    })
+
+    expect(result).toEqual({
+      delivered: false,
+      provider: 'resend',
+      message: 'Email delivery failed. The invitation was created—share the link directly.',
+    })
+  })
+
   it('sends via resend and returns delivered true on success', async () => {
     process.env.INVITE_EMAIL_PROVIDER = 'resend'
     process.env.RESEND_API_KEY = 'test-api-key'

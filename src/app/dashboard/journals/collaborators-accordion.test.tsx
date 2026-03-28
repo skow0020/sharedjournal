@@ -28,4 +28,40 @@ describe('CollaboratorsAccordion', () => {
     expect(screen.queryByText('Person 6')).not.toBeInTheDocument()
     expect(screen.getByText('+1 more')).toBeInTheDocument()
   })
+
+  it('renders all collaborators when maxVisible is not provided', async () => {
+    const user = userEvent.setup()
+    const collaborators = [
+      { id: 'c1', displayName: 'Person 1', role: 'editor' as const },
+      { id: 'c2', displayName: 'Person 2', role: 'viewer' as const },
+    ]
+
+    render(<CollaboratorsAccordion collaborators={collaborators} />)
+
+    await user.click(screen.getByRole('button', { name: 'Collaborators (2)' }))
+
+    expect(screen.getByText('Person 1')).toBeInTheDocument()
+    expect(screen.getByText('Person 2')).toBeInTheDocument()
+    expect(screen.queryByText(/\+\d+ more/)).not.toBeInTheDocument()
+  })
+
+  it('renders empty state and unnamed fallback text', async () => {
+    const user = userEvent.setup()
+
+    const { unmount } = render(<CollaboratorsAccordion collaborators={[]} />)
+
+    await user.click(screen.getByRole('button', { name: 'Collaborators (0)' }))
+    expect(screen.getByText('Not shared with anyone yet.')).toBeInTheDocument()
+
+    unmount()
+
+    render(
+      <CollaboratorsAccordion
+        collaborators={[{ id: 'c1', displayName: null, role: 'viewer' as const }]}
+      />,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Collaborators (1)' }))
+    expect(screen.getByText('Unnamed user')).toBeInTheDocument()
+  })
 })

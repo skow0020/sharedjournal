@@ -101,6 +101,14 @@ describe('DashboardPage', () => {
     expect(screen.getByTestId('create-journal-modal')).toBeInTheDocument()
   })
 
+  it('handles missing searchParams prop by defaulting to page 1', async () => {
+    const page = await DashboardPage({})
+    render(page)
+
+    expect(getUserJournalsMock).toHaveBeenCalledWith('user-1', { limit: 5, offset: 0 })
+    expect(screen.getByText('No journals found')).toBeInTheDocument()
+  })
+
   it('renders pending invites and journal list for signed in user', async () => {
     getPendingInvitationsForEmailMock.mockResolvedValue([
       {
@@ -209,5 +217,68 @@ describe('DashboardPage', () => {
     expect(screen.getByText('Page 2 of 2')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Previous' })).toHaveAttribute('href', '/dashboard?page=1')
     expect(screen.getByRole('button', { name: 'Next' })).toBeDisabled()
+  })
+
+  it('defaults to page 1 when the requested page param is not a number', async () => {
+    getUserJournalCountMock.mockResolvedValue(7)
+    getUserJournalsMock.mockResolvedValue([
+      {
+        id: 'journal-1',
+        title: 'Page One Journal 1',
+        description: null,
+        isOwner: true,
+      },
+      {
+        id: 'journal-2',
+        title: 'Page One Journal 2',
+        description: null,
+        isOwner: false,
+      },
+    ])
+
+    await renderDashboardPage({ page: 'abc' })
+
+    expect(getUserJournalsMock).toHaveBeenCalledWith('user-1', { limit: 5, offset: 0 })
+    expect(screen.getByText('Page 1 of 2')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Previous' })).toBeDisabled()
+    expect(screen.getByRole('link', { name: 'Next' })).toHaveAttribute('href', '/dashboard?page=2')
+  })
+
+  it('clamps a requested page above the total page count to the last page', async () => {
+    getUserJournalCountMock.mockResolvedValue(7)
+    getUserJournalsMock.mockResolvedValue([
+      {
+        id: 'journal-6',
+        title: 'Last Page Journal',
+        description: null,
+        isOwner: true,
+      },
+    ])
+
+    await renderDashboardPage({ page: '99' })
+
+    expect(getUserJournalsMock).toHaveBeenCalledWith('user-1', { limit: 5, offset: 5 })
+    expect(screen.getByText('Page 2 of 2')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Previous' })).toHaveAttribute('href', '/dashboard?page=1')
+    expect(screen.getByRole('button', { name: 'Next' })).toBeDisabled()
+  })
+
+  it('defaults to page 1 when the requested page param is below 1', async () => {
+    getUserJournalCountMock.mockResolvedValue(7)
+    getUserJournalsMock.mockResolvedValue([
+      {
+        id: 'journal-1',
+        title: 'First Page Journal',
+        description: null,
+        isOwner: true,
+      },
+    ])
+
+    await renderDashboardPage({ page: '0' })
+
+    expect(getUserJournalsMock).toHaveBeenCalledWith('user-1', { limit: 5, offset: 0 })
+    expect(screen.getByText('Page 1 of 2')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Previous' })).toBeDisabled()
+    expect(screen.getByRole('link', { name: 'Next' })).toHaveAttribute('href', '/dashboard?page=2')
   })
 })
