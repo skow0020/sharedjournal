@@ -198,7 +198,7 @@ export function CreateEntryModal({ journalId, action, cleanupAction }: CreateEnt
       for (let index = startIndex; index < results.length; index += 1) {
         const result = results[index]
 
-        if (!result || result.isFinal === false) {
+        if (!result || result.isFinal !== true) {
           continue
         }
 
