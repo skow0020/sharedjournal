@@ -2,6 +2,7 @@
 
 import { upload } from '@vercel/blob/client'
 import { format } from 'date-fns'
+import { Camera, Mic, MicOff } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useRef, useState, useTransition } from 'react'
 
@@ -533,7 +534,9 @@ export function CreateEntryModal({ journalId, action, cleanupAction }: CreateEnt
                 <Button
                   type="button"
                   variant="outline"
-                  size="sm"
+                  size="icon"
+                  className="w-10"
+                  aria-label={isListening ? 'Stop listening' : 'Speak entry'}
                   disabled={pending}
                   onClick={() => {
                     if (isListening) {
@@ -544,7 +547,7 @@ export function CreateEntryModal({ journalId, action, cleanupAction }: CreateEnt
                     startVoiceInput()
                   }}
                 >
-                  {isListening ? 'Stop listening' : 'Speak entry'}
+                  {isListening ? <MicOff className="size-4" aria-hidden /> : <Mic className="size-4" aria-hidden />}
                 </Button>
                 {isListening ? <p className="text-muted-foreground text-xs">Listening for your voice...</p> : null}
               </div>
@@ -603,11 +606,13 @@ export function CreateEntryModal({ journalId, action, cleanupAction }: CreateEnt
                   <Button
                     type="button"
                     variant="outline"
-                    size="sm"
+                    size="icon"
+                    className="w-10"
+                    aria-label="Take photo"
                     disabled={pending}
                     onClick={() => cameraInputRef.current?.click()}
                   >
-                    Take photo
+                    <Camera className="size-4" aria-hidden />
                   </Button>
                 ) : null}
               </div>
