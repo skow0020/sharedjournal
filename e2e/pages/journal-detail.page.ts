@@ -33,7 +33,7 @@ export class JournalDetailPage {
   }
 
   async openDeleteJournalDialog(): Promise<DeleteJournalDialog> {
-    await this.page.getByRole('button', { name: 'Delete' }).click()
+    await this.page.getByRole('button', { name: 'Delete journal', exact: true }).click()
     return this.deleteJournalDialog
   }
 
@@ -84,5 +84,17 @@ export class JournalDetailPage {
 
   entryContent(content: string) {
     return this.page.getByText(content)
+  }
+
+  private entryCard(title: string) {
+    return this.page.locator('[data-slot="card"]').filter({ hasText: title }).first()
+  }
+
+  async deleteEntry(title: string) {
+    const card = this.entryCard(title)
+    await card.getByRole('button', { name: 'Delete entry' }).click()
+
+    const dialog = this.page.getByRole('dialog')
+    await dialog.getByRole('button', { name: 'Delete entry' }).click()
   }
 }

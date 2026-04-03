@@ -62,7 +62,7 @@ export function DeleteJournalButton({ journalId, action, successRedirectTo, trig
       ) : (
         <DialogTrigger asChild>
           <Button type="button" size="sm" variant="outline" className="text-destructive hover:text-destructive">
-            Delete
+            Delete journal
           </Button>
         </DialogTrigger>
       )}
@@ -79,7 +79,7 @@ export function DeleteJournalButton({ journalId, action, successRedirectTo, trig
             Cancel
           </Button>
           <Button type="button" onClick={handleDelete} disabled={pending}>
-            {pending ? 'Deleting...' : 'Delete'}
+            {pending ? 'Deleting...' : 'Delete journal'}
           </Button>
         </DialogFooter>
       </DialogContent>

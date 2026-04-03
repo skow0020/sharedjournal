@@ -28,8 +28,8 @@ describe('DeleteJournalButton', () => {
 
     render(<DeleteJournalButton journalId="journal-1" action={action} />)
 
-    await user.click(screen.getByRole('button', { name: 'Delete' }))
-    await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete' }))
+    await user.click(screen.getByRole('button', { name: 'Delete journal' }))
+    await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete journal' }))
 
     await waitFor(() => {
       expect(action).toHaveBeenCalledWith({ journalId: 'journal-1' })
@@ -51,8 +51,8 @@ describe('DeleteJournalButton', () => {
       />,
     )
 
-    await user.click(screen.getByRole('button', { name: 'Delete' }))
-    await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete' }))
+    await user.click(screen.getByRole('button', { name: 'Delete journal' }))
+    await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete journal' }))
 
     await waitFor(() => {
       expect(pushMock).toHaveBeenCalledWith('/dashboard')
@@ -67,8 +67,8 @@ describe('DeleteJournalButton', () => {
 
     render(<DeleteJournalButton journalId="journal-1" action={action} />)
 
-    await user.click(screen.getByRole('button', { name: 'Delete' }))
-    await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete' }))
+    await user.click(screen.getByRole('button', { name: 'Delete journal' }))
+    await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete journal' }))
 
     expect(await screen.findByText('Could not delete journal.')).toBeInTheDocument()
     expect(refreshMock).not.toHaveBeenCalled()
