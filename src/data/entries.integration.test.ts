@@ -1,10 +1,20 @@
 import { and, eq } from 'drizzle-orm'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+const { delMock } = vi.hoisted(() => ({
+  delMock: vi.fn(),
+}))
+
+vi.mock('@vercel/blob', () => ({
+  copy: vi.fn(),
+  del: delMock,
+}))
 
 import { db } from '@/db'
 import { entries, entryPhotos, journalMembers, journals, users } from '@/db/schema'
 import {
   createEntryForJournal,
+  deleteEntryForJournal,
   getEntryPhotoForUser,
   getJournalEntryCountForJournal,
   getJournalEntriesByDate,
@@ -365,6 +375,127 @@ describe('createEntryForJournal', () => {
       .where(eq(entries.id, result!.id))
 
     expect(row.title).toBeNull()
+  })
+})
+
+describe('deleteEntryForJournal', () => {
+  let ownerId: string
+  let authorId: string
+  let memberId: string
+  let outsiderId: string
+  let journalId: string
+  let ownerEntryId: string
+  let authorEntryId: string
+
+  beforeEach(async () => {
+    vi.clearAllMocks()
+
+    const owner = await createUser({ displayName: 'Owner' })
+    const author = await createUser({ displayName: 'Author' })
+    const member = await createUser({ displayName: 'Member' })
+    const outsider = await createUser({ displayName: 'Outsider' })
+
+    ownerId = owner.id
+    authorId = author.id
+    memberId = member.id
+    outsiderId = outsider.id
+
+    const journal = await createJournal(ownerId, 'Delete Journal')
+    journalId = journal.id
+
+    await addMember(journalId, ownerId, 'owner')
+    await addMember(journalId, authorId, 'editor')
+    await addMember(journalId, memberId, 'editor')
+
+    const ownerEntry = await createEntry(journalId, ownerId, {
+      title: 'Owner entry',
+      content: 'Owner content.',
+      entryDate: '2026-03-10',
+    })
+    ownerEntryId = ownerEntry.id
+
+    const authorEntry = await createEntry(journalId, authorId, {
+      title: 'Author entry',
+      content: 'Author content.',
+      entryDate: '2026-03-11',
+    })
+    authorEntryId = authorEntry.id
+
+    await db.insert(entryPhotos).values({
+      entryId: authorEntryId,
+      uploaderUserId: authorId,
+      storageKey: 'journals/delete-photo.jpg',
+      imageUrl: 'https://example.com/delete-photo.jpg',
+      mimeType: 'image/jpeg',
+      position: 0,
+    })
+  })
+
+  afterEach(async () => {
+    await deleteJournals([journalId])
+    await deleteUsers([ownerId, authorId, memberId, outsiderId])
+  })
+
+  it('allows the journal owner to delete another user\'s entry', async () => {
+    const result = await deleteEntryForJournal({
+      userId: ownerId,
+      journalId,
+      entryId: authorEntryId,
+    })
+
+    expect(result).toBe(true)
+
+    const rows = await db
+      .select({ id: entries.id })
+      .from(entries)
+      .where(eq(entries.id, authorEntryId))
+
+    expect(rows).toHaveLength(0)
+    expect(delMock).toHaveBeenCalledWith(['journals/delete-photo.jpg'])
+  })
+
+  it('allows the entry author to delete their own entry', async () => {
+    const result = await deleteEntryForJournal({
+      userId: authorId,
+      journalId,
+      entryId: authorEntryId,
+    })
+
+    expect(result).toBe(true)
+
+    const rows = await db
+      .select({ id: entries.id })
+      .from(entries)
+      .where(eq(entries.id, authorEntryId))
+
+    expect(rows).toHaveLength(0)
+  })
+
+  it('rejects a member who is neither the owner nor the author', async () => {
+    const result = await deleteEntryForJournal({
+      userId: memberId,
+      journalId,
+      entryId: ownerEntryId,
+    })
+
+    expect(result).toBe(false)
+
+    const rows = await db
+      .select({ id: entries.id })
+      .from(entries)
+      .where(eq(entries.id, ownerEntryId))
+
+    expect(rows).toHaveLength(1)
+  })
+
+  it('rejects users outside the journal', async () => {
+    const result = await deleteEntryForJournal({
+      userId: outsiderId,
+      journalId,
+      entryId: ownerEntryId,
+    })
+
+    expect(result).toBe(false)
   })
 })
 

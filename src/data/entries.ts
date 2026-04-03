@@ -1,5 +1,5 @@
 import { copy, del } from '@vercel/blob'
-import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray, or, sql } from 'drizzle-orm'
 
 import { db } from '@/db'
 import { entries, entryPhotos, journalMembers, journals, users } from '@/db/schema'
@@ -17,6 +17,7 @@ export type JournalEntry = {
 
 export type JournalEntryForJournal = {
   id: string
+  authorUserId: string
   title: string | null
   content: string
   entryDate: string
@@ -109,6 +110,7 @@ export async function getJournalEntriesForJournal(
   const query = db
     .select({
       id: entries.id,
+      authorUserId: entries.authorUserId,
       title: entries.title,
       content: entries.content,
       entryDate: entries.entryDate,
@@ -192,6 +194,68 @@ export async function getJournalEntryCountForJournal(
     )
 
   return result?.count ?? 0
+}
+
+export async function deleteEntryForJournal(input: {
+  userId: string
+  journalId: string
+  entryId: string
+}): Promise<boolean> {
+  const [entry] = await db
+    .select({
+      id: entries.id,
+    })
+    .from(entries)
+    .innerJoin(journals, eq(journals.id, entries.journalId))
+    .where(
+      and(
+        eq(entries.id, input.entryId),
+        eq(entries.journalId, input.journalId),
+        or(
+          eq(entries.authorUserId, input.userId),
+          eq(journals.ownerUserId, input.userId),
+        ),
+      ),
+    )
+    .limit(1)
+
+  if (!entry) {
+    return false
+  }
+
+  const photoRows = await db
+    .select({ storageKey: entryPhotos.storageKey })
+    .from(entryPhotos)
+    .where(eq(entryPhotos.entryId, input.entryId))
+
+  await db
+    .delete(entries)
+    .where(
+      and(
+        eq(entries.id, input.entryId),
+        eq(entries.journalId, input.journalId),
+      ),
+    )
+
+  await db
+    .update(journals)
+    .set({ updatedAt: new Date() })
+    .where(eq(journals.id, input.journalId))
+
+  const storageKeys = photoRows.map((photo) => photo.storageKey)
+
+  if (storageKeys.length > 0) {
+    try {
+      await del(storageKeys)
+    } catch (error) {
+      console.error('Failed to delete entry photo blobs', {
+        entryId: input.entryId,
+        error,
+      })
+    }
+  }
+
+  return true
 }
 
 /**
