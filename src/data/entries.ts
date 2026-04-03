@@ -235,7 +235,7 @@ export async function deleteEntryForJournal(input: {
     .from(entryPhotos)
     .where(eq(entryPhotos.entryId, input.entryId))
 
-  await db
+  const [deletedEntry] = await db
     .delete(entries)
     .where(
       and(
@@ -243,6 +243,11 @@ export async function deleteEntryForJournal(input: {
         eq(entries.journalId, input.journalId),
       ),
     )
+    .returning({ id: entries.id })
+
+  if (!deletedEntry) {
+    return false
+  }
 
   await db
     .update(journals)
