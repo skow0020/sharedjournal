@@ -500,161 +500,165 @@ export function CreateEntryModal({ journalId, action, cleanupAction }: CreateEnt
       <DialogTrigger asChild>
         <Button size="sm">Add entry</Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="flex max-h-[calc(100dvh-2rem)] flex-col overflow-hidden p-0 sm:max-w-lg">
         <DialogHeader>
+          <div className="px-6 pt-6">
           <DialogTitle>Create an entry</DialogTitle>
           <DialogDescription>Fill in the details below to add an entry to this journal.</DialogDescription>
+          </div>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <label htmlFor="entry-title" className="text-sm font-medium">
-              Title
-            </label>
-            <Input
-              id="entry-title"
-              name="title"
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
-              maxLength={220}
-            />
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="entry-content" className="text-sm font-medium">
-              Content
-            </label>
-            <Textarea
-              id="entry-content"
-              name="content"
-              value={content}
-              onChange={(event) => setContent(event.target.value)}
-              required
-            />
-            {isMobile && isSpeechRecognitionSupported ? (
-              <div className="space-y-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  className="w-10"
-                  aria-label={isListening ? 'Stop listening' : 'Speak entry'}
-                  disabled={pending}
-                  onClick={() => {
-                    if (isListening) {
-                      stopVoiceInput()
-                      return
-                    }
-
-                    startVoiceInput()
-                  }}
-                >
-                  {isListening ? <MicOff className="size-4" aria-hidden /> : <Mic className="size-4" aria-hidden />}
-                </Button>
-                {isListening ? <p className="text-muted-foreground text-xs">Listening for your voice...</p> : null}
-              </div>
-            ) : null}
-            {speechError ? <p className="text-destructive text-sm">{speechError}</p> : null}
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="entry-date" className="text-sm font-medium">
-              Entry date
-            </label>
-            <Input
-              id="entry-date"
-              name="entryDate"
-              type="date"
-              value={entryDate}
-              onChange={(event) => setEntryDate(event.target.value)}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <p className="text-sm font-medium">Images</p>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              multiple
-              className="sr-only"
-              onChange={handleImageSelection}
-              disabled={pending}
-              tabIndex={-1}
-              aria-hidden
-            />
-            <input
-              ref={cameraInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              capture="environment"
-              className="sr-only"
-              onChange={handleImageSelection}
-              disabled={pending}
-              tabIndex={-1}
-              aria-hidden
-            />
-            {selectedImages.length < ENTRY_IMAGE_MAX_FILES ? (
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  disabled={pending}
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  Browse images
-                </Button>
-                {isMobile ? (
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 pb-4">
+            <div className="space-y-2">
+              <label htmlFor="entry-title" className="text-sm font-medium">
+                Title
+              </label>
+              <Input
+                id="entry-title"
+                name="title"
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+                maxLength={220}
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="entry-content" className="text-sm font-medium">
+                Content
+              </label>
+              <Textarea
+                id="entry-content"
+                name="content"
+                value={content}
+                onChange={(event) => setContent(event.target.value)}
+                required
+              />
+              {isMobile && isSpeechRecognitionSupported ? (
+                <div className="space-y-2">
                   <Button
                     type="button"
                     variant="outline"
                     size="icon"
                     className="w-10"
-                    aria-label="Take photo"
+                    aria-label={isListening ? 'Stop listening' : 'Speak entry'}
                     disabled={pending}
-                    onClick={() => cameraInputRef.current?.click()}
+                    onClick={() => {
+                      if (isListening) {
+                        stopVoiceInput()
+                        return
+                      }
+
+                      startVoiceInput()
+                    }}
                   >
-                    <Camera className="size-4" aria-hidden />
+                    {isListening ? <MicOff className="size-4" aria-hidden /> : <Mic className="size-4" aria-hidden />}
                   </Button>
-                ) : null}
-              </div>
-            ) : null}
-            <p className="text-muted-foreground text-xs">
-              Up to {ENTRY_IMAGE_MAX_FILES} images, {formatFileSize(ENTRY_IMAGE_MAX_FILE_BYTES)} each.
-            </p>
-            {selectedImages.length > 0 ? (
-              <div className="grid grid-cols-2 gap-2">
-                {selectedImages.map((image) => (
-                  <div key={image.id} className="space-y-2 rounded-md border p-2">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={image.previewUrl}
-                      alt={image.fileName}
-                      className="h-24 w-full rounded-sm object-cover"
-                    />
-                    <p className="truncate text-xs">{image.fileName}</p>
-                    <p className="text-muted-foreground text-xs">
-                      {image.status === 'uploading' ? 'Uploading...' : null}
-                      {image.status === 'uploaded' ? 'Uploaded' : null}
-                      {image.status === 'error' ? image.errorMessage || 'Upload failed.' : null}
-                    </p>
+                  {isListening ? <p className="text-muted-foreground text-xs">Listening for your voice...</p> : null}
+                </div>
+              ) : null}
+              {speechError ? <p className="text-destructive text-sm">{speechError}</p> : null}
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="entry-date" className="text-sm font-medium">
+                Entry date
+              </label>
+              <Input
+                id="entry-date"
+                name="entryDate"
+                type="date"
+                value={entryDate}
+                onChange={(event) => setEntryDate(event.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Images</p>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                className="sr-only"
+                onChange={handleImageSelection}
+                disabled={pending}
+                tabIndex={-1}
+                aria-hidden
+              />
+              <input
+                ref={cameraInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                capture="environment"
+                className="sr-only"
+                onChange={handleImageSelection}
+                disabled={pending}
+                tabIndex={-1}
+                aria-hidden
+              />
+              {selectedImages.length < ENTRY_IMAGE_MAX_FILES ? (
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={pending}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    Browse images
+                  </Button>
+                  {isMobile ? (
                     <Button
                       type="button"
                       variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        void handleRemoveImage(image.id)
-                      }}
-                      disabled={pending || image.status === 'uploading'}
+                      size="icon"
+                      className="w-10"
+                      aria-label="Take photo"
+                      disabled={pending}
+                      onClick={() => cameraInputRef.current?.click()}
                     >
-                      Remove
+                      <Camera className="size-4" aria-hidden />
                     </Button>
-                  </div>
-                ))}
-              </div>
-            ) : null}
-            {uploadError ? <p className="text-destructive text-sm">{uploadError}</p> : null}
+                  ) : null}
+                </div>
+              ) : null}
+              <p className="text-muted-foreground text-xs">
+                Up to {ENTRY_IMAGE_MAX_FILES} images, {formatFileSize(ENTRY_IMAGE_MAX_FILE_BYTES)} each.
+              </p>
+              {selectedImages.length > 0 ? (
+                <div className="grid grid-cols-2 gap-2">
+                  {selectedImages.map((image) => (
+                    <div key={image.id} className="space-y-2 rounded-md border p-2">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={image.previewUrl}
+                        alt={image.fileName}
+                        className="h-20 w-full rounded-sm object-cover sm:h-24"
+                      />
+                      <p className="truncate text-xs">{image.fileName}</p>
+                      <p className="text-muted-foreground text-xs">
+                        {image.status === 'uploading' ? 'Uploading...' : null}
+                        {image.status === 'uploaded' ? 'Uploaded' : null}
+                        {image.status === 'error' ? image.errorMessage || 'Upload failed.' : null}
+                      </p>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          void handleRemoveImage(image.id)
+                        }}
+                        disabled={pending || image.status === 'uploading'}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+              {uploadError ? <p className="text-destructive text-sm">{uploadError}</p> : null}
+            </div>
+            {state.error ? <p className="text-destructive text-sm">{state.error}</p> : null}
           </div>
-          {state.error ? <p className="text-destructive text-sm">{state.error}</p> : null}
-          <DialogFooter>
+          <DialogFooter className="border-t px-6 py-4">
             <Button
               type="button"
               variant="outline"

@@ -41,6 +41,10 @@ vi.mock('@/app/dashboard/journals/[journalId]/create-entry-modal', () => ({
   CreateEntryModal: () => <div data-testid="create-entry-modal">Create entry modal</div>,
 }))
 
+vi.mock('@/app/dashboard/journals/[journalId]/delete-entry-button', () => ({
+  DeleteEntryButton: () => <div data-testid="delete-entry-button">Delete entry</div>,
+}))
+
 vi.mock('@/app/dashboard/journals/[journalId]/invite-user-modal', () => ({
   InviteUserModal: () => <div data-testid="invite-user-modal">Invite user modal</div>,
 }))
@@ -66,6 +70,7 @@ vi.mock('@/app/dashboard/journals/[journalId]/actions', () => ({
   cleanupEntryImageUploadsAction: vi.fn(),
   createEntryAction: vi.fn(),
   createInviteAction: vi.fn(),
+  deleteEntryAction: vi.fn(async () => ({ error: null, success: true })),
   updateJournalTitleAction: vi.fn(),
 }))
 
@@ -128,6 +133,7 @@ describe('JournalDetailsPage', () => {
     getJournalEntriesForJournalMock.mockResolvedValue([
       {
         id: 'entry-1',
+        authorUserId: 'user-1',
         title: 'Morning Reflection',
         content: 'Wrote about goals for the day.',
         entryDate: '2026-03-10',
@@ -182,6 +188,7 @@ describe('JournalDetailsPage', () => {
     expect(screen.getByRole('heading', { name: 'Journal entries' })).toBeInTheDocument()
     expect(screen.getByText('Morning Reflection')).toBeInTheDocument()
     expect(screen.getByText('Wrote about goals for the day.')).toBeInTheDocument()
+    expect(screen.getByTestId('delete-entry-button')).toBeInTheDocument()
     expect(screen.getByTestId('journal-entries-infinite-loader')).toHaveTextContent('Page 1 loader false')
 
     expect(screen.getByTestId('create-entry-modal')).toBeInTheDocument()
@@ -228,6 +235,60 @@ describe('JournalDetailsPage', () => {
 
     expect(screen.queryByTestId('delete-journal-button')).not.toBeInTheDocument()
     expect(screen.queryByTestId('mobile-owner-actions-menu')).not.toBeInTheDocument()
+  })
+
+  it('renders entry delete control for a non-owner who wrote the entry', async () => {
+    getUserJournalByIdMock.mockResolvedValue({
+      id: 'journal-1',
+      title: 'Family Journal',
+      description: 'Shared notes and reflections',
+      ownerUserId: 'user-2',
+      isOwner: false,
+    })
+
+    getJournalEntriesForJournalMock.mockResolvedValue([
+      {
+        id: 'entry-1',
+        authorUserId: 'user-1',
+        title: 'Morning Reflection',
+        content: 'Wrote about goals for the day.',
+        entryDate: '2026-03-10',
+        authorName: 'Colin',
+        createdAt: new Date('2026-03-10T09:00:00.000Z'),
+        photos: [],
+      },
+    ])
+
+    await renderJournalDetailsPage()
+
+    expect(screen.getByTestId('delete-entry-button')).toBeInTheDocument()
+  })
+
+  it('hides entry delete control for a shared journal member who did not write the entry', async () => {
+    getUserJournalByIdMock.mockResolvedValue({
+      id: 'journal-1',
+      title: 'Family Journal',
+      description: 'Shared notes and reflections',
+      ownerUserId: 'user-2',
+      isOwner: false,
+    })
+
+    getJournalEntriesForJournalMock.mockResolvedValue([
+      {
+        id: 'entry-1',
+        authorUserId: 'user-3',
+        title: 'Morning Reflection',
+        content: 'Wrote about goals for the day.',
+        entryDate: '2026-03-10',
+        authorName: 'Casey',
+        createdAt: new Date('2026-03-10T09:00:00.000Z'),
+        photos: [],
+      },
+    ])
+
+    await renderJournalDetailsPage()
+
+    expect(screen.queryByTestId('delete-entry-button')).not.toBeInTheDocument()
   })
 
   it('does not render invite controls for journals shared with the user', async () => {

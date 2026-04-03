@@ -35,6 +35,10 @@ test('can create a journal, add an entry, and invite a collaborator', async ({ p
   await expect(journalDetailPage.entryTitle(entryTitle)).toBeVisible()
   await expect(journalDetailPage.entryContent(entryContent)).toBeVisible()
 
+  await journalDetailPage.deleteEntry(entryTitle)
+  await expect(journalDetailPage.entryTitle(entryTitle)).not.toBeVisible()
+  await expect(journalDetailPage.entryContent(entryContent)).not.toBeVisible()
+
   const inviteUserModal = await journalDetailPage.openInviteUserModal()
   await expect(inviteUserModal.heading()).toBeVisible()
   await inviteUserModal.fillEmail(inviteeEmail)

@@ -15,12 +15,14 @@ import {
   cleanupEntryImageUploadsAction,
   createEntryAction,
   createInviteAction,
+  deleteEntryAction,
   updateJournalTitleAction,
 } from '@/app/dashboard/journals/[journalId]/actions'
 import { CollaboratorsAccordion } from '@/app/dashboard/journals/collaborators-accordion'
 import { deleteJournalAction } from '@/app/dashboard/actions'
 import { DeleteJournalButton } from '@/app/dashboard/delete-journal-button'
 import { CreateEntryModal } from '@/app/dashboard/journals/[journalId]/create-entry-modal'
+import { DeleteEntryButton } from '@/app/dashboard/journals/[journalId]/delete-entry-button'
 import { InviteUserModal } from '@/app/dashboard/journals/[journalId]/invite-user-modal'
 import { JournalEntriesInfiniteLoader } from '@/app/dashboard/journals/[journalId]/journal-entries-infinite-loader'
 import { JournalTitleEditor } from '@/app/dashboard/journals/[journalId]/journal-title-editor'
@@ -172,10 +174,21 @@ export default async function JournalDetailsPage({ params, searchParams }: Journ
               {entries.map((entry: JournalEntryForJournal) => (
                 <Card key={entry.id}>
                   <CardHeader>
-                    <CardTitle>{entry.title || 'Untitled entry'}</CardTitle>
-                    <CardDescription>
-                      {format(parseISO(entry.entryDate), 'MMMM d, yyyy')} · {entry.authorName || 'Unknown author'}
-                    </CardDescription>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 space-y-1">
+                        <CardTitle>{entry.title || 'Untitled entry'}</CardTitle>
+                        <CardDescription>
+                          {format(parseISO(entry.entryDate), 'MMMM d, yyyy')} · {entry.authorName || 'Unknown author'}
+                        </CardDescription>
+                      </div>
+                      {journal.isOwner || entry.authorUserId === appUser.id ? (
+                        <DeleteEntryButton
+                          journalId={journalId}
+                          entryId={entry.id}
+                          action={deleteEntryAction}
+                        />
+                      ) : null}
+                    </div>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm leading-6 whitespace-pre-wrap">{entry.content}</p>

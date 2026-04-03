@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
 import { z } from 'zod'
 
-import { createEntryWithUploadedImagesForJournal } from '@/data/entries'
+import { createEntryWithUploadedImagesForJournal, deleteEntryForJournal } from '@/data/entries'
 import {
   createJournalInvitation,
   revokeJournalInvitationByOwner,
@@ -47,6 +47,16 @@ export type CleanupEntryImageUploadsInput = {
 
 export type CleanupEntryImageUploadsState = {
   error: string | null
+}
+
+export type DeleteEntryInput = {
+  journalId: string
+  entryId: string
+}
+
+export type DeleteEntryState = {
+  error: string | null
+  success: boolean
 }
 
 export type InviteUserInput = {
@@ -112,6 +122,11 @@ const cleanupEntryImageUploadsSchema = z.object({
   storageKeys: z
     .array(z.string().trim().min(1, 'Storage key is required.'))
     .max(ENTRY_IMAGE_MAX_FILES, `You can upload up to ${ENTRY_IMAGE_MAX_FILES} images per entry.`),
+})
+
+const deleteEntrySchema = z.object({
+  journalId: z.string().uuid('Invalid journal id.'),
+  entryId: z.string().uuid('Invalid entry id.'),
 })
 
 const inviteUserSchema = z.object({
@@ -292,6 +307,48 @@ export async function cleanupEntryImageUploadsAction(
 
   return {
     error: null,
+  }
+}
+
+export async function deleteEntryAction(
+  input: DeleteEntryInput,
+): Promise<DeleteEntryState> {
+  const currentUser = await getCurrentAppUser()
+
+  if (!currentUser) {
+    return {
+      error: 'You must be signed in to delete an entry.',
+      success: false,
+    }
+  }
+
+  const parsedInput = deleteEntrySchema.safeParse(input)
+
+  if (!parsedInput.success) {
+    return {
+      error: parsedInput.error.issues[0]?.message ?? 'Unable to delete entry.',
+      success: false,
+    }
+  }
+
+  const deleted = await deleteEntryForJournal({
+    userId: currentUser.id,
+    journalId: parsedInput.data.journalId,
+    entryId: parsedInput.data.entryId,
+  })
+
+  if (!deleted) {
+    return {
+      error: 'Entry not found or you do not have permission to delete it.',
+      success: false,
+    }
+  }
+
+  revalidatePath(`/dashboard/journals/${parsedInput.data.journalId}`)
+
+  return {
+    error: null,
+    success: true,
   }
 }
 

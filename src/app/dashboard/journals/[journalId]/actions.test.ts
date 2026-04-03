@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 const {
   getClerkCurrentUserMock,
   createEntryWithUploadedImagesForJournalMock,
+  deleteEntryForJournalMock,
   createJournalInvitationMock,
   updateJournalTitleForOwnerMock,
   setInvitationEmailDeliveryFlagMock,
@@ -15,6 +16,7 @@ const {
 } = vi.hoisted(() => ({
   getClerkCurrentUserMock: vi.fn(),
   createEntryWithUploadedImagesForJournalMock: vi.fn(),
+  deleteEntryForJournalMock: vi.fn(),
   createJournalInvitationMock: vi.fn(),
   updateJournalTitleForOwnerMock: vi.fn(),
   setInvitationEmailDeliveryFlagMock: vi.fn(),
@@ -36,6 +38,7 @@ vi.mock('@vercel/blob', () => ({
 
 vi.mock('@/data/entries', () => ({
   createEntryWithUploadedImagesForJournal: createEntryWithUploadedImagesForJournalMock,
+  deleteEntryForJournal: deleteEntryForJournalMock,
 }))
 
 vi.mock('@/data/invitations', () => ({
@@ -68,6 +71,7 @@ import {
   cleanupEntryImageUploadsAction,
   createEntryAction,
   createInviteAction,
+  deleteEntryAction,
   updateJournalTitleAction,
 } from '@/app/dashboard/journals/[journalId]/actions'
 
@@ -248,6 +252,78 @@ describe('cleanupEntryImageUploadsAction', () => {
 
     expect(delMock).toHaveBeenCalledWith(['tmp/journals/journal-1/image.jpg'])
     expect(result).toEqual({ error: null })
+  })
+})
+
+describe('deleteEntryAction', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns an auth error when the user is signed out', async () => {
+    getCurrentAppUserMock.mockResolvedValue(null)
+
+    const result = await deleteEntryAction({
+      journalId: '4f687c5a-6576-4e05-a0f8-e4cdfdebe295',
+      entryId: '26a0908b-c293-43f5-94c0-9b5d53fcc592',
+    })
+
+    expect(result).toEqual({
+      error: 'You must be signed in to delete an entry.',
+      success: false,
+    })
+    expect(deleteEntryForJournalMock).not.toHaveBeenCalled()
+  })
+
+  it('validates the payload before deleting an entry', async () => {
+    getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
+
+    const result = await deleteEntryAction({
+      journalId: 'journal-1',
+      entryId: 'entry-1',
+    })
+
+    expect(result).toEqual({
+      error: 'Invalid journal id.',
+      success: false,
+    })
+    expect(deleteEntryForJournalMock).not.toHaveBeenCalled()
+  })
+
+  it('returns a permission error when the data helper rejects the deletion', async () => {
+    getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
+    deleteEntryForJournalMock.mockResolvedValue(false)
+
+    const result = await deleteEntryAction({
+      journalId: '4f687c5a-6576-4e05-a0f8-e4cdfdebe295',
+      entryId: '26a0908b-c293-43f5-94c0-9b5d53fcc592',
+    })
+
+    expect(deleteEntryForJournalMock).toHaveBeenCalledWith({
+      userId: 'user-1',
+      journalId: '4f687c5a-6576-4e05-a0f8-e4cdfdebe295',
+      entryId: '26a0908b-c293-43f5-94c0-9b5d53fcc592',
+    })
+    expect(result).toEqual({
+      error: 'Entry not found or you do not have permission to delete it.',
+      success: false,
+    })
+  })
+
+  it('revalidates the journal page when deletion succeeds', async () => {
+    getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
+    deleteEntryForJournalMock.mockResolvedValue(true)
+
+    const result = await deleteEntryAction({
+      journalId: '4f687c5a-6576-4e05-a0f8-e4cdfdebe295',
+      entryId: '26a0908b-c293-43f5-94c0-9b5d53fcc592',
+    })
+
+    expect(revalidatePathMock).toHaveBeenCalledWith('/dashboard/journals/4f687c5a-6576-4e05-a0f8-e4cdfdebe295')
+    expect(result).toEqual({
+      error: null,
+      success: true,
+    })
   })
 })
 
