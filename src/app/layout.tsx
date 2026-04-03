@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import {
   ClerkProvider,
+  GoogleOneTap,
 } from '@clerk/nextjs'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
@@ -34,6 +35,10 @@ export default function RootLayout({
           suppressHydrationWarning
         >
           <AuthHeader />
+          <GoogleOneTap
+            signInForceRedirectUrl="/auth/transition"
+            signUpForceRedirectUrl="/auth/transition"
+          />
           {children}
         </body>
       </html>
