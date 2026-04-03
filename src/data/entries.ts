@@ -207,6 +207,13 @@ export async function deleteEntryForJournal(input: {
     })
     .from(entries)
     .innerJoin(journals, eq(journals.id, entries.journalId))
+    .innerJoin(
+      journalMembers,
+      and(
+        eq(journalMembers.journalId, entries.journalId),
+        eq(journalMembers.userId, input.userId),
+      ),
+    )
     .where(
       and(
         eq(entries.id, input.entryId),

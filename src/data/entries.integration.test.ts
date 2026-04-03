@@ -497,6 +497,32 @@ describe('deleteEntryForJournal', () => {
 
     expect(result).toBe(false)
   })
+
+  it('rejects an ex-member who authored an entry but was removed from the journal', async () => {
+    await db
+      .delete(journalMembers)
+      .where(
+        and(
+          eq(journalMembers.journalId, journalId),
+          eq(journalMembers.userId, authorId),
+        ),
+      )
+
+    const result = await deleteEntryForJournal({
+      userId: authorId,
+      journalId,
+      entryId: authorEntryId,
+    })
+
+    expect(result).toBe(false)
+
+    const rows = await db
+      .select({ id: entries.id })
+      .from(entries)
+      .where(eq(entries.id, authorEntryId))
+
+    expect(rows).toHaveLength(1)
+  })
 })
 
 describe('getEntryPhotoForUser', () => {
