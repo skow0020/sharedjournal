@@ -1,7 +1,7 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { within } from '@testing-library/react'
+import { axe } from 'vitest-axe'
 
 const { pushMock, refreshMock } = vi.hoisted(() => ({
   pushMock: vi.fn(),
@@ -74,5 +74,17 @@ describe('DeleteJournalButton', () => {
     expect(refreshMock).not.toHaveBeenCalled()
     expect(pushMock).not.toHaveBeenCalled()
     expect(screen.getByRole('heading', { name: 'Delete journal' })).toBeInTheDocument()
+  })
+
+  describe('accessibility', () => {
+    it('has no violations when the dialog is open', async () => {
+      const user = userEvent.setup()
+      const action = vi.fn(async () => ({ error: null, success: true }))
+
+      render(<DeleteJournalButton journalId="journal-1" action={action} />)
+      await user.click(screen.getByRole('button', { name: 'Delete journal' }))
+
+      expect(await axe(document.body)).toHaveNoViolations()
+    })
   })
 })

@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
+import { axe } from 'vitest-axe'
 
 const { pushMock, refreshMock } = vi.hoisted(() => ({
   pushMock: vi.fn(),
@@ -86,6 +87,18 @@ describe('CreateJournalModal', () => {
     await waitFor(() => {
       expect(action).toHaveBeenCalled()
       expect(screen.getByText('Title is required.')).toBeInTheDocument()
+    })
+  })
+
+  describe('accessibility', () => {
+    it('has no violations when the modal is open', async () => {
+      const user = userEvent.setup()
+      const action = vi.fn(async () => ({ error: null, redirectTo: null }))
+
+      render(<CreateJournalModal action={action} />)
+      await user.click(screen.getByRole('button', { name: 'Add journal' }))
+
+      expect(await axe(document.body)).toHaveNoViolations()
     })
   })
 })

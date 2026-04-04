@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { axe } from 'vitest-axe'
 
 const { refreshMock } = vi.hoisted(() => ({
   refreshMock: vi.fn(),
@@ -67,5 +68,21 @@ describe('InviteUserModal', () => {
     await user.click(screen.getByRole('button', { name: 'Close' }))
 
     expect(refreshMock).toHaveBeenCalledTimes(1)
+  })
+
+  describe('accessibility', () => {
+    it('has no violations when the modal is open', async () => {
+      const user = userEvent.setup()
+      const action = vi.fn(async () => ({
+        error: null,
+        successMessage: null,
+        inviteLink: null,
+      }))
+
+      render(<InviteUserModal journalId="journal-1" journalTitle="Family Journal" action={action} />)
+      await user.click(screen.getByRole('button', { name: 'Invite' }))
+
+      expect(await axe(document.body)).toHaveNoViolations()
+    })
   })
 })

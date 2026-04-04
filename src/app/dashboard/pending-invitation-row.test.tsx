@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { axe } from 'vitest-axe'
 
 import type { PendingInvitation } from '@/data/invitations'
 import { PendingInvitationRow } from '@/app/dashboard/pending-invitation-row'
@@ -230,6 +231,23 @@ describe('PendingInvitationRow', () => {
 
     await waitFor(() => {
       expect(refreshMock).toHaveBeenCalled()
+    })
+  })
+
+  describe('accessibility', () => {
+    it('has no violations', async () => {
+      const acceptAction = vi.fn(async () => ({ error: null, redirectTo: null }))
+      const declineAction = vi.fn(async () => ({ error: null, success: true }))
+
+      const { container } = render(
+        <PendingInvitationRow
+          invitation={buildInvitation()}
+          acceptAction={acceptAction}
+          declineAction={declineAction}
+        />,
+      )
+
+      expect(await axe(container)).toHaveNoViolations()
     })
   })
 })
