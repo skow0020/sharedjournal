@@ -16,12 +16,14 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import type { JournalCollaborator, UserJournal } from '@/data/journals'
+import type { JournalCollaborator, JournalRecentPhoto, UserJournal } from '@/data/journals'
+import { buildEntryPhotoProxyUrl } from '@/lib/entry-image-storage'
 
 type JournalCardProps = {
   journal: UserJournal
   collaborators: JournalCollaborator[]
   deleteAction: (input: DeleteJournalInput) => Promise<DeleteJournalState>
+  recentPhotos: JournalRecentPhoto[]
 }
 
 function stopPropagation(event: MouseEvent<HTMLDivElement> | KeyboardEvent<HTMLDivElement>) {
@@ -40,7 +42,7 @@ function InteractiveSection({ children }: { children: ReactNode }) {
   )
 }
 
-export function JournalCard({ journal, collaborators, deleteAction }: JournalCardProps) {
+export function JournalCard({ journal, collaborators, deleteAction, recentPhotos }: JournalCardProps) {
   const router = useRouter()
 
   function handleNavigate() {
@@ -100,6 +102,21 @@ export function JournalCard({ journal, collaborators, deleteAction }: JournalCar
         <InteractiveSection>
           <CollaboratorsAccordion collaborators={collaborators} maxVisible={5} />
         </InteractiveSection>
+        {recentPhotos.length > 0 ? (
+          <div className="mt-3 grid grid-cols-3 gap-1.5 overflow-hidden rounded-md">
+            {recentPhotos.map((photo) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={photo.id}
+                src={buildEntryPhotoProxyUrl(photo.entryId, photo.id)}
+                alt=""
+                aria-hidden
+                loading="lazy"
+                className="aspect-square w-full object-cover"
+              />
+            ))}
+          </div>
+        ) : null}
       </CardContent>
 
     </Card>

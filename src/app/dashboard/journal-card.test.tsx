@@ -16,7 +16,7 @@ vi.mock('next/navigation', () => ({
 }))
 
 vi.mock('@/app/dashboard/delete-journal-button', () => ({
-  DeleteJournalButton: ({ journalId, trigger }: { journalId: string; trigger?: React.ReactNode }) => (
+  DeleteJournalButton: ({ journalId, trigger }: { journalId: string, trigger?: React.ReactNode }) => (
     <div data-testid={`delete-journal-${journalId}`}>
       {trigger ?? <button type="button">Delete</button>}
     </div>
@@ -54,6 +54,7 @@ describe('JournalCard', () => {
         }}
         collaborators={[]}
         deleteAction={vi.fn()}
+        recentPhotos={[]}
       />,
     )
 
@@ -73,6 +74,7 @@ describe('JournalCard', () => {
         }}
         collaborators={[]}
         deleteAction={vi.fn()}
+        recentPhotos={[]}
       />,
     )
 
@@ -92,6 +94,7 @@ describe('JournalCard', () => {
         }}
         collaborators={[]}
         deleteAction={vi.fn()}
+        recentPhotos={[]}
       />,
     )
 
@@ -117,6 +120,7 @@ describe('JournalCard', () => {
         }}
         collaborators={collaborators}
         deleteAction={vi.fn()}
+        recentPhotos={[]}
       />,
     )
 
@@ -140,6 +144,7 @@ describe('JournalCard', () => {
         }}
         collaborators={[]}
         deleteAction={vi.fn()}
+        recentPhotos={[]}
       />,
     )
 
@@ -161,6 +166,7 @@ describe('JournalCard', () => {
         }}
         collaborators={[]}
         deleteAction={vi.fn()}
+        recentPhotos={[]}
       />,
     )
 
@@ -182,6 +188,7 @@ describe('JournalCard', () => {
         }}
         collaborators={[]}
         deleteAction={vi.fn()}
+        recentPhotos={[]}
       />,
     )
 
@@ -205,6 +212,7 @@ describe('JournalCard', () => {
         }}
         collaborators={[]}
         deleteAction={vi.fn()}
+        recentPhotos={[]}
       />,
     )
 
@@ -227,6 +235,7 @@ describe('JournalCard', () => {
           }}
           collaborators={[]}
           deleteAction={vi.fn()}
+          recentPhotos={[]}
         />,
       )
 
