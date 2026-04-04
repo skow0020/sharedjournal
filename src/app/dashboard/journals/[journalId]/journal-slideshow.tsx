@@ -10,6 +10,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
+  DialogTrigger,
 } from '@/components/ui/dialog'
 import type { JournalPhotoForSlideshow } from '@/data/entries'
 import { buildEntryPhotoProxyUrl } from '@/lib/entry-image-storage'
@@ -87,11 +88,8 @@ export function JournalSlideshow({ photos, trigger }: JournalSlideshowProps) {
 
   return (
     <>
-      <div onClick={() => handleOpenChange(true)} style={{ display: 'contents' }}>
-        {trigger}
-      </div>
-
       <Dialog open={open} onOpenChange={handleOpenChange}>
+        <DialogTrigger asChild>{trigger}</DialogTrigger>
         <DialogContent className="max-w-none h-screen w-screen gap-0 rounded-none border-0 bg-black p-0">
           <DialogTitle className="sr-only">
             Slideshow — photo {currentIndex + 1} of {total}
