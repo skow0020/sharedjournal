@@ -67,6 +67,10 @@ export function JournalSlideshow({ photos, trigger }: JournalSlideshowProps) {
       if (e.key === 'ArrowLeft') handlePrev()
       else if (e.key === 'ArrowRight') handleNext()
       else if (e.key === ' ') {
+        // Don't intercept Space when an interactive element has focus — the
+        // browser should activate it (e.g. Pause/Close button).
+        const target = e.target as Element
+        if (target.closest('button, input, textarea, select, a[href]')) return
         e.preventDefault()
         setIsPlaying((p) => !p)
       }

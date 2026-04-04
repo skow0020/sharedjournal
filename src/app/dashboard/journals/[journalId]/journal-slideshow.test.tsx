@@ -104,6 +104,21 @@ describe('JournalSlideshow', () => {
     expect(screen.getByLabelText('Play slideshow')).toBeInTheDocument()
   })
 
+  it('does not intercept Space when focus is on a button', async () => {
+    const user = userEvent.setup()
+    render(<JournalSlideshow photos={photos} trigger={<button>Open Slideshow</button>} />)
+    await user.click(screen.getByRole('button', { name: 'Open Slideshow' }))
+    // Move focus onto the Pause button and press Space — it should activate the
+    // button (toggling to Play) rather than being swallowed by the global handler
+    // and toggling play state a second time back to Pause.
+    const pauseBtn = screen.getByLabelText('Pause slideshow')
+    pauseBtn.focus()
+    await user.keyboard('{ }')
+    // Button Space-activation fires onClick → toggles to Play, then the global
+    // handler is skipped because target is a button, so state stays at Play.
+    expect(screen.getByLabelText('Play slideshow')).toBeInTheDocument()
+  })
+
   it('closes the dialog when Close button is clicked', async () => {
     const user = userEvent.setup()
     render(<JournalSlideshow photos={photos} trigger={<button>Open Slideshow</button>} />)
