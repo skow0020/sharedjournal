@@ -1,3 +1,4 @@
+import React from 'react'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -14,10 +15,10 @@ vi.mock('next/navigation', () => ({
 }))
 
 vi.mock('@/app/dashboard/delete-journal-button', () => ({
-  DeleteJournalButton: ({ journalId }: { journalId: string }) => (
-    <button type="button" data-testid={`delete-journal-${journalId}`}>
-      Delete
-    </button>
+  DeleteJournalButton: ({ journalId, trigger }: { journalId: string; trigger?: React.ReactNode }) => (
+    <div data-testid={`delete-journal-${journalId}`}>
+      {trigger ?? <button type="button">Delete</button>}
+    </div>
   ),
 }))
 
