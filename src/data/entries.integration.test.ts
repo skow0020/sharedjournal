@@ -15,6 +15,7 @@ import { entries, entryPhotos, journalMembers, journals, users } from '@/db/sche
 import {
   createEntryForJournal,
   deleteEntryForJournal,
+  getAllPhotosForJournal,
   getEntryPhotoForUser,
   getJournalEntryCountForJournal,
   getJournalEntriesByDate,
@@ -629,5 +630,108 @@ describe('getEntryPhotoForUser', () => {
     })
 
     expect(result).toBeNull()
+  })
+})
+
+describe('getAllPhotosForJournal', () => {
+  let ownerId: string
+  let memberId: string
+  let outsiderId: string
+  let journalId: string
+  let entryId1: string
+  let entryId2: string
+
+  async function insertPhoto(entryId: string, position: number, key: string) {
+    const [photo] = await db
+      .insert(entryPhotos)
+      .values({
+        entryId,
+        storageKey: key,
+        imageUrl: `https://example.com/${key}`,
+        mimeType: 'image/jpeg',
+        position,
+      })
+      .returning({ id: entryPhotos.id })
+    return photo
+  }
+
+  beforeEach(async () => {
+    const owner = await createUser({ displayName: 'Owner' })
+    const member = await createUser({ displayName: 'Member' })
+    const outsider = await createUser({ displayName: 'Outsider' })
+
+    ownerId = owner.id
+    memberId = member.id
+    outsiderId = outsider.id
+
+    const journal = await createJournal(ownerId, 'Photo Slideshow Journal')
+    journalId = journal.id
+
+    await addMember(journalId, ownerId, 'owner')
+    await addMember(journalId, memberId, 'editor')
+
+    const entry1 = await createEntry(journalId, ownerId, { entryDate: '2026-03-01' })
+    const entry2 = await createEntry(journalId, ownerId, { entryDate: '2026-03-02' })
+
+    entryId1 = entry1.id
+    entryId2 = entry2.id
+
+    await insertPhoto(entryId1, 0, 'journals/photo-a.jpg')
+    await insertPhoto(entryId1, 1, 'journals/photo-b.jpg')
+    await insertPhoto(entryId2, 0, 'journals/photo-c.jpg')
+  })
+
+  afterEach(async () => {
+    await deleteJournals([journalId])
+    await deleteUsers([ownerId, memberId, outsiderId])
+  })
+
+  it('returns all photos for a journal member', async () => {
+    const result = await getAllPhotosForJournal(ownerId, journalId)
+
+    expect(result).toHaveLength(3)
+  })
+
+  it('returns all photos for an editor member', async () => {
+    const result = await getAllPhotosForJournal(memberId, journalId)
+
+    expect(result).toHaveLength(3)
+  })
+
+  it('returns empty array for a non-member', async () => {
+    const result = await getAllPhotosForJournal(outsiderId, journalId)
+
+    expect(result).toHaveLength(0)
+  })
+
+  it('returns photos with id and entryId fields', async () => {
+    const result = await getAllPhotosForJournal(ownerId, journalId)
+
+    for (const photo of result) {
+      expect(photo.id).toBeDefined()
+      expect(photo.entryId).toBeDefined()
+    }
+  })
+
+  it('orders photos by entry date descending then position ascending', async () => {
+    const result = await getAllPhotosForJournal(ownerId, journalId)
+
+    // entry2 (2026-03-02) > entry1 (2026-03-01)
+    expect(result[0].entryId).toBe(entryId2)
+    // entry1's two photos come next, position 0 then 1
+    expect(result[1].entryId).toBe(entryId1)
+    expect(result[2].entryId).toBe(entryId1)
+  })
+
+  it('returns empty array when journal has no photos', async () => {
+    const emptyJournal = await createJournal(ownerId, 'Empty Journal')
+    await addMember(emptyJournal.id, ownerId, 'owner')
+    await createEntry(emptyJournal.id, ownerId, {})
+
+    const result = await getAllPhotosForJournal(ownerId, emptyJournal.id)
+
+    expect(result).toHaveLength(0)
+
+    await deleteJournals([emptyJournal.id])
   })
 })

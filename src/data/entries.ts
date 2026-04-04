@@ -196,6 +196,36 @@ export async function getJournalEntryCountForJournal(
   return result?.count ?? 0
 }
 
+export type JournalPhotoForSlideshow = {
+  id: string
+  entryId: string
+}
+
+/**
+ * Get all photos for a journal, across all entries, in entry date order.
+ * Access-controlled: user must be a member of the journal.
+ */
+export async function getAllPhotosForJournal(
+  userId: string,
+  journalId: string,
+): Promise<JournalPhotoForSlideshow[]> {
+  return db
+    .select({
+      id: entryPhotos.id,
+      entryId: entries.id,
+    })
+    .from(entryPhotos)
+    .innerJoin(entries, eq(entries.id, entryPhotos.entryId))
+    .innerJoin(journalMembers, eq(journalMembers.journalId, entries.journalId))
+    .where(
+      and(
+        eq(entries.journalId, journalId),
+        eq(journalMembers.userId, userId),
+      ),
+    )
+    .orderBy(desc(entries.entryDate), desc(entries.createdAt), asc(entryPhotos.position))
+}
+
 export async function deleteEntryForJournal(input: {
   userId: string
   journalId: string

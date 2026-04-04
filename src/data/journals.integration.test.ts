@@ -2,11 +2,12 @@ import { eq } from 'drizzle-orm'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { db } from '@/db'
-import { journalMembers, journals, users } from '@/db/schema'
+import { entries, entryPhotos, journalMembers, journals, users } from '@/db/schema'
 import {
   createJournalForOwner,
   deleteJournalOwnedByUser,
   getCollaboratorsForJournal,
+  getRecentPhotosForJournals,
   getUserJournalById,
   getUserJournalCount,
   getUserJournals,
@@ -570,5 +571,136 @@ describe('updateJournalTitleForOwner', () => {
     })
 
     expect(result).toBe(false)
+  })
+})
+
+describe('getRecentPhotosForJournals', () => {
+  let ownerId: string
+  let outsiderId: string
+  let journalId1: string
+  let journalId2: string
+
+  async function createEntry(journalId: string, authorUserId: string, entryDate: string) {
+    const [entry] = await db
+      .insert(entries)
+      .values({ journalId, authorUserId, content: 'test', entryDate })
+      .returning({ id: entries.id })
+    return entry
+  }
+
+  async function insertPhoto(entryId: string, position: number, key: string) {
+    const [photo] = await db
+      .insert(entryPhotos)
+      .values({
+        entryId,
+        storageKey: key,
+        imageUrl: `https://example.com/${key}`,
+        mimeType: 'image/jpeg',
+        position,
+      })
+      .returning({ id: entryPhotos.id })
+    return photo
+  }
+
+  beforeEach(async () => {
+    const owner = await db
+      .insert(users)
+      .values({ clerkUserId: `test_${crypto.randomUUID()}`, displayName: 'Owner' })
+      .returning({ id: users.id })
+    const outsider = await db
+      .insert(users)
+      .values({ clerkUserId: `test_${crypto.randomUUID()}`, displayName: 'Outsider' })
+      .returning({ id: users.id })
+
+    ownerId = owner[0].id
+    outsiderId = outsider[0].id
+
+    const j1 = await db
+      .insert(journals)
+      .values({ ownerUserId: ownerId, title: 'Journal One' })
+      .returning({ id: journals.id })
+    const j2 = await db
+      .insert(journals)
+      .values({ ownerUserId: ownerId, title: 'Journal Two' })
+      .returning({ id: journals.id })
+
+    journalId1 = j1[0].id
+    journalId2 = j2[0].id
+
+    await db.insert(journalMembers).values({ journalId: journalId1, userId: ownerId, role: 'owner' })
+    await db.insert(journalMembers).values({ journalId: journalId2, userId: ownerId, role: 'owner' })
+  })
+
+  afterEach(async () => {
+    await db.delete(journals).where(eq(journals.id, journalId1))
+    await db.delete(journals).where(eq(journals.id, journalId2))
+    await db.delete(users).where(eq(users.id, ownerId))
+    await db.delete(users).where(eq(users.id, outsiderId))
+  })
+
+  it('returns empty map when journalIds array is empty', async () => {
+    const result = await getRecentPhotosForJournals([])
+
+    expect(result.size).toBe(0)
+  })
+
+  it('returns empty map entry when a journal has no photos', async () => {
+    const result = await getRecentPhotosForJournals([journalId1])
+
+    expect(result.has(journalId1)).toBe(false)
+  })
+
+  it('returns photos for journals with photos', async () => {
+    const entry = await createEntry(journalId1, ownerId, '2026-03-01')
+    await insertPhoto(entry.id, 0, 'j1/photo-a.jpg')
+
+    const result = await getRecentPhotosForJournals([journalId1])
+
+    expect(result.get(journalId1)).toHaveLength(1)
+  })
+
+  it('caps results at the limitPerJournal default of 3', async () => {
+    const entry = await createEntry(journalId1, ownerId, '2026-03-01')
+    await insertPhoto(entry.id, 0, 'j1/p0.jpg')
+    await insertPhoto(entry.id, 1, 'j1/p1.jpg')
+    await insertPhoto(entry.id, 2, 'j1/p2.jpg')
+    await insertPhoto(entry.id, 3, 'j1/p3.jpg')
+
+    const result = await getRecentPhotosForJournals([journalId1])
+
+    expect(result.get(journalId1)).toHaveLength(3)
+  })
+
+  it('respects a custom limitPerJournal', async () => {
+    const entry = await createEntry(journalId1, ownerId, '2026-03-01')
+    await insertPhoto(entry.id, 0, 'j1/l0.jpg')
+    await insertPhoto(entry.id, 1, 'j1/l1.jpg')
+
+    const result = await getRecentPhotosForJournals([journalId1], 1)
+
+    expect(result.get(journalId1)).toHaveLength(1)
+  })
+
+  it('returns photos with id and entryId fields', async () => {
+    const entry = await createEntry(journalId1, ownerId, '2026-03-01')
+    await insertPhoto(entry.id, 0, 'j1/fld.jpg')
+
+    const result = await getRecentPhotosForJournals([journalId1])
+    const photos = result.get(journalId1) ?? []
+
+    expect(photos[0].id).toBeDefined()
+    expect(photos[0].entryId).toBe(entry.id)
+  })
+
+  it('returns photos scoped per journal when fetching multiple journals', async () => {
+    const e1 = await createEntry(journalId1, ownerId, '2026-03-01')
+    const e2 = await createEntry(journalId2, ownerId, '2026-03-01')
+    await insertPhoto(e1.id, 0, 'j1/multi.jpg')
+    await insertPhoto(e2.id, 0, 'j2/multi.jpg')
+
+    const result = await getRecentPhotosForJournals([journalId1, journalId2])
+
+    expect(result.get(journalId1)).toHaveLength(1)
+    expect(result.get(journalId2)).toHaveLength(1)
   })
 })
