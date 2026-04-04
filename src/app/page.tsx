@@ -127,7 +127,7 @@ export default async function Home() {
                 <CardDescription>Collaborate with invited members in a single timeline.</CardDescription>
               </CardHeader>
             </Card>
-            <Card className="border-[#d4e6ff] bg-[#f5f9ff]">
+            <Card className="border-[#d4e6ff] bg-[#f8fbff]">
               <CardHeader>
                 <CardTitle className="text-base">Photo support</CardTitle>
                 <CardDescription>Add multiple images to entries and review them in-place.</CardDescription>

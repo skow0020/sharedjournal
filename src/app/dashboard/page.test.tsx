@@ -7,6 +7,7 @@ const {
   getCurrentUserEmailMock,
   getPendingInvitationsForEmailMock,
   getCollaboratorsForJournalsMock,
+  getRecentPhotosForJournalsMock,
   getUserJournalCountMock,
   getUserJournalsMock,
   createJournalForOwnerMock,
@@ -16,6 +17,7 @@ const {
   getCurrentUserEmailMock: vi.fn(),
   getPendingInvitationsForEmailMock: vi.fn(),
   getCollaboratorsForJournalsMock: vi.fn(),
+  getRecentPhotosForJournalsMock: vi.fn(),
   getUserJournalCountMock: vi.fn(),
   getUserJournalsMock: vi.fn(),
   createJournalForOwnerMock: vi.fn(),
@@ -57,6 +59,7 @@ vi.mock('@/data/invitations', () => ({
 
 vi.mock('@/data/journals', () => ({
   getCollaboratorsForJournals: getCollaboratorsForJournalsMock,
+  getRecentPhotosForJournals: getRecentPhotosForJournalsMock,
   getUserJournalCount: getUserJournalCountMock,
   getUserJournals: getUserJournalsMock,
   createJournalForOwner: createJournalForOwnerMock,
@@ -80,6 +83,7 @@ describe('DashboardPage', () => {
     getUserJournalCountMock.mockResolvedValue(0)
     getUserJournalsMock.mockResolvedValue([])
     getCollaboratorsForJournalsMock.mockResolvedValue(new Map())
+    getRecentPhotosForJournalsMock.mockResolvedValue(new Map())
     getPendingInvitationsForEmailMock.mockResolvedValue([])
   })
 

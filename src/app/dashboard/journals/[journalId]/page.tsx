@@ -1,4 +1,5 @@
 import { format, parseISO } from 'date-fns'
+import { ImagesIcon } from 'lucide-react'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
@@ -9,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { OwnedPendingInvitations } from '@/app/dashboard/journals/[journalId]/owned-pending-invitations'
 import {
   cancelPendingInvitationAction,
@@ -28,12 +30,14 @@ import { JournalEntriesInfiniteLoader } from '@/app/dashboard/journals/[journalI
 import { JournalTitleEditor } from '@/app/dashboard/journals/[journalId]/journal-title-editor'
 import { MobileOwnerActionsMenu } from '@/app/dashboard/journals/[journalId]/mobile-owner-actions-menu'
 import {
+  getAllPhotosForJournal,
   getJournalEntryCountForJournal,
   getJournalEntriesForJournal,
   type JournalEntryForJournal,
 } from '@/data/entries'
 import { buildEntryPhotoProxyUrl } from '@/lib/entry-image-storage'
 import { EntryPhotoGallery } from '@/app/dashboard/journals/[journalId]/entry-photo-gallery'
+import { JournalSlideshow } from '@/app/dashboard/journals/[journalId]/journal-slideshow'
 import {
   getPendingInvitationsForOwnedJournal,
 } from '@/data/invitations'
@@ -73,11 +77,12 @@ export default async function JournalDetailsPage({ params, searchParams }: Journ
     ? 1
     : parsedEntriesPage
 
-  const [totalEntryCount, entries] = await Promise.all([
+  const [totalEntryCount, entries, allPhotos] = await Promise.all([
     getJournalEntryCountForJournal(appUser.id, journalId),
     getJournalEntriesForJournal(appUser.id, journalId, {
       limit: currentEntriesPage * ENTRIES_PER_PAGE,
     }),
+    getAllPhotosForJournal(appUser.id, journalId),
   ])
   const collaborators = await getCollaboratorsForJournal(appUser.id, journalId)
   const pendingInvitations = journal.isOwner
@@ -123,6 +128,17 @@ export default async function JournalDetailsPage({ params, searchParams }: Journ
             </div>
           </div>
           <div className="flex w-full items-center justify-end gap-2 sm:w-auto sm:justify-end">
+            {allPhotos.length > 0 ? (
+              <JournalSlideshow
+                photos={allPhotos}
+                trigger={
+                  <Button type="button" variant="outline" size="sm">
+                    <ImagesIcon className="size-4" aria-hidden />
+                    <span className="sr-only sm:not-sr-only">Slideshow</span>
+                  </Button>
+                }
+              />
+            ) : null}
             <CreateEntryModal
               journalId={journalId}
               action={createEntryAction}

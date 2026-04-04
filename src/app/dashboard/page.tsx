@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button'
 import { getPendingInvitationsForEmail } from '@/data/invitations'
 import {
   getCollaboratorsForJournals,
+  getRecentPhotosForJournals,
   getUserJournalCount,
   getUserJournals,
 } from '@/data/journals'
@@ -59,6 +60,9 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     ? await getPendingInvitationsForEmail(currentUserEmail)
     : []
   const collaboratorsByJournal = await getCollaboratorsForJournals(
+    userJournals.map((journal) => journal.id),
+  )
+  const recentPhotosByJournal = await getRecentPhotosForJournals(
     userJournals.map((journal) => journal.id),
   )
 
@@ -103,6 +107,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             journal={journal}
             collaborators={collaboratorsByJournal.get(journal.id) ?? []}
             deleteAction={deleteJournalAction}
+            recentPhotos={recentPhotosByJournal.get(journal.id) ?? []}
           />
         ))
       )}

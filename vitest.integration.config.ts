@@ -8,6 +8,7 @@ export default defineConfig({
     },
   },
   test: {
+    maxWorkers: process.env.CI ? undefined : '50%',
     environment: 'node',
     setupFiles: ['./src/test/setup.integration.ts'],
     include: ['src/**/*.integration.test.ts'],

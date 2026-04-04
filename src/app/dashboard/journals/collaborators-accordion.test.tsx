@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
+import { axe } from 'vitest-axe'
 
 import { CollaboratorsAccordion } from '@/app/dashboard/journals/collaborators-accordion'
 
@@ -63,5 +64,29 @@ describe('CollaboratorsAccordion', () => {
 
     await user.click(screen.getByRole('button', { name: 'Collaborators (1)' }))
     expect(screen.getByText('Unnamed user')).toBeInTheDocument()
+  })
+
+  describe('accessibility', () => {
+    it('has no violations when collapsed', async () => {
+      const { container } = render(
+        <CollaboratorsAccordion
+          collaborators={[{ id: 'c1', displayName: 'Alex', role: 'editor' as const }]}
+        />,
+      )
+      expect(await axe(container)).toHaveNoViolations()
+    })
+
+    it('has no violations when expanded', async () => {
+      const user = userEvent.setup()
+      const { container } = render(
+        <CollaboratorsAccordion
+          collaborators={[{ id: 'c1', displayName: 'Alex', role: 'editor' as const }]}
+        />,
+      )
+
+      await user.click(screen.getByRole('button', { name: 'Collaborators (1)' }))
+
+      expect(await axe(container)).toHaveNoViolations()
+    })
   })
 })

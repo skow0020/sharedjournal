@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { axe } from 'vitest-axe'
 
 const { usePathnameMock, authState } = vi.hoisted(() => ({
   usePathnameMock: vi.fn(),
@@ -79,5 +80,18 @@ describe('AuthHeader', () => {
     expect(screen.getByTestId('user-button')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Sign In' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Sign Up' })).not.toBeInTheDocument()
+  })
+
+  describe('accessibility', () => {
+    it('has no violations when signed out', async () => {
+      const { container } = render(<AuthHeader />)
+      expect(await axe(container)).toHaveNoViolations()
+    })
+
+    it('has no violations when signed in', async () => {
+      authState.isSignedIn = true
+      const { container } = render(<AuthHeader />)
+      expect(await axe(container)).toHaveNoViolations()
+    })
   })
 })

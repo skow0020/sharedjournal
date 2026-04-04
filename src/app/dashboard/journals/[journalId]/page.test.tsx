@@ -7,6 +7,7 @@ const {
   getCollaboratorsForJournalMock,
   getJournalEntryCountForJournalMock,
   getJournalEntriesForJournalMock,
+  getAllPhotosForJournalMock,
   getPendingInvitationsForOwnedJournalMock,
   notFoundMock,
   redirectMock,
@@ -17,6 +18,7 @@ const {
   getCollaboratorsForJournalMock: vi.fn(),
   getJournalEntryCountForJournalMock: vi.fn(),
   getJournalEntriesForJournalMock: vi.fn(),
+  getAllPhotosForJournalMock: vi.fn(),
   getPendingInvitationsForOwnedJournalMock: vi.fn(),
   notFoundMock: vi.fn(() => {
     throw new Error('NEXT_NOT_FOUND')
@@ -86,7 +88,12 @@ vi.mock('@/data/journals', () => ({
 vi.mock('@/data/entries', () => ({
   getJournalEntryCountForJournal: getJournalEntryCountForJournalMock,
   getJournalEntriesForJournal: getJournalEntriesForJournalMock,
+  getAllPhotosForJournal: getAllPhotosForJournalMock,
   createEntryForJournal: vi.fn(),
+}))
+
+vi.mock('@/app/dashboard/journals/[journalId]/journal-slideshow', () => ({
+  JournalSlideshow: () => <div data-testid="journal-slideshow">Slideshow</div>,
 }))
 
 vi.mock('@/data/invitations', () => ({
@@ -142,6 +149,7 @@ describe('JournalDetailsPage', () => {
         photos: [],
       },
     ])
+    getAllPhotosForJournalMock.mockResolvedValue([])
     getPendingInvitationsForOwnedJournalMock.mockResolvedValue([
       {
         id: 'inv-1',

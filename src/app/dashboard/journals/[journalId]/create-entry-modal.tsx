@@ -610,7 +610,7 @@ export function CreateEntryModal({ journalId, action, cleanupAction }: CreateEnt
                       type="button"
                       variant="outline"
                       size="icon"
-                      className="w-10"
+                      className="size-8"
                       aria-label="Take photo"
                       disabled={pending}
                       onClick={() => cameraInputRef.current?.click()}

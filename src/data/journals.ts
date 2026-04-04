@@ -1,7 +1,7 @@
-import { and, desc, eq, inArray, ne, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray, ne, sql } from 'drizzle-orm'
 
 import { db } from '@/db'
-import { journalMembers, journals, users } from '@/db/schema'
+import { entries, entryPhotos, journalMembers, journals, users } from '@/db/schema'
 
 export type UserJournal = {
   id: string
@@ -239,4 +239,49 @@ export async function updateJournalTitleForOwner({
     .returning({ id: journals.id })
 
   return Boolean(updatedJournal)
+}
+
+export type JournalRecentPhoto = {
+  id: string
+  entryId: string
+  width: number | null
+  height: number | null
+}
+
+/**
+ * Get the most recent photos for multiple journals in one query.
+ * journalIds must already be access-scoped by the caller.
+ */
+export async function getRecentPhotosForJournals(
+  journalIds: string[],
+  limitPerJournal = 3,
+): Promise<Map<string, JournalRecentPhoto[]>> {
+  if (journalIds.length === 0) {
+    return new Map()
+  }
+
+  const photoRows = await db
+    .select({
+      journalId: entries.journalId,
+      id: entryPhotos.id,
+      entryId: entries.id,
+      width: entryPhotos.width,
+      height: entryPhotos.height,
+    })
+    .from(entryPhotos)
+    .innerJoin(entries, eq(entries.id, entryPhotos.entryId))
+    .where(inArray(entries.journalId, journalIds))
+    .orderBy(desc(entries.entryDate), desc(entries.createdAt), asc(entryPhotos.position))
+
+  const map = new Map<string, JournalRecentPhoto[]>()
+
+  for (const row of photoRows) {
+    const current = map.get(row.journalId) ?? []
+    if (current.length < limitPerJournal) {
+      current.push({ id: row.id, entryId: row.entryId, width: row.width, height: row.height })
+      map.set(row.journalId, current)
+    }
+  }
+
+  return map
 }

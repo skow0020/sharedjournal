@@ -1,6 +1,8 @@
+import React from 'react'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { axe } from 'vitest-axe'
 
 const { collaboratorsAccordionMock, pushMock } = vi.hoisted(() => ({
   collaboratorsAccordionMock: vi.fn(),
@@ -14,10 +16,10 @@ vi.mock('next/navigation', () => ({
 }))
 
 vi.mock('@/app/dashboard/delete-journal-button', () => ({
-  DeleteJournalButton: ({ journalId }: { journalId: string }) => (
-    <button type="button" data-testid={`delete-journal-${journalId}`}>
-      Delete
-    </button>
+  DeleteJournalButton: ({ journalId, trigger }: { journalId: string, trigger?: React.ReactNode }) => (
+    <div data-testid={`delete-journal-${journalId}`}>
+      {trigger ?? <button type="button">Delete</button>}
+    </div>
   ),
 }))
 
@@ -52,6 +54,7 @@ describe('JournalCard', () => {
         }}
         collaborators={[]}
         deleteAction={vi.fn()}
+        recentPhotos={[]}
       />,
     )
 
@@ -71,6 +74,7 @@ describe('JournalCard', () => {
         }}
         collaborators={[]}
         deleteAction={vi.fn()}
+        recentPhotos={[]}
       />,
     )
 
@@ -90,6 +94,7 @@ describe('JournalCard', () => {
         }}
         collaborators={[]}
         deleteAction={vi.fn()}
+        recentPhotos={[]}
       />,
     )
 
@@ -115,6 +120,7 @@ describe('JournalCard', () => {
         }}
         collaborators={collaborators}
         deleteAction={vi.fn()}
+        recentPhotos={[]}
       />,
     )
 
@@ -138,6 +144,7 @@ describe('JournalCard', () => {
         }}
         collaborators={[]}
         deleteAction={vi.fn()}
+        recentPhotos={[]}
       />,
     )
 
@@ -159,6 +166,7 @@ describe('JournalCard', () => {
         }}
         collaborators={[]}
         deleteAction={vi.fn()}
+        recentPhotos={[]}
       />,
     )
 
@@ -180,6 +188,7 @@ describe('JournalCard', () => {
         }}
         collaborators={[]}
         deleteAction={vi.fn()}
+        recentPhotos={[]}
       />,
     )
 
@@ -203,6 +212,7 @@ describe('JournalCard', () => {
         }}
         collaborators={[]}
         deleteAction={vi.fn()}
+        recentPhotos={[]}
       />,
     )
 
@@ -211,5 +221,25 @@ describe('JournalCard', () => {
     await user.keyboard('{ArrowDown}')
 
     expect(pushMock).not.toHaveBeenCalled()
+  })
+
+  describe('accessibility', () => {
+    it('has no violations', async () => {
+      const { container } = render(
+        <JournalCard
+          journal={{
+            id: 'journal-a11y',
+            title: 'Accessible Journal',
+            description: 'A test journal',
+            isOwner: true,
+          }}
+          collaborators={[]}
+          deleteAction={vi.fn()}
+          recentPhotos={[]}
+        />,
+      )
+
+      expect(await axe(container)).toHaveNoViolations()
+    })
   })
 })
