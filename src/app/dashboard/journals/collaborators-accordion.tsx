@@ -1,8 +1,9 @@
+import * as AccordionPrimitive from '@radix-ui/react-accordion'
+
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
-  AccordionTrigger,
 } from '@/components/ui/accordion'
 import type { JournalCollaborator } from '@/data/journals'
 
@@ -24,9 +25,16 @@ export function CollaboratorsAccordion({
   return (
     <Accordion type="single" collapsible>
       <AccordionItem value="collaborators" className="border-none">
-        <AccordionTrigger className="text-muted-foreground py-1 text-sm font-medium hover:no-underline !inline-flex !w-auto !flex-none !justify-start !gap-1 pr-0">
-          Collaborators ({collaborators.length})
-        </AccordionTrigger>
+        <AccordionPrimitive.Header asChild>
+          <div className="flex">
+            <AccordionPrimitive.Trigger
+              data-slot="accordion-trigger"
+              className="text-muted-foreground focus-visible:ring-ring/50 py-1 text-sm font-medium outline-none hover:underline focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 !inline-flex !w-auto !flex-none !justify-start !gap-1 pr-0"
+            >
+              Collaborators ({collaborators.length})
+            </AccordionPrimitive.Trigger>
+          </div>
+        </AccordionPrimitive.Header>
         <AccordionContent>
           {visibleCollaborators.length > 0 ? (
             <ul className="text-muted-foreground space-y-1 text-sm">
