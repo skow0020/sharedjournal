@@ -112,6 +112,16 @@ describe('JournalSlideshow', () => {
     expect(screen.queryByLabelText('Close slideshow')).not.toBeInTheDocument()
   })
 
+  it('opens without error and shows no photo content when photos is empty', async () => {
+    const user = userEvent.setup()
+    render(<JournalSlideshow photos={[]} trigger={<button>Open Slideshow</button>} />)
+    await user.click(screen.getByRole('button', { name: 'Open Slideshow' }))
+    // Keyboard navigation must not throw or corrupt state when total === 0
+    await user.keyboard('{ArrowLeft}')
+    await user.keyboard('{ArrowRight}')
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+  })
+
   it('hides prev/next buttons for a single photo', async () => {
     const user = userEvent.setup()
     render(

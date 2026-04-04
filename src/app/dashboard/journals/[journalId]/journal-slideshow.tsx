@@ -39,10 +39,12 @@ export function JournalSlideshow({ photos, trigger }: JournalSlideshowProps) {
   const total = shuffledPhotos.length
 
   const handlePrev = React.useCallback(() => {
+    if (total === 0) return
     setCurrentIndex((i) => (i - 1 + total) % total)
   }, [total])
 
   const handleNext = React.useCallback(() => {
+    if (total === 0) return
     setCurrentIndex((i) => {
       if (i + 1 < total) return i + 1
       setShuffledPhotos((prev) => shuffled(prev))
