@@ -105,7 +105,7 @@ export default async function Home() {
             </Card>
           </div>
           <div className="flex flex-wrap justify-center gap-2">
-            {['Owner controls', 'Role-based access', 'Invite links', 'Private image serving', 'Activity history'].map((tag) => (
+            {['Owner controls', 'Role-based access', 'Invite links', 'Private image serving', 'Clean activity history'].map((tag) => (
               <span
                 key={tag}
                 className="rounded-full border border-[#ffd4c8] bg-[#fff6f3] px-3 py-1 text-sm text-[#7b3f2d]"
