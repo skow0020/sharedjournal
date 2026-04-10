@@ -22,7 +22,7 @@ export async function register() {
       request(span, req) {
         if (!span || !req) return
         const url = (req as { url?: string }).url ?? ''
-        if (url.includes('/api/entries')) {
+        if (/\/api\/entries(\/|$)/.test(url)) {
           span.setTag('resource.name', '[REDACTED_ENTRY_PATH]')
         }
       },

@@ -5,6 +5,7 @@ import { datadogLogs } from '@datadog/browser-logs'
 import { datadogRum } from '@datadog/browser-rum'
 
 const SENSITIVE_KEYS = ['content', 'password', 'token', 'secret', 'key', 'email', 'authorization']
+const EMAIL_REGEX = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g
 
 function redactSensitiveContext(context: Record<string, unknown>): Record<string, unknown> {
   const redacted: Record<string, unknown> = {}
@@ -43,7 +44,7 @@ export function DatadogInit() {
       sessionSampleRate: 100,
       beforeSend(event) {
         if (event.message) {
-          event.message = event.message.replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g, '[REDACTED_EMAIL]')
+          event.message = event.message.replace(EMAIL_REGEX, '[REDACTED_EMAIL]')
         }
         if (event.context) {
           event.context = redactSensitiveContext(event.context as Record<string, unknown>)
@@ -73,7 +74,7 @@ export function DatadogInit() {
         if (event.type === 'error') {
           const err = event.error as { message?: string, stack?: string }
           if (err.message) {
-            err.message = err.message.replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g, '[REDACTED_EMAIL]')
+            err.message = err.message.replace(EMAIL_REGEX, '[REDACTED_EMAIL]')
           }
         }
         if (event.context) {
