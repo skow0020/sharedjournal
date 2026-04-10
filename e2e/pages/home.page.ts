@@ -12,7 +12,7 @@ export class HomePage {
   }
 
   headline() {
-    return this.page.getByText('Everything in one journal workflow')
+    return this.page.getByRole('heading', { name: /Write together/i })
   }
 
   featureCard(name: string) {
