@@ -42,6 +42,11 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 INVITE_EMAIL_PROVIDER=resend
 RESEND_API_KEY=re_...
 RESEND_FROM_EMAIL=SharedJournal <invites@notify.sharedjournal.app>
+
+# Datadog monitoring (optional — all Datadog vars are optional; monitoring is disabled when absent)
+NEXT_PUBLIC_DATADOG_CLIENT_TOKEN=pub...
+NEXT_PUBLIC_DATADOG_APPLICATION_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+DD_API_KEY=...
 ```
 
 ### Clerk Authentication
@@ -151,6 +156,54 @@ Important notes:
 - [Clerk Documentation](https://clerk.com/docs)
 - [Drizzle ORM Documentation](https://orm.drizzle.team/)
 - [Neon Documentation](https://neon.tech/docs)
+
+## Datadog Monitoring
+
+SharedJournal integrates [Datadog](https://www.datadoghq.com/) for frontend and backend observability including Real User Monitoring (RUM), browser logs, and distributed tracing.
+
+### Environment Variables
+
+Add the following variables to your `.env.local` (frontend variables are optional — monitoring is silently disabled when they are absent):
+
+```bash
+# Datadog Browser RUM & Logs (frontend — optional)
+NEXT_PUBLIC_DATADOG_CLIENT_TOKEN=pub...
+NEXT_PUBLIC_DATADOG_APPLICATION_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+NEXT_PUBLIC_DATADOG_SITE=datadoghq.com          # default: datadoghq.com
+NEXT_PUBLIC_DATADOG_SERVICE=sharedjournal-web   # default: sharedjournal-web
+NEXT_PUBLIC_DATADOG_ENV=production              # default: NODE_ENV
+NEXT_PUBLIC_DATADOG_VERSION=1.0.0              # optional
+
+# Datadog APM / Server-side tracing (backend — optional)
+# Set DD_API_KEY or DD_AGENT_HOST to enable server-side tracing.
+DD_API_KEY=...                 # Datadog API key (if using agentless intake)
+DD_AGENT_HOST=localhost        # Datadog Agent host (if running the Agent)
+DD_SERVICE=sharedjournal       # default: sharedjournal
+DD_ENV=production              # default: NODE_ENV
+DD_VERSION=1.0.0               # optional
+```
+
+### Setup
+
+1. Create a [Datadog](https://www.datadoghq.com/) account (free trial available).
+2. In the Datadog UI navigate to **UX Monitoring → Real User Monitoring → New Application** to get your `NEXT_PUBLIC_DATADOG_APPLICATION_ID` and `NEXT_PUBLIC_DATADOG_CLIENT_TOKEN`.
+3. Add all desired variables to `.env.local` (never commit secrets to the repository).
+4. For server-side APM either:
+   - Install the [Datadog Agent](https://docs.datadoghq.com/agent/) on your host and set `DD_AGENT_HOST`, **or**
+   - Set `DD_API_KEY` for agentless HTTP intake.
+
+### How It Works
+
+- **Frontend** (`src/components/datadog-init.tsx`): A `'use client'` React component initialised in the root layout. It calls `datadogRum.init()` and `datadogLogs.init()` on first mount. Both use `beforeSend` callbacks to redact email addresses and sensitive context keys (`content`, `password`, `token`, `secret`, `key`, `email`, `authorization`) before any data leaves the browser.
+- **Backend** (`instrumentation.ts`): Uses the Next.js [Instrumentation API](https://nextjs.org/docs/app/building-your-application/optimizing/instrumentation) to import `dd-trace` at server startup (Node.js runtime only). The tracer is only activated when `DD_API_KEY` or `DD_AGENT_HOST` is present so there is no performance overhead in environments without Datadog configured.
+- **Privacy**: `defaultPrivacyLevel: 'mask-user-input'` is set for RUM so all form inputs are masked in session recordings by default.
+
+### References
+
+- [Datadog Browser Logs](https://docs.datadoghq.com/logs/log_collection/javascript/)
+- [Datadog Real User Monitoring](https://docs.datadoghq.com/real_user_monitoring/browser/)
+- [Datadog Node.js APM (dd-trace)](https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/nodejs/)
+- [Security & Data Redaction in Datadog](https://docs.datadoghq.com/logs/log_collection/security/)
 
 ## Learn More
 

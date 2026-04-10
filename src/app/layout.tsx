@@ -6,6 +6,7 @@ import {
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import { AuthHeader } from '@/components/auth-header'
+import { DatadogInit } from '@/components/datadog-init'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -35,6 +36,7 @@ export default function RootLayout({
           suppressHydrationWarning
         >
           <AuthHeader />
+          <DatadogInit />
           <GoogleOneTap
             signInForceRedirectUrl="/auth/transition"
             signUpForceRedirectUrl="/auth/transition"
