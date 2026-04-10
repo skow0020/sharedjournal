@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react'
+import type { ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
 const { authMock, redirectMock } = vi.hoisted(() => ({
@@ -10,6 +11,11 @@ const { authMock, redirectMock } = vi.hoisted(() => ({
 
 vi.mock('@clerk/nextjs/server', () => ({
   auth: authMock,
+}))
+
+vi.mock('@clerk/nextjs', () => ({
+  SignInButton: ({ children }: { children: ReactNode }) => <>{children}</>,
+  SignUpButton: ({ children }: { children: ReactNode }) => <>{children}</>,
 }))
 
 vi.mock('next/navigation', () => ({
@@ -32,11 +38,11 @@ describe('Home page', () => {
     const page = await Home()
     render(page)
 
-    expect(screen.getByRole('heading', { name: 'SharedJournal' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /Write together/i })).toBeInTheDocument()
     expect(screen.getByText(/Private and collaborative journaling/i)).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /Google Play/i })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /App Store/i })).toBeInTheDocument()
-    expect(screen.getByText('Everything in one journal workflow')).toBeInTheDocument()
-    expect(screen.getByText('Core flow')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /How it works/i })).toBeInTheDocument()
+    expect(screen.getByText('Personal journals')).toBeInTheDocument()
+    expect(screen.getByText('Shared entries')).toBeInTheDocument()
+    expect(screen.getByText('Photo support')).toBeInTheDocument()
   })
 })
