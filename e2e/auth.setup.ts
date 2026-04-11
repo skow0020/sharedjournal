@@ -26,6 +26,7 @@ test('authenticate test user', async ({ page }) => {
   await expect(signInPage.passwordInput()).toBeVisible()
   await signInPage.fillPassword(password!)
   await signInPage.clickContinue()
+  await expect(page).toHaveURL('/dashboard')
 
   await mkdir(authDir, { recursive: true })
   await page.context().storageState({ path: authFile })
