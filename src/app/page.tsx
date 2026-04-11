@@ -2,34 +2,24 @@ import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 
 import {
-  Button,
-} from '@/components/ui/button'
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion'
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { LandingHeroCta } from '@/components/landing-hero-cta'
 
-function GooglePlayLogo() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4">
-      <path fill="#00C853" d="M3.33 2.01 13.9 12.6 3.33 22.99a1.86 1.86 0 0 1-.33-1.12V3.13c0-.41.12-.8.33-1.12Z" />
-      <path fill="#FFAB00" d="m16.17 14.86-2.27-2.26 2.27-2.27 2.96 1.68c1.17.66 1.17 1.6 0 2.26l-2.96 1.59Z" />
-      <path fill="#FF3D00" d="M16.17 14.86 5.38 21.05c-.88.5-1.61.27-2.05-.32L13.9 12.6l2.27 2.26Z" />
-      <path fill="#00B0FF" d="M16.17 10.33 13.9 12.6 3.33 4.25c.44-.59 1.17-.82 2.05-.32l10.79 6.4Z" />
-    </svg>
-  )
-}
-
-function AppleLogo() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4 fill-current">
-      <path d="M16.71 12.66c.02 2.18 1.91 2.91 1.93 2.92-.02.06-.3 1.03-.99 2.05-.59.88-1.2 1.76-2.16 1.78-.94.02-1.24-.56-2.32-.56-1.09 0-1.42.54-2.3.58-.92.03-1.62-.92-2.22-1.79-1.22-1.77-2.16-5-0.9-7.2.63-1.1 1.75-1.8 2.96-1.81.92-.02 1.8.62 2.32.62.52 0 1.49-.77 2.52-.66.43.02 1.64.17 2.41 1.29-.06.04-1.44.84-1.43 2.78Zm-1.4-5.33c.49-.59.82-1.4.73-2.22-.71.03-1.58.47-2.09 1.06-.46.53-.86 1.35-.75 2.14.79.06 1.61-.4 2.11-.98Z" />
-    </svg>
-  )
-}
+/*
+ * Note: Native mobile apps (Android / iOS) are not yet available.
+ * The Google Play and App Store download buttons have been removed
+ * until those apps are released.
+ */
 
 export default async function Home() {
   const { userId } = await auth()
@@ -39,82 +29,62 @@ export default async function Home() {
   }
 
   return (
-    <main className="relative mx-auto min-h-[calc(100vh-72px)] w-full max-w-6xl overflow-hidden px-6 py-10">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-16 right-10 h-64 w-64 rounded-full bg-[#74d9c5]/30 blur-3xl" />
-        <div className="absolute bottom-12 -left-20 h-72 w-72 rounded-full bg-[#ff9a7f]/30 blur-3xl" />
-      </div>
-
-      <div className="relative grid items-start gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-        <section className="space-y-6">
+    <main className="w-full">
+      {/* ── Hero ── */}
+      <section className="relative overflow-hidden px-6 py-20 sm:py-28">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute -top-20 right-0 h-80 w-80 rounded-full bg-[#74d9c5]/25 blur-3xl" />
+          <div className="absolute bottom-0 -left-20 h-80 w-80 rounded-full bg-[#ff9a7f]/20 blur-3xl" />
+        </div>
+        <div className="relative mx-auto max-w-3xl space-y-6 text-center">
           <div className="inline-flex rounded-full border border-[#74d9c5]/60 bg-[#f4fffc] px-3 py-1 text-xs font-medium text-[#1f5f56]">
             Private and collaborative journaling
           </div>
+          <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
+            Write together.<br className="hidden sm:block" /> Stay connected.
+          </h1>
+          <p className="mx-auto max-w-xl text-base leading-7 text-muted-foreground sm:text-lg">
+            SharedJournal is a web app for couples, families, and small groups who want to write,
+            share memories, and stay in each other&apos;s lives — privately, on their own terms.
+          </p>
+          <LandingHeroCta />
+        </div>
+      </section>
 
-          <div className="space-y-3">
-            <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">SharedJournal</h1>
-            <p className="max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
-              Write personal entries, collaborate in shared journals, and keep everyone aligned with invitation-based
-              access. SharedJournal is built for ongoing stories, not one-off notes.
-            </p>
+      {/* ── How it works ── */}
+      <section className="bg-[#f8fffd] px-6 py-16 sm:py-20">
+        <div className="mx-auto max-w-4xl space-y-10">
+          <div className="text-center space-y-2">
+            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">How it works</h2>
+            <p className="text-muted-foreground">Everything in one journal workflow</p>
           </div>
+          <ol className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              { step: '1', title: 'Create a journal', body: 'Start a personal or shared journal for any topic — travel, family milestones, a project, or everyday life.' },
+              { step: '2', title: 'Write entries', body: 'Add written entries whenever you like. Attach photos to capture moments alongside your words.' },
+              { step: '3', title: 'Invite trusted people', body: 'Send an invitation link to people you trust. Only invited members can read or write in your shared journal.' },
+              { step: '4', title: 'Write together', body: 'Everyone in the journal contributes to a shared timeline. See new entries as they appear.' },
+            ].map(({ step, title, body }) => (
+              <li key={step} className="flex flex-col gap-3">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full border border-[#74d9c5] bg-[#e9f8f4] text-sm font-semibold text-[#174f48]">
+                  {step}
+                </span>
+                <p className="text-sm font-semibold text-foreground">{title}</p>
+                <p className="text-sm leading-6 text-muted-foreground">{body}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <Button asChild variant="outline" className="h-12 rounded-xl border-[#174f48]/20 bg-white/90 px-4">
-              <a href="#" aria-label="Download SharedJournal on Google Play (placeholder)">
-                <span className="flex h-7 w-7 items-center justify-center rounded-md bg-[#e9f8f4] text-[#174f48]">
-                  <GooglePlayLogo />
-                </span>
-                <span className="text-left leading-tight">
-                  <span className="block text-[10px] text-muted-foreground">Get it on</span>
-                  <span className="block text-sm font-semibold">Google Play</span>
-                </span>
-              </a>
-            </Button>
-            <Button asChild variant="outline" className="h-12 rounded-xl border-[#174f48]/20 bg-white/90 px-4">
-              <a href="#" aria-label="Download SharedJournal on the App Store (placeholder)">
-                <span className="flex h-7 w-7 items-center justify-center rounded-md bg-[#fff1ec] text-[#7b3f2d]">
-                  <AppleLogo />
-                </span>
-                <span className="text-left leading-tight">
-                  <span className="block text-[10px] text-muted-foreground">Download on the</span>
-                  <span className="block text-sm font-semibold">App Store</span>
-                </span>
-              </a>
-            </Button>
+      {/* ── Feature highlights ── */}
+      <section className="px-6 py-16 sm:py-20">
+        <div className="mx-auto max-w-4xl space-y-10">
+          <div className="text-center space-y-2">
+            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Built for ongoing stories</h2>
+            <p className="text-muted-foreground">Not one-off notes — a lasting record of shared life.</p>
           </div>
-
-          <Card className="border-[#d9efe9] bg-white/90 shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-xl">Everything in one journal workflow</CardTitle>
-              <CardDescription>Create journals, add entries, upload photos, and share with trusted people.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                {['Create journal', 'Add entries', 'Upload photos', 'Invite collaborators'].map((step) => (
-                  <div
-                    key={step}
-                    className="rounded-2xl border border-[#d9efe9] bg-[#f7fffd] px-2 py-3 text-center text-xs font-medium sm:text-sm"
-                  >
-                    {step}
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex flex-wrap gap-2 text-sm">
-                {['Owner controls', 'Role-based access', 'Invite links', 'Private image serving', 'Clean activity history'].map((capability) => (
-                  <span
-                    key={capability}
-                    className="rounded-full border border-[#ffd4c8] bg-[#fff6f3] px-3 py-1 text-[#7b3f2d]"
-                  >
-                    {capability}
-                  </span>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <section className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-3">
             <Card className="border-[#d9efe9] bg-[#f8fffd]">
               <CardHeader>
                 <CardTitle className="text-base">Personal journals</CardTitle>
@@ -133,37 +103,96 @@ export default async function Home() {
                 <CardDescription>Add multiple images to entries and review them in-place.</CardDescription>
               </CardHeader>
             </Card>
-          </section>
-        </section>
+          </div>
+          <div className="flex flex-wrap justify-center gap-2">
+            {['Owner controls', 'Role-based access', 'Invite links', 'Private image serving', 'Clean activity history'].map((tag) => (
+              <span
+                key={tag}
+                className="rounded-full border border-[#ffd4c8] bg-[#fff6f3] px-3 py-1 text-sm text-[#7b3f2d]"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
 
-        <section>
-          <Card className="mx-auto w-full max-w-sm border-[#d9efe9] bg-white/95 shadow-lg">
-            <CardHeader className="space-y-2">
-              <CardTitle className="text-lg">SharedJournal at a glance</CardTitle>
-              <CardDescription>Designed for private reflection and trusted collaboration</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="rounded-2xl border border-[#d9efe9] bg-[#f3fffb] p-4">
-                <p className="text-xs font-medium uppercase tracking-wide text-[#1f5f56]">Core flow</p>
-                <p className="mt-1 text-2xl font-semibold text-[#174f48]">Journal to entry to invite</p>
-              </div>
+      {/* ── Privacy & security ── */}
+      <section className="bg-[#f4fffc] px-6 py-16 sm:py-20">
+        <div className="mx-auto max-w-3xl space-y-8 text-center">
+          <div className="space-y-2">
+            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Your journals stay yours</h2>
+            <p className="text-muted-foreground">
+              Journals hold personal memories. We built SharedJournal with access control at the core,
+              not as an afterthought.
+            </p>
+          </div>
+          <ul className="grid gap-4 text-left sm:grid-cols-2">
+            {[
+              { title: 'Invitation-only access', body: 'No one can join a shared journal without an explicit invitation from the owner.' },
+              { title: 'Role-based permissions', body: 'Owners and collaborators have distinct capabilities. You stay in control of your space.' },
+              { title: 'Private image serving', body: 'Photos attached to entries are served privately and are not publicly accessible.' },
+              { title: 'Clean activity history', body: 'Every change is tracked so you always know what happened and when.' },
+            ].map(({ title, body }) => (
+              <li key={title} className="rounded-xl border border-[#d9efe9] bg-white/90 px-4 py-4">
+                <p className="text-sm font-semibold text-[#174f48]">{title}</p>
+                <p className="mt-1 text-sm leading-6 text-muted-foreground">{body}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
 
-              <div className="space-y-3">
-                {[
-                  ['Access control', 'Only journal members can read and write within shared spaces.'],
-                  ['Invitation lifecycle', 'Send invite links and track pending, accepted, or declined responses.'],
-                  ['Media attachments', 'Upload and review entry photos from the journal detail page.'],
-                ].map(([label, note]) => (
-                  <article key={label} className="rounded-xl border border-border bg-background px-3 py-2">
-                    <p className="text-sm font-medium text-foreground">{label}</p>
-                    <p className="text-xs text-muted-foreground">{note}</p>
-                  </article>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </section>
-      </div>
+      {/* ── FAQ ── */}
+      <section className="px-6 py-16 sm:py-20">
+        <div className="mx-auto max-w-2xl space-y-8">
+          <div className="text-center space-y-2">
+            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Common questions</h2>
+          </div>
+          <Accordion type="single" collapsible className="w-full">
+            {[
+              {
+                q: 'Is SharedJournal free to use?',
+                a: 'You can sign up and start journaling for free. Create an account and explore the app at no cost.',
+              },
+              {
+                q: 'Who can see my journals?',
+                a: 'Only you — and anyone you explicitly invite. Personal journals are private to you. Shared journals are visible only to the members you invite.',
+              },
+              {
+                q: 'How do I invite someone to a shared journal?',
+                a: 'From your journal settings, generate an invite link and send it to the person you want to include. They will be prompted to create an account if they do not have one.',
+              },
+              {
+                q: 'Can I remove someone from a shared journal?',
+                a: 'Yes. As the journal owner you can remove any collaborator at any time from the journal settings.',
+              },
+              {
+                q: 'Is there a mobile app?',
+                a: 'SharedJournal is a web app that works well on mobile browsers. Native iOS and Android apps are not yet available.',
+              },
+            ].map(({ q, a }) => (
+              <AccordionItem key={q} value={q}>
+                <AccordionTrigger className="text-left text-sm font-medium">{q}</AccordionTrigger>
+                <AccordionContent className="text-sm leading-6 text-muted-foreground">{a}</AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </div>
+      </section>
+
+      {/* ── Final CTA ── */}
+      <section className="bg-[#f8fffd] px-6 py-16 sm:py-20">
+        <div className="mx-auto max-w-xl space-y-6 text-center">
+          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+            Start writing together today
+          </h2>
+          <p className="text-muted-foreground">
+            Create your first journal in minutes. No credit card required.
+          </p>
+          <LandingHeroCta />
+        </div>
+      </section>
     </main>
   )
 }
