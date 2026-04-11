@@ -32,7 +32,7 @@ export default function AuthTransitionPage() {
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-4xl items-center justify-center px-6 py-8">
-      <Card className="w-full max-w-md border-[#d9efe9] bg-white/95 shadow-lg">
+      <Card className="w-full max-w-md border-[#d9efe9] bg-white/95 dark:bg-zinc-900 dark:border-zinc-700 shadow-lg">
         <CardHeader className="space-y-2 text-center">
           <CardTitle className="text-xl">Signing you in</CardTitle>
           <CardDescription>Preparing your journal dashboard...</CardDescription>

@@ -52,10 +52,10 @@ export default async function Home() {
       </section>
 
       {/* ── How it works ── */}
-      <section className="bg-[#f8fffd] px-6 py-16 sm:py-20">
+      <section className="bg-[#f8fffd] dark:bg-zinc-900 px-6 py-16 sm:py-20">
         <div className="mx-auto max-w-4xl space-y-10">
           <div className="text-center space-y-2">
-            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">How it works</h2>
+            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl text-foreground">How it works</h2>
             <p className="text-muted-foreground">Everything in one journal workflow</p>
           </div>
           <ol className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -69,7 +69,7 @@ export default async function Home() {
                 <span className="flex h-9 w-9 items-center justify-center rounded-full border border-[#74d9c5] bg-[#e9f8f4] text-sm font-semibold text-[#174f48]">
                   {step}
                 </span>
-                <p className="text-sm font-semibold text-foreground">{title}</p>
+                <p className="text-sm font-semibold text-[#174f48] dark:text-emerald-400">{title}</p>
                 <p className="text-sm leading-6 text-muted-foreground">{body}</p>
               </li>
             ))}
@@ -81,23 +81,23 @@ export default async function Home() {
       <section className="px-6 py-16 sm:py-20">
         <div className="mx-auto max-w-4xl space-y-10">
           <div className="text-center space-y-2">
-            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Built for ongoing stories</h2>
+            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl text-foreground">Built for ongoing stories</h2>
             <p className="text-muted-foreground">Not one-off notes — a lasting record of shared life.</p>
           </div>
           <div className="grid gap-4 sm:grid-cols-3">
-            <Card className="border-[#d9efe9] bg-[#f8fffd]">
+            <Card className="border-[#d9efe9] bg-[#f8fffd] dark:bg-teal-950 dark:border-teal-800">
               <CardHeader>
                 <CardTitle className="text-base">Personal journals</CardTitle>
                 <CardDescription>Keep private writing spaces organized by topic and date.</CardDescription>
               </CardHeader>
             </Card>
-            <Card className="border-[#ffd9cf] bg-[#fff8f5]">
+            <Card className="border-[#ffd9cf] bg-[#fff8f5] dark:bg-orange-950 dark:border-orange-800">
               <CardHeader>
                 <CardTitle className="text-base">Shared entries</CardTitle>
                 <CardDescription>Collaborate with invited members in a single timeline.</CardDescription>
               </CardHeader>
             </Card>
-            <Card className="border-[#d4e6ff] bg-[#f8fbff]">
+            <Card className="border-[#d4e6ff] bg-[#f8fbff] dark:bg-blue-950 dark:border-blue-800">
               <CardHeader>
                 <CardTitle className="text-base">Photo support</CardTitle>
                 <CardDescription>Add multiple images to entries and review them in-place.</CardDescription>
@@ -118,10 +118,10 @@ export default async function Home() {
       </section>
 
       {/* ── Privacy & security ── */}
-      <section className="bg-[#f4fffc] px-6 py-16 sm:py-20">
+      <section className="bg-[#f4fffc] dark:bg-zinc-900 px-6 py-16 sm:py-20">
         <div className="mx-auto max-w-3xl space-y-8 text-center">
           <div className="space-y-2">
-            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Your journals stay yours</h2>
+            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl text-foreground">Your journals stay yours</h2>
             <p className="text-muted-foreground">
               Journals hold personal memories. We built SharedJournal with access control at the core,
               not as an afterthought.
@@ -134,8 +134,8 @@ export default async function Home() {
               { title: 'Private image serving', body: 'Photos attached to entries are served privately and are not publicly accessible.' },
               { title: 'Clean activity history', body: 'Every change is tracked so you always know what happened and when.' },
             ].map(({ title, body }) => (
-              <li key={title} className="rounded-xl border border-[#d9efe9] bg-white/90 px-4 py-4">
-                <p className="text-sm font-semibold text-[#174f48]">{title}</p>
+              <li key={title} className="rounded-xl border border-[#d9efe9] bg-white/90 dark:bg-zinc-800 dark:border-zinc-700 px-4 py-4">
+                <p className="text-sm font-semibold text-[#174f48] dark:text-emerald-400">{title}</p>
                 <p className="mt-1 text-sm leading-6 text-muted-foreground">{body}</p>
               </li>
             ))}
@@ -182,9 +182,9 @@ export default async function Home() {
       </section>
 
       {/* ── Final CTA ── */}
-      <section className="bg-[#f8fffd] px-6 py-16 sm:py-20">
+      <section className="bg-[#f8fffd] dark:bg-zinc-900 px-6 py-16 sm:py-20">
         <div className="mx-auto max-w-xl space-y-6 text-center">
-          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl text-foreground">
             Start writing together today
           </h2>
           <p className="text-muted-foreground">
