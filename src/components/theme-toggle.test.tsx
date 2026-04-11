@@ -18,7 +18,7 @@ describe('ThemeToggle', () => {
   })
 
   it('renders nothing before mounting', () => {
-    useThemeMock.mockReturnValue({ theme: 'light', setTheme: vi.fn() })
+    useThemeMock.mockReturnValue({ resolvedTheme: 'light', setTheme: vi.fn() })
     // Before useEffect runs, component returns null
     const { container } = render(<ThemeToggle />)
     // After mount the button appears; we just verify no crash
@@ -26,20 +26,20 @@ describe('ThemeToggle', () => {
   })
 
   it('shows moon icon when theme is light', async () => {
-    useThemeMock.mockReturnValue({ theme: 'light', setTheme: vi.fn() })
+    useThemeMock.mockReturnValue({ resolvedTheme: 'light', setTheme: vi.fn() })
     render(<ThemeToggle />)
     expect(await screen.findByRole('button', { name: 'Toggle theme' })).toBeInTheDocument()
   })
 
   it('shows sun icon when theme is dark', async () => {
-    useThemeMock.mockReturnValue({ theme: 'dark', setTheme: vi.fn() })
+    useThemeMock.mockReturnValue({ resolvedTheme: 'dark', setTheme: vi.fn() })
     render(<ThemeToggle />)
     expect(await screen.findByRole('button', { name: 'Toggle theme' })).toBeInTheDocument()
   })
 
   it('calls setTheme with "dark" when current theme is light', async () => {
     const setTheme = vi.fn()
-    useThemeMock.mockReturnValue({ theme: 'light', setTheme })
+    useThemeMock.mockReturnValue({ resolvedTheme: 'light', setTheme })
     const user = userEvent.setup()
 
     render(<ThemeToggle />)
@@ -51,7 +51,7 @@ describe('ThemeToggle', () => {
 
   it('calls setTheme with "light" when current theme is dark', async () => {
     const setTheme = vi.fn()
-    useThemeMock.mockReturnValue({ theme: 'dark', setTheme })
+    useThemeMock.mockReturnValue({ resolvedTheme: 'dark', setTheme })
     const user = userEvent.setup()
 
     render(<ThemeToggle />)
