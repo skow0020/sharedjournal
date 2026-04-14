@@ -29,10 +29,10 @@ export function CollaboratorsAccordion({
         <AccordionPrimitive.Header className="flex">
           <AccordionPrimitive.Trigger
               data-slot="accordion-trigger"
-              className="text-muted-foreground focus-visible:ring-ring/50 py-1 text-sm font-medium outline-none hover:underline focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 !inline-flex !w-auto !flex-none !justify-start !gap-1 pr-0"
+              className="text-muted-foreground focus-visible:ring-ring/50 py-1 text-sm font-medium outline-none hover:underline focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 !inline-flex !w-auto !flex-none !justify-start !gap-1 pr-0 [&[data-state=open]>svg]:rotate-180"
             >
               Collaborators ({collaborators.length})
-              <ChevronDownIcon className="pointer-events-none size-4 shrink-0 transition-transform duration-200 [&[data-state=open]]:rotate-180" aria-hidden="true" />
+              <ChevronDownIcon className="pointer-events-none size-4 shrink-0 transition-transform duration-200" aria-hidden="true" />
             </AccordionPrimitive.Trigger>
         </AccordionPrimitive.Header>
         <AccordionContent>
