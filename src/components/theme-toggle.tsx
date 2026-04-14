@@ -8,7 +8,9 @@ export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme()
   const [mounted, setMounted] = React.useState(false)
   React.useEffect(() => setMounted(true), [])
-  if (!mounted) return null
+  if (!mounted) {
+    return <Button variant="ghost" size="icon" aria-label="Toggle theme" disabled className="invisible" />
+  }
 
   return (
     <Button
