@@ -17,14 +17,6 @@ describe('ThemeToggle', () => {
     vi.clearAllMocks()
   })
 
-  it('renders nothing before mounting', () => {
-    useThemeMock.mockReturnValue({ resolvedTheme: 'light', setTheme: vi.fn() })
-    // Before useEffect runs, component returns null
-    const { container } = render(<ThemeToggle />)
-    // After mount the button appears; we just verify no crash
-    expect(container).toBeDefined()
-  })
-
   it('shows moon icon when theme is light', async () => {
     useThemeMock.mockReturnValue({ resolvedTheme: 'light', setTheme: vi.fn() })
     render(<ThemeToggle />)
