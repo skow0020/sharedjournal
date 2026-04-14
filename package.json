@@ -50,7 +50,7 @@
     "@vitest/coverage-v8": "^4.1.4",
     "drizzle-kit": "^0.31.10",
     "esbuild": "^0.28.0",
-    "eslint": "9.39.1",
+    "eslint": "10.2.0",
     "eslint-config-next": "16.2.3",
     "jsdom": "^29.0.1",
     "shadcn": "^4.2.0",
