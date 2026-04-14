@@ -17,7 +17,7 @@ describe('ThemeToggle', () => {
     vi.clearAllMocks()
   })
 
-  it('shows moon icon when theme is light', async () => {
+  it('renders toggle button when theme is light', async () => {
     useThemeMock.mockReturnValue({ resolvedTheme: 'light', setTheme: vi.fn() })
     render(<ThemeToggle />)
     expect(await screen.findByRole('button', { name: 'Toggle theme' })).toBeInTheDocument()
@@ -29,7 +29,7 @@ describe('ThemeToggle', () => {
     expect(await screen.findByRole('button', { name: 'Toggle theme', pressed: false })).toBeInTheDocument()
   })
 
-  it('shows sun icon when theme is dark', async () => {
+  it('renders toggle button when theme is dark', async () => {
     useThemeMock.mockReturnValue({ resolvedTheme: 'dark', setTheme: vi.fn() })
     render(<ThemeToggle />)
     expect(await screen.findByRole('button', { name: 'Toggle theme' })).toBeInTheDocument()
