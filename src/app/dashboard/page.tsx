@@ -67,7 +67,11 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   )
 
   return (
-    <main className="mx-auto w-full max-w-5xl space-y-6 px-6 py-8">
+    <main className="relative mx-auto w-full max-w-5xl space-y-6 px-6 py-8">
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <div className="absolute -top-32 right-0 h-96 w-96 rounded-full bg-[#74d9c5]/15 blur-3xl" />
+        <div className="absolute bottom-0 -left-32 h-96 w-96 rounded-full bg-[#ff9a7f]/10 blur-3xl" />
+      </div>
       <section className="space-y-4">
         <div className="flex items-start justify-between gap-4">
           <h1 className="text-3xl font-semibold tracking-tight">Your Journals</h1>

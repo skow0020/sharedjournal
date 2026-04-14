@@ -17,6 +17,7 @@ export class DashboardPage {
   }
 
   async openCreateJournalModal(): Promise<CreateJournalModal> {
+    await this.page.getByRole('button', { name: 'Toggle theme' }).waitFor()
     await this.page.getByRole('button', { name: 'Add journal' }).click()
     return this.createJournalModal
   }
