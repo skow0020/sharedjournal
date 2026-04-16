@@ -24,16 +24,46 @@ type DeleteJournalButtonProps = {
   action: (input: DeleteJournalInput) => Promise<DeleteJournalState>
   successRedirectTo?: string
   trigger?: ReactNode
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
-export function DeleteJournalButton({ journalId, action, successRedirectTo, trigger }: DeleteJournalButtonProps) {
+export function DeleteJournalButton({
+  journalId,
+  action,
+  successRedirectTo,
+  trigger,
+  open: controlledOpen,
+  onOpenChange,
+}: DeleteJournalButtonProps) {
   const router = useRouter()
-  const [open, setOpen] = useState(false)
+  const [internalOpen, setInternalOpen] = useState(false)
   const [state, setState] = useState<DeleteJournalState>({
     error: null,
     success: false,
   })
   const [pending, startTransition] = useTransition()
+  const open = controlledOpen ?? internalOpen
+
+  function setOpen(nextOpen: boolean) {
+    if (onOpenChange) {
+      onOpenChange(nextOpen)
+      return
+    }
+
+    setInternalOpen(nextOpen)
+  }
+
+  function handleOpenChange(nextOpen: boolean) {
+    setOpen(nextOpen)
+
+    if (nextOpen) {
+      setState({
+        error: null,
+        success: false,
+      })
+    }
+  }
 
   function handleDelete() {
     startTransition(async () => {
@@ -54,12 +84,12 @@ export function DeleteJournalButton({ journalId, action, successRedirectTo, trig
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       {trigger ? (
         <DialogTrigger asChild>
           {trigger}
         </DialogTrigger>
-      ) : (
+      ) : controlledOpen !== undefined ? null : (
         <DialogTrigger asChild>
           <Button type="button" size="sm" variant="outline" className="text-destructive hover:text-destructive">
             Delete journal

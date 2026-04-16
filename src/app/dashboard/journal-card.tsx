@@ -87,7 +87,12 @@ export function JournalCard({ journal, collaborators, deleteAction, recentPhotos
                   journalId={journal.id}
                   action={deleteAction}
                   trigger={
-                    <Button type="button" size="sm" variant="outline" className="text-destructive hover:text-destructive">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="text-muted-foreground hover:text-destructive hover:border-destructive/40"
+                    >
                       <Trash2 className="size-4" aria-hidden />
                       <span className="sr-only sm:not-sr-only">Delete journal</span>
                     </Button>

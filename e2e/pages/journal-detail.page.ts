@@ -33,20 +33,26 @@ export class JournalDetailPage {
   }
 
   async openDeleteJournalDialog(): Promise<DeleteJournalDialog> {
-    await this.page.getByRole('button', { name: 'Delete journal', exact: true }).click()
+    await this.page.getByRole('button', { name: 'Open journal actions' }).click()
+    await this.page.getByRole('menuitem', { name: 'Delete journal' }).click()
     return this.deleteJournalDialog
   }
 
-  async openEditJournalTitle() {
-    await this.page.getByRole('button', { name: 'Edit journal title' }).click()
+  async openEditJournal() {
+    await this.page.getByRole('button', { name: 'Open journal actions' }).click()
+    await this.page.getByRole('menuitem', { name: 'Edit journal' }).click()
   }
 
   async setJournalTitle(title: string) {
-    await this.page.getByRole('textbox', { name: 'Journal title' }).fill(title)
+    await this.page.getByRole('textbox', { name: 'Title' }).fill(title)
   }
 
-  async saveJournalTitle() {
-    await this.page.getByRole('button', { name: 'Save journal title' }).click()
+  async setJournalDescription(description: string) {
+    await this.page.getByRole('textbox', { name: 'Description' }).fill(description)
+  }
+
+  async saveJournalChanges() {
+    await this.page.getByRole('button', { name: 'Save changes' }).click()
   }
 
   async openCollaboratorsPanel() {

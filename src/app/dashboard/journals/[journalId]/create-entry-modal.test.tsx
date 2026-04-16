@@ -429,6 +429,37 @@ describe('CreateEntryModal', () => {
     expect(screen.queryByRole('button', { name: 'Take photo' })).not.toBeInTheDocument()
   })
 
+  it('detects mobile using the pointer coarse media query', async () => {
+    const user = userEvent.setup()
+
+    const matchMediaMock = vi.fn().mockImplementation((query: string) => ({
+      matches: query === '(pointer: coarse)',
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }))
+
+    Object.defineProperty(window, 'matchMedia', {
+      configurable: true,
+      writable: true,
+      value: matchMediaMock,
+    })
+
+    const action = vi.fn(async () => ({ error: null, redirectTo: null }))
+    const cleanupAction = vi.fn(async () => ({ error: null }))
+
+    render(<CreateEntryModal journalId="journal-1" action={action} cleanupAction={cleanupAction} />)
+
+    await user.click(screen.getByRole('button', { name: 'Add entry' }))
+
+    expect(matchMediaMock).toHaveBeenCalledWith('(pointer: coarse)')
+    expect(screen.getByRole('button', { name: 'Take photo' })).toBeInTheDocument()
+  })
+
   it('defaults to non-mobile behavior when matchMedia is unavailable', async () => {
     const user = userEvent.setup()
 

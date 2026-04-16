@@ -66,6 +66,7 @@ test('can create a journal, add an entry, and invite a collaborator', async ({ p
 test('can edit journal name and delete on details page', async ({ page }) => {
   const journalTitle = `E2E Journal ${Date.now()}`
   const newJournalTitle = `Updated ${journalTitle}`
+  const newJournalDescription = 'Secrets galore'
 
   const dashboardPage = new DashboardPage(page)
   await dashboardPage.goto()
@@ -80,11 +81,13 @@ test('can edit journal name and delete on details page', async ({ page }) => {
   await expect(page).toHaveURL(/\/dashboard\/journals\/[a-z0-9-]+$/i)
   await expect(journalDetailPage.heading(journalTitle)).toBeVisible()
 
-  await journalDetailPage.openEditJournalTitle()
+  await journalDetailPage.openEditJournal()
   await journalDetailPage.setJournalTitle(newJournalTitle)
-  await journalDetailPage.saveJournalTitle()
+  await journalDetailPage.setJournalDescription(newJournalDescription)
+  await journalDetailPage.saveJournalChanges()
 
   await expect(journalDetailPage.heading(newJournalTitle)).toBeVisible()
+  await expect(journalDetailPage.descriptionText(newJournalDescription)).toBeVisible()
 
   const deleteJournalDialog = await journalDetailPage.openDeleteJournalDialog()
   await deleteJournalDialog.confirm()

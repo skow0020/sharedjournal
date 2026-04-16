@@ -12,7 +12,7 @@ import {
   revokeJournalInvitationByOwner,
   setInvitationEmailDeliveryFlag,
 } from '@/data/invitations'
-import { getUserJournalById, updateJournalTitleForOwner } from '@/data/journals'
+import { getUserJournalById, updateJournalDetailsForOwner } from '@/data/journals'
 import { ENTRY_IMAGE_ALLOWED_MIME_TYPES, ENTRY_IMAGE_MAX_FILES } from '@/lib/entry-image-constants'
 import { isTempEntryImageStorageKeyForJournal } from '@/lib/entry-image-storage'
 import { getCurrentAppUser } from '@/lib/get-current-app-user'
@@ -65,9 +65,10 @@ export type InviteUserInput = {
   email: string
 }
 
-export type UpdateJournalTitleInput = {
+export type UpdateJournalDetailsInput = {
   journalId: string
   title: string
+  description: string
 }
 
 export type CancelPendingInvitationInput = {
@@ -81,7 +82,7 @@ export type InviteActionState = {
   inviteLink: string | null
 }
 
-export type UpdateJournalTitleState = {
+export type UpdateJournalDetailsState = {
   error: string | null
 }
 
@@ -135,13 +136,14 @@ const inviteUserSchema = z.object({
   email: z.string().trim().email('Please provide a valid email address.').transform((value) => value.toLowerCase()),
 })
 
-const updateJournalTitleSchema = z.object({
+const updateJournalDetailsSchema = z.object({
   journalId: z.string().trim().min(1, 'Journal is required.'),
   title: z
     .string()
     .trim()
     .min(1, 'Title is required.')
     .max(JOURNAL_TITLE_MAX_LENGTH, 'Title must be 180 characters or less.'),
+  description: z.string().trim().max(2000, 'Description must be 2000 characters or less.'),
 })
 
 const cancelPendingInvitationSchema = z.object({
@@ -417,9 +419,9 @@ export async function createInviteAction(
   }
 }
 
-export async function updateJournalTitleAction(
-  input: UpdateJournalTitleInput,
-): Promise<UpdateJournalTitleState> {
+export async function updateJournalDetailsAction(
+  input: UpdateJournalDetailsInput,
+): Promise<UpdateJournalDetailsState> {
   const currentUser = await getCurrentAppUser()
 
   if (!currentUser) {
@@ -428,18 +430,19 @@ export async function updateJournalTitleAction(
     }
   }
 
-  const parsedInput = updateJournalTitleSchema.safeParse(input)
+  const parsedInput = updateJournalDetailsSchema.safeParse(input)
 
   if (!parsedInput.success) {
     return {
-      error: parsedInput.error.issues[0]?.message ?? 'Unable to update journal title.',
+      error: parsedInput.error.issues[0]?.message ?? 'Unable to update journal.',
     }
   }
 
-  const updated = await updateJournalTitleForOwner({
+  const updated = await updateJournalDetailsForOwner({
     ownerUserId: currentUser.id,
     journalId: parsedInput.data.journalId,
     title: parsedInput.data.title,
+    description: parsedInput.data.description || null,
   })
 
   if (!updated) {
