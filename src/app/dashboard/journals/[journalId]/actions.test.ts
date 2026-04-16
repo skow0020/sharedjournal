@@ -5,7 +5,7 @@ const {
   createEntryWithUploadedImagesForJournalMock,
   deleteEntryForJournalMock,
   createJournalInvitationMock,
-  updateJournalTitleForOwnerMock,
+  updateJournalDetailsForOwnerMock,
   setInvitationEmailDeliveryFlagMock,
   delMock,
   getCurrentAppUserMock,
@@ -18,7 +18,7 @@ const {
   createEntryWithUploadedImagesForJournalMock: vi.fn(),
   deleteEntryForJournalMock: vi.fn(),
   createJournalInvitationMock: vi.fn(),
-  updateJournalTitleForOwnerMock: vi.fn(),
+  updateJournalDetailsForOwnerMock: vi.fn(),
   setInvitationEmailDeliveryFlagMock: vi.fn(),
   delMock: vi.fn(),
   getCurrentAppUserMock: vi.fn(),
@@ -48,7 +48,7 @@ vi.mock('@/data/invitations', () => ({
 
 vi.mock('@/data/journals', () => ({
   getUserJournalById: getUserJournalByIdMock,
-  updateJournalTitleForOwner: updateJournalTitleForOwnerMock,
+  updateJournalDetailsForOwner: updateJournalDetailsForOwnerMock,
 }))
 
 vi.mock('@/lib/get-current-app-user', () => ({
@@ -72,7 +72,7 @@ import {
   createEntryAction,
   createInviteAction,
   deleteEntryAction,
-  updateJournalTitleAction,
+  updateJournalDetailsAction,
 } from '@/app/dashboard/journals/[journalId]/actions'
 
 const originalAppUrl = process.env.NEXT_PUBLIC_APP_URL
@@ -621,7 +621,7 @@ describe('createInviteAction', () => {
   })
 })
 
-describe('updateJournalTitleAction', () => {
+describe('updateJournalDetailsAction', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
@@ -629,38 +629,56 @@ describe('updateJournalTitleAction', () => {
   it('returns an auth error when the user is signed out', async () => {
     getCurrentAppUserMock.mockResolvedValue(null)
 
-    const result = await updateJournalTitleAction({
+    const result = await updateJournalDetailsAction({
       journalId: 'journal-1',
       title: 'New title',
+      description: 'New description',
     })
 
     expect(result).toEqual({
       error: 'You must be signed in to update this journal.',
     })
-    expect(updateJournalTitleForOwnerMock).not.toHaveBeenCalled()
+    expect(updateJournalDetailsForOwnerMock).not.toHaveBeenCalled()
   })
 
   it('validates the title before calling the data helper', async () => {
     getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
 
-    const result = await updateJournalTitleAction({
+    const result = await updateJournalDetailsAction({
       journalId: 'journal-1',
       title: '   ',
+      description: 'New description',
     })
 
     expect(result).toEqual({
       error: 'Title is required.',
     })
-    expect(updateJournalTitleForOwnerMock).not.toHaveBeenCalled()
+    expect(updateJournalDetailsForOwnerMock).not.toHaveBeenCalled()
+  })
+
+  it('validates description length before calling the data helper', async () => {
+    getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
+
+    const result = await updateJournalDetailsAction({
+      journalId: 'journal-1',
+      title: 'New title',
+      description: 'x'.repeat(2001),
+    })
+
+    expect(result).toEqual({
+      error: 'Description must be 2000 characters or less.',
+    })
+    expect(updateJournalDetailsForOwnerMock).not.toHaveBeenCalled()
   })
 
   it('returns a permission error when the data helper rejects the update', async () => {
     getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
-    updateJournalTitleForOwnerMock.mockResolvedValue(false)
+    updateJournalDetailsForOwnerMock.mockResolvedValue(false)
 
-    const result = await updateJournalTitleAction({
+    const result = await updateJournalDetailsAction({
       journalId: 'journal-1',
       title: 'New title',
+      description: 'New description',
     })
 
     expect(result).toEqual({
@@ -670,17 +688,19 @@ describe('updateJournalTitleAction', () => {
 
   it('trims inputs and revalidates the journal page on success', async () => {
     getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
-    updateJournalTitleForOwnerMock.mockResolvedValue(true)
+    updateJournalDetailsForOwnerMock.mockResolvedValue(true)
 
-    const result = await updateJournalTitleAction({
+    const result = await updateJournalDetailsAction({
       journalId: '  journal-1  ',
       title: '  Fresh title  ',
+      description: '  Updated description  ',
     })
 
-    expect(updateJournalTitleForOwnerMock).toHaveBeenCalledWith({
+    expect(updateJournalDetailsForOwnerMock).toHaveBeenCalledWith({
       ownerUserId: 'user-1',
       journalId: 'journal-1',
       title: 'Fresh title',
+      description: 'Updated description',
     })
     expect(revalidatePathMock).toHaveBeenCalledWith('/dashboard/journals/journal-1')
     expect(result).toEqual({

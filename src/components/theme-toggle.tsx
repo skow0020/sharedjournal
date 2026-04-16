@@ -9,7 +9,7 @@ export function ThemeToggle() {
   const [mounted, setMounted] = React.useState(false)
   React.useEffect(() => setMounted(true), [])
   if (!mounted) {
-    return <Button variant="ghost" size="icon" aria-label="Toggle theme" disabled className="invisible" />
+    return <span aria-hidden="true" className="inline-block size-9" />
   }
 
   return (

@@ -18,17 +18,16 @@ import {
   createEntryAction,
   createInviteAction,
   deleteEntryAction,
-  updateJournalTitleAction,
+  updateJournalDetailsAction,
 } from '@/app/dashboard/journals/[journalId]/actions'
 import { CollaboratorsAccordion } from '@/app/dashboard/journals/collaborators-accordion'
 import { deleteJournalAction } from '@/app/dashboard/actions'
-import { DeleteJournalButton } from '@/app/dashboard/delete-journal-button'
 import { CreateEntryModal } from '@/app/dashboard/journals/[journalId]/create-entry-modal'
 import { DeleteEntryButton } from '@/app/dashboard/journals/[journalId]/delete-entry-button'
 import { InviteUserModal } from '@/app/dashboard/journals/[journalId]/invite-user-modal'
 import { JournalEntriesInfiniteLoader } from '@/app/dashboard/journals/[journalId]/journal-entries-infinite-loader'
+import { OwnerActionsMenu } from '@/app/dashboard/journals/[journalId]/owner-actions-menu'
 import { JournalTitleEditor } from '@/app/dashboard/journals/[journalId]/journal-title-editor'
-import { MobileOwnerActionsMenu } from '@/app/dashboard/journals/[journalId]/mobile-owner-actions-menu'
 import {
   getAllPhotosForJournal,
   getJournalEntryCountForJournal,
@@ -56,13 +55,20 @@ type JournalDetailsPageProps = {
 const ENTRIES_PER_PAGE = 10
 
 export default async function JournalDetailsPage({ params, searchParams }: JournalDetailsPageProps) {
+  const { journalId } = await params
+
+  // Ignore extension-like path probes (e.g. browser installHook.js.map requests)
+  // so they don't execute auth-dependent journal page logic.
+  if (journalId.includes('.')) {
+    notFound()
+  }
+
   const appUser = await getCurrentAppUser()
 
   if (!appUser) {
     redirect('/sign-in')
   }
 
-  const { journalId } = await params
   const journal = await getUserJournalById(appUser.id, journalId)
 
   if (!journal) {
@@ -70,7 +76,6 @@ export default async function JournalDetailsPage({ params, searchParams }: Journ
   }
 
   const journalTitle = journal.title
-  const canEditJournalTitle = journal.ownerUserId === appUser.id
   const resolvedSearchParams = searchParams ? await searchParams : undefined
   const parsedEntriesPage = Number.parseInt(resolvedSearchParams?.entriesPage ?? '1', 10)
   const currentEntriesPage = Number.isNaN(parsedEntriesPage) || parsedEntriesPage < 1
@@ -111,18 +116,9 @@ export default async function JournalDetailsPage({ params, searchParams }: Journ
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0 flex-1">
                 <JournalTitleEditor
-                  journalId={journalId}
                   title={journal.title}
-                  canEdit={canEditJournalTitle}
-                  action={updateJournalTitleAction}
                 />
               </div>
-              {journal.isOwner ? (
-                <MobileOwnerActionsMenu
-                  journalId={journalId}
-                  action={deleteJournalAction}
-                />
-              ) : null}
             </div>
             {journal.description ? (
               <p className="text-muted-foreground text-sm">{journal.description}</p>
@@ -156,13 +152,13 @@ export default async function JournalDetailsPage({ params, searchParams }: Journ
               />
             ) : null}
             {journal.isOwner ? (
-              <div className="hidden sm:block">
-                <DeleteJournalButton
-                  journalId={journalId}
-                  action={deleteJournalAction}
-                  successRedirectTo="/dashboard"
-                />
-              </div>
+              <OwnerActionsMenu
+                journalId={journalId}
+                journalTitle={journal.title}
+                journalDescription={journal.description}
+                deleteAction={deleteJournalAction}
+                updateAction={updateJournalDetailsAction}
+              />
             ) : null}
           </div>
         </div>

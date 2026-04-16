@@ -197,6 +197,13 @@ type UpdateJournalTitleInput = {
   title: string
 }
 
+type UpdateJournalDetailsInput = {
+  ownerUserId: string
+  journalId: string
+  title: string
+  description: string | null
+}
+
 export async function createJournalForOwner({
   ownerUserId,
   title,
@@ -235,6 +242,21 @@ export async function updateJournalTitleForOwner({
   const [updatedJournal] = await db
     .update(journals)
     .set({ title })
+    .where(and(eq(journals.id, journalId), eq(journals.ownerUserId, ownerUserId)))
+    .returning({ id: journals.id })
+
+  return Boolean(updatedJournal)
+}
+
+export async function updateJournalDetailsForOwner({
+  ownerUserId,
+  journalId,
+  title,
+  description,
+}: UpdateJournalDetailsInput): Promise<boolean> {
+  const [updatedJournal] = await db
+    .update(journals)
+    .set({ title, description })
     .where(and(eq(journals.id, journalId), eq(journals.ownerUserId, ownerUserId)))
     .returning({ id: journals.id })
 

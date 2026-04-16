@@ -51,8 +51,8 @@ vi.mock('@/app/dashboard/journals/[journalId]/invite-user-modal', () => ({
   InviteUserModal: () => <div data-testid="invite-user-modal">Invite user modal</div>,
 }))
 
-vi.mock('@/app/dashboard/journals/[journalId]/mobile-owner-actions-menu', () => ({
-  MobileOwnerActionsMenu: () => <div data-testid="mobile-owner-actions-menu">Mobile owner actions menu</div>,
+vi.mock('@/app/dashboard/journals/[journalId]/owner-actions-menu', () => ({
+  OwnerActionsMenu: () => <div data-testid="owner-actions-menu">Owner actions menu</div>,
 }))
 
 vi.mock('@/app/dashboard/journals/[journalId]/journal-entries-infinite-loader', () => ({
@@ -73,7 +73,7 @@ vi.mock('@/app/dashboard/journals/[journalId]/actions', () => ({
   createEntryAction: vi.fn(),
   createInviteAction: vi.fn(),
   deleteEntryAction: vi.fn(async () => ({ error: null, success: true })),
-  updateJournalTitleAction: vi.fn(),
+  updateJournalDetailsAction: vi.fn(),
 }))
 
 vi.mock('@/lib/get-current-app-user', () => ({
@@ -184,7 +184,6 @@ describe('JournalDetailsPage', () => {
     expect(screen.getByRole('link', { name: 'Back to journals' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Family Journal' })).toBeInTheDocument()
     expect(screen.getByText('Shared notes and reflections')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Edit journal title' })).toBeInTheDocument()
 
     expect(screen.getByText('Collaborators (1)')).toBeInTheDocument()
 
@@ -201,11 +200,10 @@ describe('JournalDetailsPage', () => {
 
     expect(screen.getByTestId('create-entry-modal')).toBeInTheDocument()
     expect(screen.getByTestId('invite-user-modal')).toBeInTheDocument()
-    expect(screen.getByTestId('delete-journal-button')).toBeInTheDocument()
-    expect(screen.getByTestId('mobile-owner-actions-menu')).toBeInTheDocument()
+    expect(screen.getByTestId('owner-actions-menu')).toBeInTheDocument()
   })
 
-  it('hides the edit button when the user is not the journal owner', async () => {
+  it('hides owner actions when the user is not the journal owner', async () => {
     getUserJournalByIdMock.mockResolvedValue({
       id: 'journal-1',
       title: 'Family Journal',
@@ -215,7 +213,7 @@ describe('JournalDetailsPage', () => {
 
     await renderJournalDetailsPage()
 
-    expect(screen.queryByRole('button', { name: 'Edit journal title' })).not.toBeInTheDocument()
+    expect(screen.queryByTestId('owner-actions-menu')).not.toBeInTheDocument()
   })
 
   it('renders empty entries state when there are no journal entries', async () => {
@@ -241,8 +239,7 @@ describe('JournalDetailsPage', () => {
 
     await renderJournalDetailsPage()
 
-    expect(screen.queryByTestId('delete-journal-button')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('mobile-owner-actions-menu')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('owner-actions-menu')).not.toBeInTheDocument()
   })
 
   it('renders entry delete control for a non-owner who wrote the entry', async () => {
