@@ -11,6 +11,7 @@ import {
   getUserJournalById,
   getUserJournalCount,
   getUserJournals,
+  updateJournalDetailsForOwner,
   updateJournalTitleForOwner,
 } from '@/data/journals'
 
@@ -568,6 +569,88 @@ describe('updateJournalTitleForOwner', () => {
       ownerUserId: ownerId,
       journalId: fakeJournalId,
       title: 'Never Updated',
+    })
+
+    expect(result).toBe(false)
+  })
+})
+
+describe('updateJournalDetailsForOwner', () => {
+  let ownerId: string
+  let nonOwnerId: string
+  let journalId: string
+
+  beforeEach(async () => {
+    const owner = await createUser({ displayName: 'Owner' })
+    const nonOwner = await createUser({ displayName: 'Non-owner' })
+
+    ownerId = owner.id
+    nonOwnerId = nonOwner.id
+
+    const { id } = await createJournalForOwner({
+      ownerUserId: ownerId,
+      title: 'Original Title',
+      description: 'Original Description',
+    })
+
+    journalId = id
+
+    await db.insert(journalMembers).values({
+      journalId,
+      userId: nonOwnerId,
+      role: 'editor',
+    })
+  })
+
+  afterEach(async () => {
+    await deleteJournals([journalId])
+    await deleteUsers([ownerId, nonOwnerId])
+  })
+
+  it('updates journal title and description when user is the owner', async () => {
+    const result = await updateJournalDetailsForOwner({
+      ownerUserId: ownerId,
+      journalId,
+      title: 'Updated Title',
+      description: 'Updated Description',
+    })
+
+    expect(result).toBe(true)
+
+    const [row] = await db
+      .select({ title: journals.title, description: journals.description })
+      .from(journals)
+      .where(eq(journals.id, journalId))
+
+    expect(row.title).toBe('Updated Title')
+    expect(row.description).toBe('Updated Description')
+  })
+
+  it('returns false and does not update when user is not the owner', async () => {
+    const result = await updateJournalDetailsForOwner({
+      ownerUserId: nonOwnerId,
+      journalId,
+      title: 'Attempted Title',
+      description: 'Attempted Description',
+    })
+
+    expect(result).toBe(false)
+
+    const [row] = await db
+      .select({ title: journals.title, description: journals.description })
+      .from(journals)
+      .where(eq(journals.id, journalId))
+
+    expect(row.title).toBe('Original Title')
+    expect(row.description).toBe('Original Description')
+  })
+
+  it('returns false for non-existent journal', async () => {
+    const result = await updateJournalDetailsForOwner({
+      ownerUserId: ownerId,
+      journalId: crypto.randomUUID(),
+      title: 'Never Updated',
+      description: 'Never Updated',
     })
 
     expect(result).toBe(false)

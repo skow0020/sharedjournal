@@ -54,6 +54,17 @@ export function DeleteJournalButton({
     setInternalOpen(nextOpen)
   }
 
+  function handleOpenChange(nextOpen: boolean) {
+    setOpen(nextOpen)
+
+    if (nextOpen) {
+      setState({
+        error: null,
+        success: false,
+      })
+    }
+  }
+
   function handleDelete() {
     startTransition(async () => {
       const nextState = await action({ journalId })
@@ -73,7 +84,7 @@ export function DeleteJournalButton({
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       {trigger ? (
         <DialogTrigger asChild>
           {trigger}

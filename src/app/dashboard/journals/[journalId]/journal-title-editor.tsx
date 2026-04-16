@@ -1,5 +1,3 @@
-'use client'
-
 type JournalTitleEditorProps = {
   title: string
 }
