@@ -5,6 +5,7 @@ import {
 } from '@clerk/nextjs'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { SpeedInsights } from '@vercel/speed-insights/next'
+import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 import { AuthHeader } from '@/components/auth-header'
 import { ThemeProvider } from '@/components/theme-provider'
@@ -49,6 +50,7 @@ export default function RootLayout({
             {children}
           </ThemeProvider>
           <SpeedInsights />
+          <Analytics />
         </body>
       </html>
     </ClerkProvider>
