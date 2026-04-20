@@ -1,4 +1,5 @@
 import { auth } from '@clerk/nextjs/server'
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 import {
@@ -191,6 +192,19 @@ export default async function Home() {
             Create your first journal in minutes. No credit card required.
           </p>
           <LandingHeroCta />
+          <p className="text-muted-foreground text-xs">
+            <Link href="/legal" className="underline underline-offset-4 hover:no-underline">
+              Legal
+            </Link>{' '}
+            ·{' '}
+            <Link href="/privacy" className="underline underline-offset-4 hover:no-underline">
+              Privacy Policy
+            </Link>{' '}
+            ·{' '}
+            <Link href="/terms" className="underline underline-offset-4 hover:no-underline">
+              Terms of Service
+            </Link>
+          </p>
         </div>
       </section>
     </main>
