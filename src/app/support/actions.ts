@@ -5,10 +5,16 @@ import { z } from 'zod'
 import { createSupportPayment } from '@/data/support-payments'
 import { getCurrentAppUser } from '@/lib/get-current-app-user'
 import { getCurrentUserEmail } from '@/lib/get-current-user-email'
+import { SUPPORT_AMOUNTS, type SupportAmountCents } from '@/lib/support-amounts'
 import { getStripeServerClient } from '@/lib/stripe/server-client'
 
+const supportAmountSchema = z
+  .number()
+  .int()
+  .refine((value): value is SupportAmountCents => SUPPORT_AMOUNTS.includes(value as SupportAmountCents))
+
 const supportCheckoutSchema = z.object({
-  amountCents: z.union([z.literal(500), z.literal(1000), z.literal(2500)]),
+  amountCents: supportAmountSchema,
 })
 
 export type CreateSupportCheckoutInput = {

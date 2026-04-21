@@ -10,8 +10,7 @@ import {
 import { createSupportCheckoutAction } from '@/app/support/actions'
 import { SupportButton } from '@/app/support/support-button'
 import { getCurrentAppUser } from '@/lib/get-current-app-user'
-
-const SUPPORT_AMOUNTS = [500, 1000, 2500]
+import { SUPPORT_AMOUNTS } from '@/lib/support-amounts'
 
 export default async function SupportPage() {
   const appUser = await getCurrentAppUser()
