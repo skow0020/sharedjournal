@@ -14,6 +14,8 @@ Current implementation includes:
 - Payment persistence: `support_payments` table and `src/data/support-payments.ts`
 - Success page: `/support/success`
 
+Note: Stripe webhook mutation handling in a route handler is an intentional exception to the general Server Action mutation entrypoint rule. Keep the webhook route thin and perform database mutations via typed `src/data/*` helpers.
+
 ## Environment Variables
 
 Required environment variables:

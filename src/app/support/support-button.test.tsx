@@ -38,4 +38,19 @@ describe('SupportButton', () => {
 
     expect(screen.getByText('Unable to start checkout right now. Please try again.')).toBeInTheDocument()
   })
+
+  it('shows error and resets pending state when action rejects', async () => {
+    const user = userEvent.setup()
+
+    const action = vi.fn(async () => {
+      throw new Error('network failure')
+    })
+
+    render(<SupportButton amountCents={500} action={action} />)
+
+    await user.click(screen.getByRole('button', { name: 'Support $5.00' }))
+
+    expect(await screen.findByText('Unable to start checkout right now. Please try again.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Support $5.00' })).toBeEnabled()
+  })
 })

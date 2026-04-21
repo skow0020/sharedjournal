@@ -27,20 +27,25 @@ export function SupportButton({ amountCents, action, redirectToCheckout }: Suppo
     setPending(true)
     setError(null)
 
-    const result = await action({ amountCents })
+    try {
+      const result = await action({ amountCents })
 
-    if (result.error || !result.checkoutUrl) {
-      setError(result.error ?? 'Unable to start checkout.')
+      if (result.error || !result.checkoutUrl) {
+        setError(result.error ?? 'Unable to start checkout.')
+        return
+      }
+
+      if (redirectToCheckout) {
+        redirectToCheckout(result.checkoutUrl)
+        return
+      }
+
+      window.location.assign(result.checkoutUrl)
+    } catch {
+      setError('Unable to start checkout right now. Please try again.')
+    } finally {
       setPending(false)
-      return
     }
-
-    if (redirectToCheckout) {
-      redirectToCheckout(result.checkoutUrl)
-      return
-    }
-
-    window.location.assign(result.checkoutUrl)
   }
 
   return (

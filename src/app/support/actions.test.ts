@@ -37,6 +37,8 @@ import { createSupportCheckoutAction } from '@/app/support/actions'
 describe('createSupportCheckoutAction', () => {
   const env = process.env as Record<string, string | undefined>
   const originalNodeEnv = process.env.NODE_ENV
+  const originalNextPublicAppUrl = process.env.NEXT_PUBLIC_APP_URL
+  const originalAppUrl = process.env.APP_URL
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -68,6 +70,18 @@ describe('createSupportCheckoutAction', () => {
       delete env.NODE_ENV
     } else {
       env.NODE_ENV = originalNodeEnv
+    }
+
+    if (originalNextPublicAppUrl === undefined) {
+      delete env.NEXT_PUBLIC_APP_URL
+    } else {
+      env.NEXT_PUBLIC_APP_URL = originalNextPublicAppUrl
+    }
+
+    if (originalAppUrl === undefined) {
+      delete env.APP_URL
+    } else {
+      env.APP_URL = originalAppUrl
     }
   })
 
