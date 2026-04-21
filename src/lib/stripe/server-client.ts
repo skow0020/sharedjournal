@@ -1,6 +1,7 @@
 import Stripe from 'stripe'
 
 let stripeClient: Stripe | null = null
+const STRIPE_API_VERSION: Stripe.StripeConfig['apiVersion'] = '2026-03-25.dahlia'
 
 function getStripeSecretKey(): string {
   const secretKey = process.env.STRIPE_SECRET_KEY
@@ -17,6 +18,8 @@ export function getStripeServerClient(): Stripe {
     return stripeClient
   }
 
-  stripeClient = new Stripe(getStripeSecretKey())
+  stripeClient = new Stripe(getStripeSecretKey(), {
+    apiVersion: STRIPE_API_VERSION,
+  })
   return stripeClient
 }

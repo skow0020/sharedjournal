@@ -144,4 +144,22 @@ describe('Stripe webhook route', () => {
       stripeCheckoutSessionId: 'cs_test_789',
     })
   })
+
+  it('returns 500 when internal webhook processing fails', async () => {
+    constructStripeWebhookEventMock.mockReturnValue({
+      type: 'checkout.session.completed',
+      data: {
+        object: {
+          id: 'cs_test_500',
+          payment_intent: 'pi_test_500',
+        },
+      },
+    })
+    completeSupportPaymentMock.mockRejectedValue(new Error('db unavailable'))
+
+    const response = await POST(makeRequest({ signature: 't=1,v1=abc' }))
+
+    expect(response.status).toBe(500)
+    await expect(response.json()).resolves.toEqual({ error: 'Webhook processing failed.' })
+  })
 })

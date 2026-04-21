@@ -36,10 +36,15 @@ export async function POST(request: Request): Promise<NextResponse> {
   }
 
   const payload = await request.text()
+  let event: Stripe.Event
 
   try {
-    const event = constructStripeWebhookEvent(payload, signature)
+    event = constructStripeWebhookEvent(payload, signature)
+  } catch {
+    return NextResponse.json({ error: 'Invalid webhook signature.' }, { status: 400 })
+  }
 
+  try {
     if (
       event.type === 'checkout.session.completed'
       || event.type === 'checkout.session.async_payment_succeeded'
@@ -72,6 +77,6 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     return NextResponse.json({ received: true })
   } catch {
-    return NextResponse.json({ error: 'Invalid webhook signature.' }, { status: 400 })
+    return NextResponse.json({ error: 'Webhook processing failed.' }, { status: 500 })
   }
 }
