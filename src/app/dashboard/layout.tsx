@@ -1,5 +1,7 @@
 import Link from 'next/link'
 
+import { SUPPORT_EMAIL_HREF } from '@/lib/support-contact'
+
 type DashboardLayoutProps = Readonly<{
   children: React.ReactNode
 }>
@@ -19,7 +21,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
           <nav aria-label="Dashboard footer links" className="flex items-center gap-4 text-xs">
             <a
-              href="mailto:skow0020@gmail.com"
+              href={SUPPORT_EMAIL_HREF}
               className="text-muted-foreground underline-offset-4 hover:underline"
             >
               Support

@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
 import LegalPage from '@/app/legal/page'
+import { SUPPORT_EMAIL, SUPPORT_EMAIL_HREF } from '@/lib/support-contact'
 
 describe('LegalPage', () => {
   it('renders legal index content and policy links', () => {
@@ -12,9 +13,9 @@ describe('LegalPage', () => {
 
     expect(screen.getByRole('link', { name: 'Read Privacy Policy' })).toHaveAttribute('href', '/privacy')
     expect(screen.getByRole('link', { name: 'Read Terms of Service' })).toHaveAttribute('href', '/terms')
-    expect(screen.getByRole('link', { name: 'skow0020@gmail.com' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: SUPPORT_EMAIL })).toHaveAttribute(
       'href',
-      'mailto:skow0020@gmail.com',
+      SUPPORT_EMAIL_HREF,
     )
     expect(screen.getByText('Support payments')).toBeInTheDocument()
   })

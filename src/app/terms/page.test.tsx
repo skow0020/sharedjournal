@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
 import TermsPage from '@/app/terms/page'
+import { SUPPORT_EMAIL, SUPPORT_EMAIL_HREF } from '@/lib/support-contact'
 
 describe('TermsPage', () => {
   it('renders core terms sections and links', () => {
@@ -14,10 +15,10 @@ describe('TermsPage', () => {
     expect(screen.getByText('Service terms')).toBeInTheDocument()
     expect(screen.getByText('Support payments and refunds')).toBeInTheDocument()
 
-    const supportLinks = screen.getAllByRole('link', { name: 'skow0020@gmail.com' })
+    const supportLinks = screen.getAllByRole('link', { name: SUPPORT_EMAIL })
     expect(supportLinks).toHaveLength(2)
-    expect(supportLinks[0]).toHaveAttribute('href', 'mailto:skow0020@gmail.com')
-    expect(supportLinks[1]).toHaveAttribute('href', 'mailto:skow0020@gmail.com')
+    expect(supportLinks[0]).toHaveAttribute('href', SUPPORT_EMAIL_HREF)
+    expect(supportLinks[1]).toHaveAttribute('href', SUPPORT_EMAIL_HREF)
     expect(screen.getByRole('link', { name: 'home' })).toHaveAttribute('href', '/')
   })
 })

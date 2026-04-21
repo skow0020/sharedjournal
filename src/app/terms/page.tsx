@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { SUPPORT_EMAIL, SUPPORT_EMAIL_HREF } from '@/lib/support-contact'
 
 export const metadata = {
   title: 'Terms of Service | SharedJournal',
@@ -67,8 +68,8 @@ export default function TermsPage() {
           <p>We may suspend accounts that violate these terms.</p>
           <p>
             For support or legal questions, contact{' '}
-            <a href="mailto:skow0020@gmail.com" className="underline underline-offset-4 hover:no-underline">
-              skow0020@gmail.com
+            <a href={SUPPORT_EMAIL_HREF} className="underline underline-offset-4 hover:no-underline">
+              {SUPPORT_EMAIL}
             </a>
             .
           </p>
@@ -89,8 +90,8 @@ export default function TermsPage() {
           </p>
           <p>
             Refund requests are reviewed case-by-case. Contact{' '}
-            <a href="mailto:skow0020@gmail.com" className="underline underline-offset-4 hover:no-underline">
-              skow0020@gmail.com
+            <a href={SUPPORT_EMAIL_HREF} className="underline underline-offset-4 hover:no-underline">
+              {SUPPORT_EMAIL}
             </a>{' '}
             with your payment details.
           </p>

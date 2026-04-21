@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
 import PrivacyPage from '@/app/privacy/page'
+import { SUPPORT_EMAIL, SUPPORT_EMAIL_HREF } from '@/lib/support-contact'
 
 describe('PrivacyPage', () => {
   it('renders core policy sections and links', () => {
@@ -14,9 +15,9 @@ describe('PrivacyPage', () => {
     expect(screen.getByText('Sharing and retention')).toBeInTheDocument()
     expect(screen.getByText('Payment processing')).toBeInTheDocument()
 
-    expect(screen.getByRole('link', { name: 'skow0020@gmail.com' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: SUPPORT_EMAIL })).toHaveAttribute(
       'href',
-      'mailto:skow0020@gmail.com',
+      SUPPORT_EMAIL_HREF,
     )
     expect(screen.getByRole('link', { name: 'home' })).toHaveAttribute('href', '/')
   })

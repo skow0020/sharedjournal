@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { SUPPORT_EMAIL, SUPPORT_EMAIL_HREF } from '@/lib/support-contact'
 
 export const metadata = {
   title: 'Privacy Policy | SharedJournal',
@@ -67,8 +68,8 @@ export default function PrivacyPage() {
           <p>Journal content remains private to journal members invited by the journal owner.</p>
           <p>
             You can request account-related support at{' '}
-            <a href="mailto:skow0020@gmail.com" className="underline underline-offset-4 hover:no-underline">
-              skow0020@gmail.com
+            <a href={SUPPORT_EMAIL_HREF} className="underline underline-offset-4 hover:no-underline">
+              {SUPPORT_EMAIL}
             </a>
             .
           </p>

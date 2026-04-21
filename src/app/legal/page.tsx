@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { SUPPORT_EMAIL, SUPPORT_EMAIL_HREF } from '@/lib/support-contact'
 
 export const metadata: Metadata = {
   title: 'Legal | SharedJournal',
@@ -70,7 +71,7 @@ export default function LegalPage() {
       </Card>
 
       <p className="text-muted-foreground text-xs">
-        Questions: <a href="mailto:skow0020@gmail.com" className="underline underline-offset-4 hover:no-underline">skow0020@gmail.com</a>
+        Questions: <a href={SUPPORT_EMAIL_HREF} className="underline underline-offset-4 hover:no-underline">{SUPPORT_EMAIL}</a>
       </p>
     </main>
   )
