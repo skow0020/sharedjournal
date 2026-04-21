@@ -5,12 +5,14 @@ const {
   getCurrentAppUserMock,
   getCurrentUserEmailMock,
   stripeCheckoutCreateMock,
+  stripeCheckoutExpireMock,
   getStripeServerClientMock,
 } = vi.hoisted(() => ({
   createSupportPaymentMock: vi.fn(),
   getCurrentAppUserMock: vi.fn(),
   getCurrentUserEmailMock: vi.fn(),
   stripeCheckoutCreateMock: vi.fn(),
+  stripeCheckoutExpireMock: vi.fn(),
   getStripeServerClientMock: vi.fn(),
 }))
 
@@ -53,6 +55,7 @@ describe('createSupportCheckoutAction', () => {
       checkout: {
         sessions: {
           create: stripeCheckoutCreateMock,
+          expire: stripeCheckoutExpireMock,
         },
       },
     })
@@ -193,5 +196,39 @@ describe('createSupportCheckoutAction', () => {
       checkoutUrl: null,
     })
     expect(createSupportPaymentMock).not.toHaveBeenCalled()
+    expect(stripeCheckoutExpireMock).not.toHaveBeenCalled()
+  })
+
+  it('expires checkout session and returns generic error when payment persistence fails', async () => {
+    createSupportPaymentMock.mockRejectedValue(new Error('db unavailable'))
+
+    const result = await createSupportCheckoutAction({ amountCents: 500 })
+
+    expect(result).toEqual({
+      error: 'Unable to start checkout right now. Please try again.',
+      checkoutUrl: null,
+    })
+
+    expect(createSupportPaymentMock).toHaveBeenCalledWith({
+      userId: 'user-1',
+      stripeCheckoutSessionId: 'cs_test_123',
+      amountCents: 500,
+      currency: 'usd',
+      customerEmail: 'user@example.com',
+    })
+    expect(stripeCheckoutExpireMock).toHaveBeenCalledWith('cs_test_123')
+  })
+
+  it('still returns generic error when persistence fails and session expiry also fails', async () => {
+    createSupportPaymentMock.mockRejectedValue(new Error('db unavailable'))
+    stripeCheckoutExpireMock.mockRejectedValue(new Error('stripe expire failed'))
+
+    const result = await createSupportCheckoutAction({ amountCents: 500 })
+
+    expect(result).toEqual({
+      error: 'Unable to start checkout right now. Please try again.',
+      checkoutUrl: null,
+    })
+    expect(stripeCheckoutExpireMock).toHaveBeenCalledWith('cs_test_123')
   })
 })

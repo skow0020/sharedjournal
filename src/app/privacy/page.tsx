@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { format, parseISO } from 'date-fns'
 
@@ -10,7 +11,7 @@ import {
 } from '@/components/ui/card'
 import { SUPPORT_EMAIL, SUPPORT_EMAIL_HREF } from '@/lib/support-contact'
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Privacy Policy | SharedJournal',
   description: 'How SharedJournal collects, uses, and protects your data.',
 }

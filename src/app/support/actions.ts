@@ -64,11 +64,13 @@ export async function createSupportCheckoutAction(
     }
   }
 
-  try {
-    const stripe = getStripeServerClient()
-    const baseUrl = resolveAppBaseUrl()
+  const stripe = getStripeServerClient()
+  const baseUrl = resolveAppBaseUrl()
 
-    const checkoutSession = await stripe.checkout.sessions.create({
+  let checkoutSession: { id: string, url: string | null }
+
+  try {
+    checkoutSession = await stripe.checkout.sessions.create({
       mode: 'payment',
       submit_type: 'auto',
       customer_email: currentUserEmail,
@@ -92,14 +94,21 @@ export async function createSupportCheckoutAction(
         appUserId: appUser.id,
       },
     })
-
-    if (!checkoutSession.url) {
-      return {
-        error: 'Unable to start checkout right now. Please try again.',
-        checkoutUrl: null,
-      }
+  } catch {
+    return {
+      error: 'Unable to start checkout right now. Please try again.',
+      checkoutUrl: null,
     }
+  }
 
+  if (!checkoutSession.url) {
+    return {
+      error: 'Unable to start checkout right now. Please try again.',
+      checkoutUrl: null,
+    }
+  }
+
+  try {
     await createSupportPayment({
       userId: appUser.id,
       stripeCheckoutSessionId: checkoutSession.id,
@@ -107,15 +116,30 @@ export async function createSupportCheckoutAction(
       currency: 'usd',
       customerEmail: currentUserEmail,
     })
+  } catch (error) {
+    console.error('Failed to persist support payment after checkout session creation', {
+      checkoutSessionId: checkoutSession.id,
+      userId: appUser.id,
+      error,
+    })
 
-    return {
-      error: null,
-      checkoutUrl: checkoutSession.url,
+    try {
+      await stripe.checkout.sessions.expire(checkoutSession.id)
+    } catch (expireError) {
+      console.error('Failed to expire orphaned support checkout session', {
+        checkoutSessionId: checkoutSession.id,
+        error: expireError,
+      })
     }
-  } catch {
+
     return {
       error: 'Unable to start checkout right now. Please try again.',
       checkoutUrl: null,
     }
+  }
+
+  return {
+    error: null,
+    checkoutUrl: checkoutSession.url,
   }
 }
