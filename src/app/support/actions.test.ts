@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const {
   createSupportPaymentMock,
@@ -33,6 +33,9 @@ vi.mock('@/lib/stripe/server-client', () => ({
 import { createSupportCheckoutAction } from '@/app/support/actions'
 
 describe('createSupportCheckoutAction', () => {
+  const env = process.env as Record<string, string | undefined>
+  const originalNodeEnv = process.env.NODE_ENV
+
   beforeEach(() => {
     vi.clearAllMocks()
 
@@ -55,6 +58,14 @@ describe('createSupportCheckoutAction', () => {
     })
 
     createSupportPaymentMock.mockResolvedValue({ id: 'payment-1' })
+  })
+
+  afterEach(() => {
+    if (originalNodeEnv === undefined) {
+      delete env.NODE_ENV
+    } else {
+      env.NODE_ENV = originalNodeEnv
+    }
   })
 
   it('returns error when user is not signed in', async () => {
@@ -126,5 +137,61 @@ describe('createSupportCheckoutAction', () => {
       currency: 'usd',
       customerEmail: 'user@example.com',
     })
+  })
+
+  it('uses APP_URL when NEXT_PUBLIC_APP_URL is not set', async () => {
+    delete process.env.NEXT_PUBLIC_APP_URL
+    process.env.APP_URL = 'https://app-url.test/'
+
+    await createSupportCheckoutAction({ amountCents: 500 })
+
+    expect(stripeCheckoutCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success_url: 'https://app-url.test/support/success?session_id={CHECKOUT_SESSION_ID}',
+        cancel_url: 'https://app-url.test/support',
+      }),
+    )
+  })
+
+  it('falls back to production app URL when no env base URL is set', async () => {
+    delete process.env.NEXT_PUBLIC_APP_URL
+    delete process.env.APP_URL
+    env.NODE_ENV = 'production'
+
+    await createSupportCheckoutAction({ amountCents: 500 })
+
+    expect(stripeCheckoutCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success_url: 'https://sharedjournal.app/support/success?session_id={CHECKOUT_SESSION_ID}',
+        cancel_url: 'https://sharedjournal.app/support',
+      }),
+    )
+  })
+
+  it('falls back to localhost in non-production when no env base URL is set', async () => {
+    delete process.env.NEXT_PUBLIC_APP_URL
+    delete process.env.APP_URL
+    env.NODE_ENV = 'test'
+
+    await createSupportCheckoutAction({ amountCents: 500 })
+
+    expect(stripeCheckoutCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success_url: 'http://localhost:3000/support/success?session_id={CHECKOUT_SESSION_ID}',
+        cancel_url: 'http://localhost:3000/support',
+      }),
+    )
+  })
+
+  it('returns generic error when stripe session creation throws', async () => {
+    stripeCheckoutCreateMock.mockRejectedValue(new Error('stripe unavailable'))
+
+    const result = await createSupportCheckoutAction({ amountCents: 500 })
+
+    expect(result).toEqual({
+      error: 'Unable to start checkout right now. Please try again.',
+      checkoutUrl: null,
+    })
+    expect(createSupportPaymentMock).not.toHaveBeenCalled()
   })
 })

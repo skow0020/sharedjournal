@@ -20,6 +20,10 @@ vi.mock('@/app/support/support-button', () => ({
   SupportButton: ({ amountCents }: { amountCents: number }) => <div>Support option {amountCents}</div>,
 }))
 
+vi.mock('@/app/support/actions', () => ({
+  createSupportCheckoutAction: vi.fn(),
+}))
+
 import SupportPage from '@/app/support/page'
 
 describe('SupportPage', () => {
