@@ -75,6 +75,29 @@ export default function TermsPage() {
         </CardContent>
       </Card>
 
+      <Card>
+        <CardHeader>
+          <CardTitle>Support payments and refunds</CardTitle>
+          <CardDescription>
+            Support payments are optional one-time contributions.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-2 text-sm text-muted-foreground">
+          <p>
+            Support payments help fund SharedJournal operations and are not tax-deductible charitable
+            donations.
+          </p>
+          <p>
+            Refund requests are reviewed case-by-case. Contact{' '}
+            <a href="mailto:skow0020@gmail.com" className="underline underline-offset-4 hover:no-underline">
+              skow0020@gmail.com
+            </a>{' '}
+            with your payment details.
+          </p>
+          <p>Payment processing is handled by Stripe according to Stripe&apos;s terms and policies.</p>
+        </CardContent>
+      </Card>
+
       <p className="text-muted-foreground text-xs">
         These terms are a baseline policy and are not legal advice.
       </p>

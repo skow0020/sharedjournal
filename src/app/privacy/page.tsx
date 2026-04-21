@@ -75,6 +75,26 @@ export default function PrivacyPage() {
         </CardContent>
       </Card>
 
+      <Card>
+        <CardHeader>
+          <CardTitle>Payment processing</CardTitle>
+          <CardDescription>
+            Support payments are processed by Stripe.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-2 text-sm text-muted-foreground">
+          <p>
+            When you choose to support SharedJournal, payment information is handled by Stripe, our
+            payment processor.
+          </p>
+          <p>
+            We store only basic payment records needed for account support history, such as amount,
+            currency, and payment status.
+          </p>
+          <p>We do not store full card numbers or full payment instrument details.</p>
+        </CardContent>
+      </Card>
+
       <p className="text-muted-foreground text-xs">
         This is a general policy summary and is not legal advice. For questions, contact support.
       </p>

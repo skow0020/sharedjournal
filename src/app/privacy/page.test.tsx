@@ -12,6 +12,7 @@ describe('PrivacyPage', () => {
     expect(screen.getByText('What we collect')).toBeInTheDocument()
     expect(screen.getByText('How we use data')).toBeInTheDocument()
     expect(screen.getByText('Sharing and retention')).toBeInTheDocument()
+    expect(screen.getByText('Payment processing')).toBeInTheDocument()
 
     expect(screen.getByRole('link', { name: 'skow0020@gmail.com' })).toHaveAttribute(
       'href',

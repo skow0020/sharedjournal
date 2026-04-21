@@ -12,11 +12,12 @@ describe('TermsPage', () => {
     expect(screen.getByText('Acceptable use')).toBeInTheDocument()
     expect(screen.getByText('Accounts and content')).toBeInTheDocument()
     expect(screen.getByText('Service terms')).toBeInTheDocument()
+    expect(screen.getByText('Support payments and refunds')).toBeInTheDocument()
 
-    expect(screen.getByRole('link', { name: 'skow0020@gmail.com' })).toHaveAttribute(
-      'href',
-      'mailto:skow0020@gmail.com',
-    )
+    const supportLinks = screen.getAllByRole('link', { name: 'skow0020@gmail.com' })
+    expect(supportLinks).toHaveLength(2)
+    expect(supportLinks[0]).toHaveAttribute('href', 'mailto:skow0020@gmail.com')
+    expect(supportLinks[1]).toHaveAttribute('href', 'mailto:skow0020@gmail.com')
     expect(screen.getByRole('link', { name: 'home' })).toHaveAttribute('href', '/')
   })
 })

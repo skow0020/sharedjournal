@@ -24,6 +24,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             >
               Support
             </a>
+            <Link href="/support" className="text-muted-foreground underline-offset-4 hover:underline">
+              Contribute
+            </Link>
             <Link href="/legal" className="text-muted-foreground underline-offset-4 hover:underline">
               Legal
             </Link>

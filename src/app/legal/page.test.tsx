@@ -16,5 +16,6 @@ describe('LegalPage', () => {
       'href',
       'mailto:skow0020@gmail.com',
     )
+    expect(screen.getByText('Support payments')).toBeInTheDocument()
   })
 })

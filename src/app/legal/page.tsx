@@ -54,6 +54,21 @@ export default function LegalPage() {
         </Card>
       </div>
 
+      <Card>
+        <CardHeader>
+          <CardTitle>Support payments</CardTitle>
+          <CardDescription>
+            Optional one-time support payments are processed by Stripe.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="text-sm text-muted-foreground">
+          <p>
+            See Privacy Policy and Terms of Service for payment processor details, non-tax-deductible
+            wording, and case-by-case refund handling.
+          </p>
+        </CardContent>
+      </Card>
+
       <p className="text-muted-foreground text-xs">
         Questions: <a href="mailto:skow0020@gmail.com" className="underline underline-offset-4 hover:no-underline">skow0020@gmail.com</a>
       </p>

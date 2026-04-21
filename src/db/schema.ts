@@ -23,6 +23,13 @@ export const invitationStatusEnum = pgEnum('invitation_status', [
 	'expired',
 ])
 
+export const supportPaymentStatusEnum = pgEnum('support_payment_status', [
+	'pending',
+	'completed',
+	'failed',
+	'cancelled',
+])
+
 export const users = pgTable(
 	'users',
 	{
@@ -147,11 +154,36 @@ export const entryPhotos = pgTable(
 	],
 )
 
+export const supportPayments = pgTable(
+	'support_payments',
+	{
+		id: uuid('id').defaultRandom().primaryKey(),
+		userId: uuid('user_id')
+			.notNull()
+			.references(() => users.id, { onDelete: 'cascade' }),
+		stripeCheckoutSessionId: text('stripe_checkout_session_id').notNull(),
+		stripePaymentIntentId: text('stripe_payment_intent_id'),
+		amountCents: integer('amount_cents').notNull(),
+		currency: varchar('currency', { length: 3 }).notNull().default('usd'),
+		status: supportPaymentStatusEnum('status').notNull().default('pending'),
+		customerEmail: varchar('customer_email', { length: 320 }).notNull(),
+		failureMessage: text('failure_message'),
+		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+		completedAt: timestamp('completed_at', { withTimezone: true }),
+	},
+	(table) => [
+		uniqueIndex('support_payments_checkout_session_uidx').on(table.stripeCheckoutSessionId),
+		index('support_payments_user_created_at_idx').on(table.userId, table.createdAt.desc()),
+		index('support_payments_status_idx').on(table.status),
+	],
+)
+
 export const usersRelations = relations(users, ({ many }) => ({
 	ownedJournals: many(journals),
 	journalMemberships: many(journalMembers),
 	writtenEntries: many(entries),
 	uploadedPhotos: many(entryPhotos),
+	supportPayments: many(supportPayments),
 	invitationsSent: many(journalInvitations, {
 		relationName: 'journalInvitationsSent',
 	}),
@@ -221,6 +253,13 @@ export const entryPhotosRelations = relations(entryPhotos, ({ one }) => ({
 	}),
 }))
 
+export const supportPaymentsRelations = relations(supportPayments, ({ one }) => ({
+	user: one(users, {
+		fields: [supportPayments.userId],
+		references: [users.id],
+	}),
+}))
+
 export type User = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert
 
@@ -238,3 +277,6 @@ export type NewEntry = typeof entries.$inferInsert
 
 export type EntryPhoto = typeof entryPhotos.$inferSelect
 export type NewEntryPhoto = typeof entryPhotos.$inferInsert
+
+export type SupportPayment = typeof supportPayments.$inferSelect
+export type NewSupportPayment = typeof supportPayments.$inferInsert
