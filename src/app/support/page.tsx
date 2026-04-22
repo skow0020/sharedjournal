@@ -1,0 +1,51 @@
+import { redirect } from 'next/navigation'
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { createSupportCheckoutAction } from '@/app/support/actions'
+import { SupportButton } from '@/app/support/support-button'
+import { getCurrentAppUser } from '@/lib/get-current-app-user'
+import { SUPPORT_AMOUNTS } from '@/lib/support-amounts'
+
+export default async function SupportPage() {
+  const appUser = await getCurrentAppUser()
+
+  if (!appUser) {
+    redirect('/sign-in')
+  }
+
+  return (
+    <main className="mx-auto w-full max-w-3xl space-y-6 px-6 py-10">
+      <section className="space-y-2">
+        <h1 className="text-3xl font-semibold tracking-tight">Buy me coffee</h1>
+        <p className="text-muted-foreground text-sm">
+          SharedJournal is free to use. If it has helped you, an optional one-time coffee contribution
+          helps cover hosting, storage, and ongoing development.
+        </p>
+      </section>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Choose a coffee amount</CardTitle>
+          <CardDescription>
+            Coffee contributions are optional and are not tax-deductible charitable donations.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-3 sm:grid-cols-3">
+          {SUPPORT_AMOUNTS.map((amountCents) => (
+            <SupportButton
+              key={amountCents}
+              amountCents={amountCents}
+              action={createSupportCheckoutAction}
+            />
+          ))}
+        </CardContent>
+      </Card>
+    </main>
+  )
+}

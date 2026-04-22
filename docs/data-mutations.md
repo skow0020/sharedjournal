@@ -11,6 +11,12 @@
 - Do **NOT** call `redirect()` inside Server Actions.
 - Handle redirects on the client after a Server Action resolves.
 
+### Third-Party Webhook Exception
+
+- External provider webhooks (for example, Stripe events received in route handlers) are an intentional exception to the Server Action entrypoint rule.
+- Webhook handlers must stay thin and delegate all database mutations to typed helpers in `src/data`.
+- Webhook handlers should focus on signature/authenticity validation, event parsing, and calling the appropriate mutation helpers.
+
 ## Colocated `actions.ts` Files
 
 - Every feature that performs data mutations must define its Server Actions in a colocated `actions.ts` file.

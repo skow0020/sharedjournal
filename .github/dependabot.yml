@@ -9,6 +9,7 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 10
     groups:
       react-stack:
         patterns:
@@ -20,6 +21,25 @@ updates:
         patterns:
           - "next"
           - "eslint-config-next"
+      auth-stack:
+        patterns:
+          - "@clerk/nextjs"
+      database-stack:
+        patterns:
+          - "@neondatabase/serverless"
+          - "drizzle-orm"
+          - "drizzle-kit"
+      ui-stack:
+        patterns:
+          - "@radix-ui/*"
+          - "class-variance-authority"
+          - "clsx"
+          - "lucide-react"
+          - "next-themes"
+          - "tailwind-merge"
+          - "tailwindcss"
+          - "@tailwindcss/postcss"
+          - "tw-animate-css"
       testing-stack:
         patterns:
           - "@testing-library/*"
@@ -27,3 +47,17 @@ updates:
         patterns:
           - "vitest"
           - "@vitest/coverage-v8"
+      playwright-stack:
+        patterns:
+          - "@playwright/test"
+      tooling-stack:
+        patterns:
+          - "@types/node"
+          - "esbuild"
+          - "tsx"
+          - "typescript"
+      vercel-stack:
+        patterns:
+          - "@vercel/analytics"
+          - "@vercel/blob"
+          - "@vercel/speed-insights"
