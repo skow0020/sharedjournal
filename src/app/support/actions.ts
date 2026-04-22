@@ -47,7 +47,7 @@ export async function createSupportCheckoutAction(
 
   if (!appUser) {
     return {
-      error: 'You must be signed in to support SharedJournal.',
+      error: 'You must be signed in to buy me a coffee.',
       checkoutUrl: null,
     }
   }
@@ -80,8 +80,8 @@ export async function createSupportCheckoutAction(
       mode: 'payment',
       submit_type: 'auto',
       customer_email: currentUserEmail,
-      success_url: `${baseUrl}/support/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${baseUrl}/support`,
+      success_url: `${baseUrl}/buy-me-coffee/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${baseUrl}/buy-me-coffee`,
       payment_method_types: ['card'],
       line_items: [
         {
@@ -90,8 +90,8 @@ export async function createSupportCheckoutAction(
             currency: 'usd',
             unit_amount: parsedInput.data.amountCents,
             product_data: {
-              name: 'Support SharedJournal',
-              description: 'One-time support payment',
+              name: 'Buy me a coffee',
+              description: 'One-time coffee contribution',
             },
           },
         },

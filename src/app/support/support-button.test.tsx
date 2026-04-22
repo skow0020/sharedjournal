@@ -16,7 +16,7 @@ describe('SupportButton', () => {
 
     render(<SupportButton amountCents={1000} action={action} redirectToCheckout={redirectToCheckout} />)
 
-    await user.click(screen.getByRole('button', { name: 'Support $10.00' }))
+    await user.click(screen.getByRole('button', { name: 'Buy me coffee - $10.00' }))
 
     expect(action).toHaveBeenCalledWith({ amountCents: 1000 })
     await waitFor(() => {
@@ -34,7 +34,7 @@ describe('SupportButton', () => {
 
     render(<SupportButton amountCents={500} action={action} />)
 
-    await user.click(screen.getByRole('button', { name: 'Support $5.00' }))
+    await user.click(screen.getByRole('button', { name: 'Buy me coffee - $5.00' }))
 
     expect(screen.getByText('Unable to start checkout right now. Please try again.')).toBeInTheDocument()
   })
@@ -48,9 +48,9 @@ describe('SupportButton', () => {
 
     render(<SupportButton amountCents={500} action={action} />)
 
-    await user.click(screen.getByRole('button', { name: 'Support $5.00' }))
+    await user.click(screen.getByRole('button', { name: 'Buy me coffee - $5.00' }))
 
     expect(await screen.findByText('Unable to start checkout right now. Please try again.')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Support $5.00' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: 'Buy me coffee - $5.00' })).toBeEnabled()
   })
 })

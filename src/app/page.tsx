@@ -193,8 +193,8 @@ export default async function Home() {
           </p>
           <LandingHeroCta />
           <p className="text-muted-foreground text-xs">
-            <Link href="/support" className="underline underline-offset-4 hover:no-underline">
-              Support
+            <Link href="/buy-me-coffee" className="underline underline-offset-4 hover:no-underline">
+              Buy me coffee
             </Link>{' '}
             ·{' '}
             <Link href="/legal" className="underline underline-offset-4 hover:no-underline">

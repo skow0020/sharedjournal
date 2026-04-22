@@ -22,18 +22,18 @@ export default async function SupportPage() {
   return (
     <main className="mx-auto w-full max-w-3xl space-y-6 px-6 py-10">
       <section className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight">Support SharedJournal</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">Buy me coffee</h1>
         <p className="text-muted-foreground text-sm">
-          SharedJournal is free to use. If it has helped you, optional one-time support helps cover
-          hosting, storage, and ongoing development.
+          SharedJournal is free to use. If it has helped you, an optional one-time coffee contribution
+          helps cover hosting, storage, and ongoing development.
         </p>
       </section>
 
       <Card>
         <CardHeader>
-          <CardTitle>Choose a one-time amount</CardTitle>
+          <CardTitle>Choose a coffee amount</CardTitle>
           <CardDescription>
-            Support payments are optional and are not tax-deductible charitable donations.
+            Coffee contributions are optional and are not tax-deductible charitable donations.
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-3 sm:grid-cols-3">

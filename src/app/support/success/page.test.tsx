@@ -51,7 +51,7 @@ describe('SupportSuccessPage', () => {
     })
     render(page)
 
-    expect(screen.getByText('Support record not found')).toBeInTheDocument()
+    expect(screen.getByText('Contribution record not found')).toBeInTheDocument()
   })
 
   it('renders completed payment summary', async () => {
@@ -70,7 +70,7 @@ describe('SupportSuccessPage', () => {
     })
     render(page)
 
-    expect(screen.getByText('Thank you for supporting SharedJournal')).toBeInTheDocument()
+    expect(screen.getByText('Thanks for the coffee!')).toBeInTheDocument()
     expect(screen.getByText('Status: Completed')).toBeInTheDocument()
     expect(screen.getByText('Amount: $10.00')).toBeInTheDocument()
   })

@@ -51,7 +51,7 @@ export function SupportButton({ amountCents, action, redirectToCheckout }: Suppo
   return (
     <div className="space-y-2">
       <Button type="button" className="w-full" onClick={onClick} disabled={pending}>
-        {pending ? 'Opening checkout...' : `Support $${(amountCents / 100).toFixed(2)}`}
+        {pending ? 'Opening checkout...' : `Buy me coffee - $${(amountCents / 100).toFixed(2)}`}
       </Button>
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
     </div>

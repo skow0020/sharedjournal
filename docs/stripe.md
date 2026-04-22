@@ -8,11 +8,11 @@ SharedJournal currently supports optional one-time "buy me a coffee" style payme
 
 Current implementation includes:
 
-- Support page: `/support`
+- Buy me coffee page: `/buy-me-coffee`
 - Checkout creation action: `src/app/support/actions.ts`
 - Stripe webhook route: `src/app/api/webhooks/stripe/route.ts`
 - Payment persistence: `support_payments` table and `src/data/support-payments.ts`
-- Success page: `/support/success`
+- Success page: `/buy-me-coffee/success`
 
 Note: Stripe webhook mutation handling in a route handler is an intentional exception to the general Server Action mutation entrypoint rule. Keep the webhook route thin and perform database mutations via typed `src/data/*` helpers.
 

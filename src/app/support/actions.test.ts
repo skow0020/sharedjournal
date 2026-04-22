@@ -91,7 +91,7 @@ describe('createSupportCheckoutAction', () => {
     const result = await createSupportCheckoutAction({ amountCents: 500 })
 
     expect(result).toEqual({
-      error: 'You must be signed in to support SharedJournal.',
+      error: 'You must be signed in to buy me a coffee.',
       checkoutUrl: null,
     })
     expect(stripeCheckoutCreateMock).not.toHaveBeenCalled()
@@ -142,8 +142,8 @@ describe('createSupportCheckoutAction', () => {
       expect.objectContaining({
         mode: 'payment',
         customer_email: 'user@example.com',
-        success_url: 'https://sharedjournal.test/support/success?session_id={CHECKOUT_SESSION_ID}',
-        cancel_url: 'https://sharedjournal.test/support',
+        success_url: 'https://sharedjournal.test/buy-me-coffee/success?session_id={CHECKOUT_SESSION_ID}',
+        cancel_url: 'https://sharedjournal.test/buy-me-coffee',
       }),
     )
 
@@ -164,8 +164,8 @@ describe('createSupportCheckoutAction', () => {
 
     expect(stripeCheckoutCreateMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        success_url: 'https://app-url.test/support/success?session_id={CHECKOUT_SESSION_ID}',
-        cancel_url: 'https://app-url.test/support',
+        success_url: 'https://app-url.test/buy-me-coffee/success?session_id={CHECKOUT_SESSION_ID}',
+        cancel_url: 'https://app-url.test/buy-me-coffee',
       }),
     )
   })
@@ -179,8 +179,8 @@ describe('createSupportCheckoutAction', () => {
 
     expect(stripeCheckoutCreateMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        success_url: 'https://sharedjournal.app/support/success?session_id={CHECKOUT_SESSION_ID}',
-        cancel_url: 'https://sharedjournal.app/support',
+        success_url: 'https://sharedjournal.app/buy-me-coffee/success?session_id={CHECKOUT_SESSION_ID}',
+        cancel_url: 'https://sharedjournal.app/buy-me-coffee',
       }),
     )
   })
@@ -194,8 +194,8 @@ describe('createSupportCheckoutAction', () => {
 
     expect(stripeCheckoutCreateMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        success_url: 'http://localhost:3000/support/success?session_id={CHECKOUT_SESSION_ID}',
-        cancel_url: 'http://localhost:3000/support',
+        success_url: 'http://localhost:3000/buy-me-coffee/success?session_id={CHECKOUT_SESSION_ID}',
+        cancel_url: 'http://localhost:3000/buy-me-coffee',
       }),
     )
   })

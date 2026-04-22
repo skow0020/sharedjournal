@@ -17,7 +17,7 @@ vi.mock('@/lib/get-current-app-user', () => ({
 }))
 
 vi.mock('@/app/support/support-button', () => ({
-  SupportButton: ({ amountCents }: { amountCents: number }) => <div>Support option {amountCents}</div>,
+  SupportButton: ({ amountCents }: { amountCents: number }) => <div>Coffee option {amountCents}</div>,
 }))
 
 vi.mock('@/app/support/actions', () => ({
@@ -34,15 +34,15 @@ describe('SupportPage', () => {
     expect(redirectMock).toHaveBeenCalledWith('/sign-in')
   })
 
-  it('renders support options for signed-in users', async () => {
+  it('renders coffee options for signed-in users', async () => {
     getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
 
     const page = await SupportPage()
     render(page)
 
-    expect(screen.getByRole('heading', { name: 'Support SharedJournal' })).toBeInTheDocument()
-    expect(screen.getByText('Support option 500')).toBeInTheDocument()
-    expect(screen.getByText('Support option 1000')).toBeInTheDocument()
-    expect(screen.getByText('Support option 2500')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Buy me coffee' })).toBeInTheDocument()
+    expect(screen.getByText('Coffee option 500')).toBeInTheDocument()
+    expect(screen.getByText('Coffee option 1000')).toBeInTheDocument()
+    expect(screen.getByText('Coffee option 2500')).toBeInTheDocument()
   })
 })

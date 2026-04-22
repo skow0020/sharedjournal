@@ -42,12 +42,12 @@ export default async function SupportSuccessPage({ searchParams }: SupportSucces
           <CardHeader>
             <CardTitle>Checkout session not found</CardTitle>
             <CardDescription>
-              We could not find your support checkout session. Please try again from the support page.
+              We could not find your checkout session. Please try again from the Buy me coffee page.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Link href="/support" className="text-sm underline underline-offset-4 hover:no-underline">
-              Return to support page
+            <Link href="/buy-me-coffee" className="text-sm underline underline-offset-4 hover:no-underline">
+              Return to Buy me coffee
             </Link>
           </CardContent>
         </Card>
@@ -65,14 +65,14 @@ export default async function SupportSuccessPage({ searchParams }: SupportSucces
       <main className="mx-auto w-full max-w-2xl px-6 py-10">
         <Card>
           <CardHeader>
-            <CardTitle>Support record not found</CardTitle>
+            <CardTitle>Contribution record not found</CardTitle>
             <CardDescription>
               Your payment may still be processing. Please check back in a moment.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Link href="/support" className="text-sm underline underline-offset-4 hover:no-underline">
-              Return to support page
+            <Link href="/buy-me-coffee" className="text-sm underline underline-offset-4 hover:no-underline">
+              Return to Buy me coffee
             </Link>
           </CardContent>
         </Card>
@@ -86,7 +86,7 @@ export default async function SupportSuccessPage({ searchParams }: SupportSucces
     <main className="mx-auto w-full max-w-2xl space-y-6 px-6 py-10">
       <Card>
         <CardHeader>
-          <CardTitle>Thank you for supporting SharedJournal</CardTitle>
+          <CardTitle>Thanks for the coffee!</CardTitle>
           <CardDescription>Your contribution helps us keep building for shared stories.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">
