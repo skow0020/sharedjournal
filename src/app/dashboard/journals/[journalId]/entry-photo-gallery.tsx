@@ -65,7 +65,7 @@ export function EntryPhotoGallery({ photos }: EntryPhotoGalleryProps) {
       </div>
 
       <Dialog open={openIndex !== null} onOpenChange={(open) => { if (!open) setOpenIndex(null) }}>
-        <DialogContent className="max-w-4xl gap-0 p-2">
+        <DialogContent withFlair={false} className="max-w-4xl gap-0 p-2">
           <DialogTitle className="sr-only">
             {openIndex !== null ? `Image ${openIndex + 1} of ${photos.length}` : 'Image'}
           </DialogTitle>
