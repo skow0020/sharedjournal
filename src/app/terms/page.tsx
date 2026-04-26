@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { PageFlairShell } from '@/components/page-flair-shell'
 import { SUPPORT_EMAIL, SUPPORT_EMAIL_HREF } from '@/lib/support-contact'
 
 export const metadata: Metadata = {
@@ -20,7 +21,7 @@ export default function TermsPage() {
   const lastUpdated = format(parseISO('2026-04-19'), 'MMMM d, yyyy')
 
   return (
-    <main className="mx-auto w-full max-w-3xl space-y-6 px-6 py-10">
+    <PageFlairShell contentClassName="max-w-3xl space-y-6">
       <section className="space-y-2">
         <h1 className="text-3xl font-semibold tracking-tight">Terms of Service</h1>
         <p className="text-muted-foreground text-sm">
@@ -106,6 +107,6 @@ export default function TermsPage() {
       <p className="text-muted-foreground text-xs">
         Return to <Link href="/" className="underline underline-offset-4 hover:no-underline">home</Link>.
       </p>
-    </main>
+    </PageFlairShell>
   )
 }

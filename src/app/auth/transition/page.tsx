@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { PageFlairShell } from '@/components/page-flair-shell'
 
 export default function AuthTransitionPage() {
   const router = useRouter()
@@ -31,7 +32,7 @@ export default function AuthTransitionPage() {
   }, [isLoaded, isSignedIn, router])
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-4xl items-center justify-center px-6 py-8">
+    <PageFlairShell contentClassName="flex min-h-screen max-w-4xl items-center justify-center py-8">
       <Card className="w-full max-w-md border-[#d9efe9] bg-white/95 dark:bg-zinc-900 dark:border-zinc-700 shadow-lg">
         <CardHeader className="space-y-2 text-center">
           <CardTitle className="text-xl">Signing you in</CardTitle>
@@ -42,6 +43,6 @@ export default function AuthTransitionPage() {
           <span className="sr-only">Completing sign-in and redirecting to dashboard</span>
         </CardContent>
       </Card>
-    </main>
+    </PageFlairShell>
   )
 }

@@ -14,6 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { PageFlairBackdrop } from '@/components/page-flair-shell'
 import { LandingHeroCta } from '@/components/landing-hero-cta'
 
 /*
@@ -33,10 +34,10 @@ export default async function Home() {
     <main className="w-full">
       {/* ── Hero ── */}
       <section className="relative overflow-hidden px-6 py-20 sm:py-28">
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-20 right-0 h-80 w-80 rounded-full bg-[#74d9c5]/25 blur-3xl" />
-          <div className="absolute bottom-0 -left-20 h-80 w-80 rounded-full bg-[#ff9a7f]/20 blur-3xl" />
-        </div>
+        <PageFlairBackdrop
+          topOrbClassName="-top-20 right-0 h-80 w-80 bg-[#86e6d3]/34"
+          bottomOrbClassName="bottom-0 -left-20 h-80 w-80 bg-[#ffab92]/28"
+        />
         <div className="relative mx-auto max-w-3xl space-y-6 text-center">
           <div className="inline-flex rounded-full border border-[#74d9c5]/60 bg-[#f4fffc] px-3 py-1 text-xs font-medium text-[#1f5f56]">
             Private and collaborative journaling

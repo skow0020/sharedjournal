@@ -1,19 +1,19 @@
 import { render, screen } from '@testing-library/react'
+import type { ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
-const { getCurrentAppUserMock, redirectMock } = vi.hoisted(() => ({
+const { getCurrentAppUserMock } = vi.hoisted(() => ({
   getCurrentAppUserMock: vi.fn(),
-  redirectMock: vi.fn(() => {
-    throw new Error('NEXT_REDIRECT')
-  }),
-}))
-
-vi.mock('next/navigation', () => ({
-  redirect: redirectMock,
 }))
 
 vi.mock('@/lib/get-current-app-user', () => ({
   getCurrentAppUser: getCurrentAppUserMock,
+}))
+
+vi.mock('@clerk/nextjs', () => ({
+  SignInButton: ({ children, forceRedirectUrl }: { children: ReactNode, forceRedirectUrl?: string }) => (
+    <div data-testid="sign-in-button" data-force-redirect-url={forceRedirectUrl}>{children}</div>
+  ),
 }))
 
 vi.mock('@/app/support/support-button', () => ({
@@ -27,11 +27,15 @@ vi.mock('@/app/support/actions', () => ({
 import SupportPage from '@/app/support/page'
 
 describe('SupportPage', () => {
-  it('redirects signed-out users to sign-in', async () => {
+  it('renders a sign-in prompt for signed-out users', async () => {
     getCurrentAppUserMock.mockResolvedValue(null)
 
-    await expect(SupportPage()).rejects.toThrow('NEXT_REDIRECT')
-    expect(redirectMock).toHaveBeenCalledWith('/sign-in')
+    const page = await SupportPage()
+    render(page)
+
+    expect(screen.getByText('Sign in to continue')).toBeInTheDocument()
+    expect(screen.getByTestId('sign-in-button')).toHaveAttribute('data-force-redirect-url', '/buy-me-coffee')
+    expect(screen.getByRole('button', { name: 'Sign in to buy me coffee' })).toBeInTheDocument()
   })
 
   it('renders coffee options for signed-in users', async () => {

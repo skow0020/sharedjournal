@@ -24,11 +24,11 @@ vi.mock('@/data/support-payments', () => ({
 import SupportSuccessPage from '@/app/support/success/page'
 
 describe('SupportSuccessPage', () => {
-  it('redirects signed-out users to sign-in', async () => {
+  it('redirects signed-out users to buy-me-coffee', async () => {
     getCurrentAppUserMock.mockResolvedValue(null)
 
     await expect(SupportSuccessPage({})).rejects.toThrow('NEXT_REDIRECT')
-    expect(redirectMock).toHaveBeenCalledWith('/sign-in')
+    expect(redirectMock).toHaveBeenCalledWith('/buy-me-coffee')
   })
 
   it('renders missing session state', async () => {

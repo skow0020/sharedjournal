@@ -31,7 +31,11 @@ function DialogOverlay({ className, ...props }: React.ComponentProps<typeof Dial
   )
 }
 
-function DialogContent({ className, children, ...props }: React.ComponentProps<typeof DialogPrimitive.Content>) {
+type DialogContentProps = React.ComponentProps<typeof DialogPrimitive.Content> & {
+  withFlair?: boolean
+}
+
+function DialogContent({ className, children, withFlair = true, ...props }: DialogContentProps) {
   return (
     <DialogPortal>
       <DialogOverlay />
@@ -39,10 +43,17 @@ function DialogContent({ className, children, ...props }: React.ComponentProps<t
         data-slot="dialog-content"
         className={cn(
           'bg-background fixed top-[50%] left-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg',
+          'isolate overflow-hidden [&>*]:relative [&>*]:z-10',
           className,
         )}
         {...props}
       >
+        {withFlair ? (
+          <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+            <div className="absolute -top-10 right-0 h-32 w-32 rounded-full bg-[#86e6d3]/18 blur-2xl" />
+            <div className="absolute bottom-0 -left-8 h-28 w-28 rounded-full bg-[#ffab92]/14 blur-2xl" />
+          </div>
+        ) : null}
         {children}
       </DialogPrimitive.Content>
     </DialogPortal>

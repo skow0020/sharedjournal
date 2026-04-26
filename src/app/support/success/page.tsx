@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { PageFlairShell } from '@/components/page-flair-shell'
 import { getSupportPaymentForUserByCheckoutSession } from '@/data/support-payments'
 import { getCurrentAppUser } from '@/lib/get-current-app-user'
 
@@ -29,7 +30,7 @@ export default async function SupportSuccessPage({ searchParams }: SupportSucces
   const appUser = await getCurrentAppUser()
 
   if (!appUser) {
-    redirect('/sign-in')
+    redirect('/buy-me-coffee')
   }
 
   const resolvedSearchParams = searchParams ? await searchParams : undefined
@@ -37,7 +38,7 @@ export default async function SupportSuccessPage({ searchParams }: SupportSucces
 
   if (!sessionId) {
     return (
-      <main className="mx-auto w-full max-w-2xl px-6 py-10">
+      <PageFlairShell contentClassName="max-w-2xl">
         <Card>
           <CardHeader>
             <CardTitle>Checkout session not found</CardTitle>
@@ -51,7 +52,7 @@ export default async function SupportSuccessPage({ searchParams }: SupportSucces
             </Link>
           </CardContent>
         </Card>
-      </main>
+      </PageFlairShell>
     )
   }
 
@@ -62,7 +63,7 @@ export default async function SupportSuccessPage({ searchParams }: SupportSucces
 
   if (!payment) {
     return (
-      <main className="mx-auto w-full max-w-2xl px-6 py-10">
+      <PageFlairShell contentClassName="max-w-2xl">
         <Card>
           <CardHeader>
             <CardTitle>Contribution record not found</CardTitle>
@@ -76,14 +77,14 @@ export default async function SupportSuccessPage({ searchParams }: SupportSucces
             </Link>
           </CardContent>
         </Card>
-      </main>
+      </PageFlairShell>
     )
   }
 
   const statusText = payment.status === 'completed' ? 'Completed' : 'Processing'
 
   return (
-    <main className="mx-auto w-full max-w-2xl space-y-6 px-6 py-10">
+    <PageFlairShell contentClassName="max-w-2xl space-y-6">
       <Card>
         <CardHeader>
           <CardTitle>Thanks for the coffee!</CardTitle>
@@ -113,6 +114,6 @@ export default async function SupportSuccessPage({ searchParams }: SupportSucces
         </Link>
         .
       </p>
-    </main>
+    </PageFlairShell>
   )
 }
