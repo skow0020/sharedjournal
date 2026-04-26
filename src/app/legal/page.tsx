@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { PageFlairShell } from '@/components/page-flair-shell'
 import { SUPPORT_EMAIL, SUPPORT_EMAIL_HREF } from '@/lib/support-contact'
 
 export const metadata: Metadata = {
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
 
 export default function LegalPage() {
   return (
-    <main className="mx-auto w-full max-w-3xl space-y-6 px-6 py-10">
+    <PageFlairShell contentClassName="max-w-3xl space-y-6">
       <section className="space-y-2">
         <h1 className="text-3xl font-semibold tracking-tight">Legal</h1>
         <p className="text-muted-foreground text-sm">
@@ -73,6 +74,6 @@ export default function LegalPage() {
       <p className="text-muted-foreground text-xs">
         Questions: <a href={SUPPORT_EMAIL_HREF} className="underline underline-offset-4 hover:no-underline">{SUPPORT_EMAIL}</a>
       </p>
-    </main>
+    </PageFlairShell>
   )
 }

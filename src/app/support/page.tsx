@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { PageFlairShell } from '@/components/page-flair-shell'
 import { Button } from '@/components/ui/button'
 import { createSupportCheckoutAction } from '@/app/support/actions'
 import { SupportButton } from '@/app/support/support-button'
@@ -17,7 +18,7 @@ export default async function SupportPage() {
   const appUser = await getCurrentAppUser()
 
   return (
-    <main className="mx-auto w-full max-w-3xl space-y-6 px-6 py-10">
+    <PageFlairShell contentClassName="max-w-3xl space-y-6">
       <section className="space-y-2">
         <h1 className="text-3xl font-semibold tracking-tight">Buy me coffee</h1>
         <p className="text-muted-foreground text-sm">
@@ -59,6 +60,6 @@ export default async function SupportPage() {
           </CardContent>
         </Card>
       )}
-    </main>
+    </PageFlairShell>
   )
 }

@@ -41,6 +41,7 @@ import {
   getPendingInvitationsForOwnedJournal,
 } from '@/data/invitations'
 import { getCollaboratorsForJournal, getUserJournalById } from '@/data/journals'
+import { PageFlairBackdrop } from '@/components/page-flair-shell'
 import { getCurrentAppUser } from '@/lib/get-current-app-user'
 
 type JournalDetailsPageProps = {
@@ -100,10 +101,11 @@ export default async function JournalDetailsPage({ params, searchParams }: Journ
 
   return (
     <main className="relative mx-auto w-full max-w-5xl space-y-6 px-6 py-8">
-      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute -top-32 right-0 h-96 w-96 rounded-full bg-[#74d9c5]/15 blur-3xl" />
-        <div className="absolute bottom-0 -left-32 h-96 w-96 rounded-full bg-[#ff9a7f]/10 blur-3xl" />
-      </div>
+      <PageFlairBackdrop
+        className="fixed inset-0 -z-10 overflow-hidden"
+        topOrbClassName="-top-32 right-0 h-96 w-96 bg-[#86e6d3]/24"
+        bottomOrbClassName="bottom-0 -left-32 h-96 w-96 bg-[#ffab92]/18"
+      />
       <section className="space-y-2">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0 flex-1 space-y-2">
