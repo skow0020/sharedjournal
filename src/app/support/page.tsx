@@ -18,7 +18,7 @@ export default async function SupportPage() {
   const appUser = await getCurrentAppUser()
 
   return (
-    <PageFlairShell contentClassName="max-w-3xl space-y-6">
+    <PageFlairShell mainClassName="min-h-[100svh]" contentClassName="max-w-3xl space-y-6">
       <section className="space-y-2">
         <h1 className="text-3xl font-semibold tracking-tight">Buy me coffee</h1>
         <p className="text-muted-foreground text-sm">
