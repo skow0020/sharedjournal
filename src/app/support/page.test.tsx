@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react'
+import type { ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
 const { getCurrentAppUserMock } = vi.hoisted(() => ({
@@ -10,7 +11,7 @@ vi.mock('@/lib/get-current-app-user', () => ({
 }))
 
 vi.mock('@clerk/nextjs', () => ({
-  SignInButton: ({ children, forceRedirectUrl }: { children: React.ReactNode, forceRedirectUrl?: string }) => (
+  SignInButton: ({ children, forceRedirectUrl }: { children: ReactNode, forceRedirectUrl?: string }) => (
     <div data-testid="sign-in-button" data-force-redirect-url={forceRedirectUrl}>{children}</div>
   ),
 }))
