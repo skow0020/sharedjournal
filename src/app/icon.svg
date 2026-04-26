@@ -1,19 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#1f5f56;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#147a6e;stop-opacity:1" />
+    <linearGradient id="bg" x1="18%" y1="12%" x2="82%" y2="88%">
+      <stop offset="0%" stop-color="#2b6b63" />
+      <stop offset="100%" stop-color="#184c46" />
     </linearGradient>
   </defs>
-  <rect width="100" height="100" rx="22" fill="url(#bg)" />
-  <text
-    x="50"
-    y="67"
-    font-family="system-ui, -apple-system, sans-serif"
-    font-size="46"
-    font-weight="700"
-    text-anchor="middle"
-    fill="white"
-    letter-spacing="-1"
-  >SJ</text>
+  <rect width="100" height="100" rx="24" fill="url(#bg)" />
+  <rect x="24" y="18" width="52" height="64" rx="12" fill="#f6efe3" />
+  <path d="M24 30c0-6.627 5.373-12 12-12h4v64h-4c-6.627 0-12-5.373-12-12V30Z" fill="#d8ccb6" />
+  <circle cx="32" cy="34" r="3.5" fill="#184c46" />
+  <circle cx="32" cy="50" r="3.5" fill="#184c46" />
+  <circle cx="32" cy="66" r="3.5" fill="#184c46" />
+  <path d="M61 18h9v18l-4.5-3.5L61 36V18Z" fill="#eb7a57" />
+  <path d="M45 40h19" stroke="#2b6b63" stroke-width="5" stroke-linecap="round" />
+  <path d="M45 54h15" stroke="#2b6b63" stroke-width="5" stroke-linecap="round" />
+  <path d="M45 68h19" stroke="#c8baa2" stroke-width="5" stroke-linecap="round" />
 </svg>
