@@ -17,6 +17,7 @@ import { CreateJournalModal } from '@/app/dashboard/create-journal-modal'
 import { JournalCard } from '@/app/dashboard/journal-card'
 import { PendingInvitationRow } from '@/app/dashboard/pending-invitation-row'
 import { Button } from '@/components/ui/button'
+import { PageFlairBackdrop } from '@/components/page-flair-shell'
 import { getPendingInvitationsForEmail } from '@/data/invitations'
 import {
   getCollaboratorsForJournals,
@@ -68,10 +69,11 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
   return (
     <main className="relative mx-auto w-full max-w-5xl space-y-6 px-6 py-8">
-      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute -top-32 right-0 h-96 w-96 rounded-full bg-[#74d9c5]/15 blur-3xl" />
-        <div className="absolute bottom-0 -left-32 h-96 w-96 rounded-full bg-[#ff9a7f]/10 blur-3xl" />
-      </div>
+      <PageFlairBackdrop
+        className="fixed inset-0 -z-10 overflow-hidden"
+        topOrbClassName="-top-32 right-0 h-96 w-96 bg-[#86e6d3]/24"
+        bottomOrbClassName="bottom-0 -left-32 h-96 w-96 bg-[#ffab92]/18"
+      />
       <section className="space-y-4">
         <div className="flex items-start justify-between gap-4">
           <h1 className="text-3xl font-semibold tracking-tight">Your Journals</h1>

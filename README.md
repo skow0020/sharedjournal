@@ -42,7 +42,81 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 INVITE_EMAIL_PROVIDER=resend
 RESEND_API_KEY=re_...
 RESEND_FROM_EMAIL=SharedJournal <invites@notify.sharedjournal.app>
+
+# Support payments (Stripe)
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
 ```
+
+### Stripe Integration (Support Payments)
+
+SharedJournal supports optional one-time "buy me a coffee" style contributions via Stripe Checkout.
+
+#### What is implemented
+
+- Support page: `/support`
+- Checkout creation: server action in `src/app/support/actions.ts`
+- Webhook endpoint: `/api/webhooks/stripe`
+- Success page: `/support/success`
+- Payment records stored in `support_payments`
+
+#### Required Stripe events
+
+Configure these events for your webhook endpoint:
+
+- `checkout.session.completed`
+- `checkout.session.async_payment_succeeded`
+- `checkout.session.async_payment_failed`
+- `checkout.session.expired`
+
+#### Local development setup
+
+1. Ensure your Stripe test key is configured:
+  - `STRIPE_SECRET_KEY=sk_test_...`
+2. Start the app:
+
+```bash
+npm run dev
+```
+
+3. In a separate terminal, start Stripe CLI forwarding:
+
+```bash
+stripe listen --events checkout.session.completed,checkout.session.async_payment_succeeded,checkout.session.async_payment_failed,checkout.session.expired --forward-to http://localhost:3000/api/webhooks/stripe
+```
+
+4. Copy the webhook signing secret printed by Stripe CLI (`whsec_...`) and set:
+  - `STRIPE_WEBHOOK_SECRET=whsec_...`
+
+Notes:
+
+- For local testing with Stripe CLI, you do not need to manually create a webhook endpoint in the Stripe Dashboard.
+- Use Stripe test cards in Checkout, for example `4242 4242 4242 4242`.
+
+#### Production / Preview setup
+
+For deployed environments (Vercel preview or production):
+
+1. Create a Stripe webhook endpoint in Dashboard for each environment URL:
+  - `https://<your-domain>/api/webhooks/stripe`
+2. Subscribe it to the required events listed above.
+3. Use that endpoint's signing secret as `STRIPE_WEBHOOK_SECRET` in that environment.
+
+Important:
+
+- Webhook secrets are endpoint-specific.
+- Local Stripe CLI `whsec_...` is different from production/preview dashboard endpoint secrets.
+- Keep test and live credentials separated (`sk_test_...` vs `sk_live_...`).
+
+#### Migration requirement
+
+Stripe support payments require the `support_payments` table migration. Run:
+
+```bash
+npm run db:migrate
+```
+
+before testing checkout.
 
 ### Clerk Authentication
 

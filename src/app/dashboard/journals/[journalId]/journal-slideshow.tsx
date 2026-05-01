@@ -94,7 +94,7 @@ export function JournalSlideshow({ photos, trigger }: JournalSlideshowProps) {
     <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogTrigger asChild>{trigger}</DialogTrigger>
-        <DialogContent className="max-w-none h-screen w-screen gap-0 rounded-none border-0 bg-black p-0">
+        <DialogContent withFlair={false} className="max-w-none h-screen w-screen gap-0 rounded-none border-0 bg-black p-0">
           <DialogTitle className="sr-only">
             Slideshow — photo {currentIndex + 1} of {total}
           </DialogTitle>
