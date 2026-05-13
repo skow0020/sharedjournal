@@ -37,6 +37,16 @@ export default function RootLayout({
   return (
     <ClerkProvider afterSignOutUrl="/auth/sign-out">
       <html lang="en" suppressHydrationWarning>
+        <head>
+          {(process.env.NODE_ENV === 'development' || process.env.VERCEL_ENV === 'preview') && (
+            // eslint-disable-next-line @next/next/no-sync-scripts
+            <script
+              data-recording-token="yY0QKTXP6LKqY6XIZtkah8Z9OJQGlRbFoRlm6TFd"
+              data-is-production-environment="false"
+              src="https://snippet.meticulous.ai/v1/meticulous.js"
+            />
+          )}
+        </head>
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
           suppressHydrationWarning
