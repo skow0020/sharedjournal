@@ -27,7 +27,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               Support
             </a>
             <Link href="/buy-me-coffee" className="text-muted-foreground underline-offset-4 hover:underline">
-              Buy me coffeee
+              Buy me coffee
             </Link>
             <Link href="/legal" className="text-muted-foreground underline-offset-4 hover:underline">
               Legal
