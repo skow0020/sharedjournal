@@ -36,6 +36,9 @@ ENTRY_CONTENT_ENCRYPTION_KEY=replace-with-openssl-rand-base64-32
 # App URL (used in invite links)
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 
+# Meticulous session recording (enabled in development/preview)
+NEXT_PUBLIC_METICULOUS_RECORDING_TOKEN=replace-with-meticulous-recording-token
+
 # Invite Email Provider (optional)
 # Resend is auto-detected when RESEND_API_KEY and RESEND_FROM_EMAIL are set.
 # Optionally set INVITE_EMAIL_PROVIDER=resend explicitly, or INVITE_EMAIL_PROVIDER=none to disable email sending.

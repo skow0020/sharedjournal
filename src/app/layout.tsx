@@ -34,14 +34,16 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const meticulousRecordingToken = process.env.NEXT_PUBLIC_METICULOUS_RECORDING_TOKEN
+
   return (
     <ClerkProvider afterSignOutUrl="/auth/sign-out">
       <html lang="en" suppressHydrationWarning>
         <head>
-          {(process.env.NODE_ENV === 'development' || process.env.VERCEL_ENV === 'preview') && (
+          {(process.env.NODE_ENV === 'development' || process.env.VERCEL_ENV === 'preview') && meticulousRecordingToken && (
             // eslint-disable-next-line @next/next/no-sync-scripts
             <script
-              data-recording-token="yY0QKTXP6LKqY6XIZtkah8Z9OJQGlRbFoRlm6TFd"
+              data-recording-token={meticulousRecordingToken}
               data-is-production-environment="false"
               src="https://snippet.meticulous.ai/v1/meticulous.js"
             />
