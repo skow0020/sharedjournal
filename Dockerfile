@@ -7,7 +7,8 @@ FROM node:24-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN npm run build
+ARG DATABASE_URL
+RUN DATABASE_URL="$DATABASE_URL" npm run build
 
 FROM node:24-alpine AS runner
 WORKDIR /app
