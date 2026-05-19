@@ -50,7 +50,7 @@ describe('getStripeServerClient', () => {
     expect(firstClient).toBe(secondClient)
     expect(StripeMock).toHaveBeenCalledTimes(1)
     expect(StripeMock).toHaveBeenCalledWith('sk_test_123', {
-      apiVersion: '2026-03-25.dahlia',
+      apiVersion: '2026-04-22.dahlia',
     })
   })
 })
