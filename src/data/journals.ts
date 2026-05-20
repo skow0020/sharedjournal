@@ -79,6 +79,7 @@ export type UserJournalDetails = {
   title: string
   description: string | null
   ownerUserId: string
+  role: 'owner' | 'editor' | 'viewer'
   isOwner: boolean
 }
 
@@ -105,6 +106,7 @@ export async function getUserJournalById(
       title: journals.title,
       description: journals.description,
       ownerUserId: journals.ownerUserId,
+      role: journalMembers.role,
       isOwner: sql<boolean>`${journals.ownerUserId} = ${userId}`,
     })
     .from(journals)

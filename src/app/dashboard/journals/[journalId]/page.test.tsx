@@ -8,6 +8,7 @@ const {
   getJournalEntryCountForJournalMock,
   getJournalEntriesForJournalMock,
   getAllPhotosForJournalMock,
+  getCommentsForEntryMock,
   getPendingInvitationsForOwnedJournalMock,
   notFoundMock,
   redirectMock,
@@ -19,6 +20,7 @@ const {
   getJournalEntryCountForJournalMock: vi.fn(),
   getJournalEntriesForJournalMock: vi.fn(),
   getAllPhotosForJournalMock: vi.fn(),
+  getCommentsForEntryMock: vi.fn(),
   getPendingInvitationsForOwnedJournalMock: vi.fn(),
   notFoundMock: vi.fn(() => {
     throw new Error('NEXT_NOT_FOUND')
@@ -68,6 +70,7 @@ vi.mock('@/app/dashboard/delete-journal-button', () => ({
 }))
 
 vi.mock('@/app/dashboard/journals/[journalId]/actions', () => ({
+  addCommentAction: vi.fn(async () => ({ error: null, success: true })),
   cancelPendingInvitationAction: vi.fn(async () => ({ error: null, success: true })),
   cleanupEntryImageUploadsAction: vi.fn(),
   createEntryAction: vi.fn(),
@@ -90,6 +93,10 @@ vi.mock('@/data/entries', () => ({
   getJournalEntriesForJournal: getJournalEntriesForJournalMock,
   getAllPhotosForJournal: getAllPhotosForJournalMock,
   createEntryForJournal: vi.fn(),
+}))
+
+vi.mock('@/data/comments', () => ({
+  getCommentsForEntry: getCommentsForEntryMock,
 }))
 
 vi.mock('@/app/dashboard/journals/[journalId]/journal-slideshow', () => ({
@@ -149,6 +156,7 @@ describe('JournalDetailsPage', () => {
         photos: [],
       },
     ])
+    getCommentsForEntryMock.mockResolvedValue([])
     getAllPhotosForJournalMock.mockResolvedValue([])
     getPendingInvitationsForOwnedJournalMock.mockResolvedValue([
       {

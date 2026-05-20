@@ -1,3 +1,5 @@
+import { getCommentsForEntry } from '@/data/comments'
+import { EntryComments } from './entry-comments'
 import { format, parseISO } from 'date-fns'
 import { ImagesIcon } from 'lucide-react'
 import Link from 'next/link'
@@ -13,6 +15,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { OwnedPendingInvitations } from '@/app/dashboard/journals/[journalId]/owned-pending-invitations'
 import {
+  addCommentAction,
   cancelPendingInvitationAction,
   cleanupEntryImageUploadsAction,
   createEntryAction,
@@ -90,6 +93,16 @@ export default async function JournalDetailsPage({ params, searchParams }: Journ
     }),
     getAllPhotosForJournal(appUser.id, journalId),
   ])
+
+  // Fetch comments for all entries (flat, not paginated)
+  const entryCommentsMap = Object.fromEntries(
+    await Promise.all(
+      entries.map(async (entry) => [entry.id, await getCommentsForEntry(entry.id)] as const),
+    ),
+  )
+
+  // Determine if user can comment (editor or owner)
+  const canComment = journal.role === 'editor' || journal.role === 'owner'
   const collaborators = await getCollaboratorsForJournal(appUser.id, journalId)
   const pendingInvitations = journal.isOwner
     ? await getPendingInvitationsForOwnedJournal({
@@ -218,6 +231,13 @@ export default async function JournalDetailsPage({ params, searchParams }: Journ
                         }))}
                       />
                     ) : null}
+                    <EntryComments
+                      entryId={entry.id}
+                      journalId={journalId}
+                      action={addCommentAction}
+                      comments={entryCommentsMap[entry.id] || []}
+                      canComment={canComment}
+                    />
                   </CardContent>
                 </Card>
               ))}

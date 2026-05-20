@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 const {
   getClerkCurrentUserMock,
   createEntryWithUploadedImagesForJournalMock,
+  createEntryCommentMock,
   deleteEntryForJournalMock,
   createJournalInvitationMock,
   updateJournalDetailsForOwnerMock,
@@ -16,6 +17,7 @@ const {
 } = vi.hoisted(() => ({
   getClerkCurrentUserMock: vi.fn(),
   createEntryWithUploadedImagesForJournalMock: vi.fn(),
+  createEntryCommentMock: vi.fn(),
   deleteEntryForJournalMock: vi.fn(),
   createJournalInvitationMock: vi.fn(),
   updateJournalDetailsForOwnerMock: vi.fn(),
@@ -39,6 +41,10 @@ vi.mock('@vercel/blob', () => ({
 vi.mock('@/data/entries', () => ({
   createEntryWithUploadedImagesForJournal: createEntryWithUploadedImagesForJournalMock,
   deleteEntryForJournal: deleteEntryForJournalMock,
+}))
+
+vi.mock('@/data/comments', () => ({
+  createEntryComment: createEntryCommentMock,
 }))
 
 vi.mock('@/data/invitations', () => ({
@@ -68,6 +74,7 @@ vi.mock('next/headers', () => ({
 }))
 
 import {
+  addCommentAction,
   cleanupEntryImageUploadsAction,
   createEntryAction,
   createInviteAction,
@@ -79,6 +86,8 @@ const originalAppUrl = process.env.NEXT_PUBLIC_APP_URL
 const originalServerAppUrl = process.env.APP_URL
 const originalVercelUrl = process.env.VERCEL_URL
 const originalVercelProductionUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
+const VALID_JOURNAL_ID = '4f687c5a-6576-4e05-a0f8-e4cdfdebe295'
+const VALID_ENTRY_ID = '26a0908b-c293-43f5-94c0-9b5d53fcc592'
 
 describe('createEntryAction', () => {
   beforeEach(() => {
@@ -617,6 +626,87 @@ describe('createInviteAction', () => {
       error: null,
       successMessage: 'Invitation created for friend@example.com. Copy the link below to share.',
       inviteLink: 'https://sharedjournal-preview.vercel.app/invitations/token-123',
+    })
+  })
+})
+
+describe('addCommentAction', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns an auth error when the user is signed out', async () => {
+    getCurrentAppUserMock.mockResolvedValue(null)
+
+    const result = await addCommentAction({
+      journalId: VALID_JOURNAL_ID,
+      entryId: VALID_ENTRY_ID,
+      content: 'Looks good.',
+    })
+
+    expect(result).toEqual({
+      error: 'You must be signed in to comment.',
+      success: false,
+    })
+    expect(createEntryCommentMock).not.toHaveBeenCalled()
+  })
+
+  it('validates input before calling the data helper', async () => {
+    getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
+
+    const result = await addCommentAction({
+      journalId: 'journal-1',
+      entryId: VALID_ENTRY_ID,
+      content: 'Looks good.',
+    })
+
+    expect(result).toEqual({
+      error: 'Invalid journal id.',
+      success: false,
+    })
+    expect(createEntryCommentMock).not.toHaveBeenCalled()
+  })
+
+  it('returns a permission error when comment creation is rejected', async () => {
+    getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
+    createEntryCommentMock.mockResolvedValue(null)
+
+    const result = await addCommentAction({
+      journalId: VALID_JOURNAL_ID,
+      entryId: VALID_ENTRY_ID,
+      content: 'Looks good.',
+    })
+
+    expect(createEntryCommentMock).toHaveBeenCalledWith({
+      entryId: VALID_ENTRY_ID,
+      authorUserId: 'user-1',
+      content: 'Looks good.',
+    })
+    expect(result).toEqual({
+      error: 'You do not have permission to comment on this entry.',
+      success: false,
+    })
+  })
+
+  it('creates a comment and revalidates the journal page on success', async () => {
+    getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
+    createEntryCommentMock.mockResolvedValue({ id: 'comment-1' })
+
+    const result = await addCommentAction({
+      journalId: VALID_JOURNAL_ID,
+      entryId: VALID_ENTRY_ID,
+      content: '  Great entry!  ',
+    })
+
+    expect(createEntryCommentMock).toHaveBeenCalledWith({
+      entryId: VALID_ENTRY_ID,
+      authorUserId: 'user-1',
+      content: 'Great entry!',
+    })
+    expect(revalidatePathMock).toHaveBeenCalledWith(`/dashboard/journals/${VALID_JOURNAL_ID}`)
+    expect(result).toEqual({
+      error: null,
+      success: true,
     })
   })
 })
