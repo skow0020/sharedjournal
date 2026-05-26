@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { createEntryComment, getCommentsForEntry } from '@/data/comments'
 import { db } from '@/db'
 import { entries, entryComments, journalMembers, journals, users } from '@/db/schema'
+import { isEncryptedEntryContent } from '@/lib/entry-content-crypto'
 
 async function createUser(overrides?: { clerkUserId?: string, displayName?: string }) {
   const [user] = await db
@@ -99,6 +100,15 @@ describe('comments data helpers', () => {
     expect(ownerComment).not.toBeNull()
     expect(editorComment).not.toBeNull()
     expect(ownerComment?.content).toBe('Owner note')
+
+    const storedComments = await db
+      .select({ id: entryComments.id, content: entryComments.content })
+      .from(entryComments)
+      .where(eq(entryComments.entryId, entryId))
+
+    expect(storedComments).toHaveLength(2)
+    expect(storedComments.every((comment) => isEncryptedEntryContent(comment.content))).toBe(true)
+    expect(storedComments.some((comment) => comment.content.includes('Owner note'))).toBe(false)
 
     const comments = await getCommentsForEntry(entryId)
     expect(comments).toHaveLength(2)

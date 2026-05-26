@@ -2,6 +2,7 @@ import { and, asc, eq, inArray } from 'drizzle-orm'
 
 import { db } from '@/db'
 import { entryComments, entries, journalMembers } from '@/db/schema'
+import { decryptEntryContent, encryptEntryContent } from '@/lib/entry-content-crypto'
 import { z } from 'zod'
 
 // --- Types ---
@@ -33,18 +34,45 @@ export async function createEntryComment(input: CreateEntryCommentInput) {
   const [comment] = await db.insert(entryComments).values({
     entryId: input.entryId,
     authorUserId: input.authorUserId,
-    content: input.content.trim(),
+    content: encryptEntryContent(input.content.trim()),
   }).returning()
 
+  const decryptedContent = decryptEntryContent(comment.content)
+
   return comment
+    ? {
+        ...comment,
+        content: decryptedContent,
+      }
+    : null
 }
 
 export async function getCommentsForEntry(entryId: string) {
-  return db.query.entryComments.findMany({
+  const comments = await db.query.entryComments.findMany({
     where: eq(entryComments.entryId, entryId),
     orderBy: [asc(entryComments.createdAt)],
     with: {
       author: true,
     },
   })
+
+  const decryptedComments = [] as typeof comments
+
+  for (const comment of comments) {
+    try {
+      decryptedComments.push({
+        ...comment,
+        content: decryptEntryContent(comment.content),
+      })
+    } catch (error) {
+      // Skip comments that cannot be decrypted so one bad row does not break the page.
+      console.error('Failed to decrypt journal entry comment content', {
+        commentId: comment.id,
+        entryId: comment.entryId,
+        error,
+      })
+    }
+  }
+
+  return decryptedComments
 }
