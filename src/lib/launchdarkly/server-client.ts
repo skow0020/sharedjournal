@@ -7,6 +7,34 @@ import {
 let launchDarklyClient: LDClient | null = null
 let launchDarklyInitialization: Promise<LDClient> | null = null
 const LAUNCHDARKLY_INITIALIZATION_TIMEOUT_SECONDS = 10
+const ENTRY_COMMENTS_FLAG_KEY = 'entry-comments'
+const ENTRY_COMMENTS_OVERRIDE_ENV_VAR = 'LAUNCHDARKLY_FLAG_ENTRY_COMMENTS'
+
+function parseBooleanEnvValue(value: string | undefined): boolean | undefined {
+  if (!value) {
+    return undefined
+  }
+
+  const normalized = value.trim().toLowerCase()
+
+  if (normalized === 'true') {
+    return true
+  }
+
+  if (normalized === 'false') {
+    return false
+  }
+
+  return undefined
+}
+
+function getFlagOverride(flagKey: string): boolean | undefined {
+  if (flagKey !== ENTRY_COMMENTS_FLAG_KEY) {
+    return undefined
+  }
+
+  return parseBooleanEnvValue(process.env[ENTRY_COMMENTS_OVERRIDE_ENV_VAR])
+}
 
 function getLaunchDarklySdkKey(): string {
   const sdkKey = process.env.LAUNCHDARKLY_SDK_KEY
@@ -64,6 +92,12 @@ export async function getLaunchDarklyVariation<T>(params: {
   context: LDContext
   fallback: T
 }): Promise<T> {
+  const override = getFlagOverride(params.flagKey)
+
+  if (typeof override === 'boolean') {
+    return override as T
+  }
+
   const client = await getLaunchDarklyServerClient()
 
   return client.variation(params.flagKey, params.context, params.fallback)

@@ -28,6 +28,7 @@ vi.mock('@launchdarkly/node-server-sdk', () => ({
 
 describe('launchdarkly/server-client', () => {
   const originalSdkKey = process.env.LAUNCHDARKLY_SDK_KEY
+  const originalEntryCommentsOverride = process.env.LAUNCHDARKLY_FLAG_ENTRY_COMMENTS
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -39,6 +40,12 @@ describe('launchdarkly/server-client', () => {
       delete process.env.LAUNCHDARKLY_SDK_KEY
     } else {
       process.env.LAUNCHDARKLY_SDK_KEY = originalSdkKey
+    }
+
+    if (originalEntryCommentsOverride === undefined) {
+      delete process.env.LAUNCHDARKLY_FLAG_ENTRY_COMMENTS
+    } else {
+      process.env.LAUNCHDARKLY_FLAG_ENTRY_COMMENTS = originalEntryCommentsOverride
     }
   })
 
@@ -107,5 +114,43 @@ describe('launchdarkly/server-client', () => {
 
     expect(result).toBe(false)
     expect(variationMock).toHaveBeenCalledWith('new-dashboard', context, true)
+  })
+
+  it('uses entry-comments override when configured to true', async () => {
+    process.env.LAUNCHDARKLY_FLAG_ENTRY_COMMENTS = 'true'
+
+    const {
+      createLaunchDarklyContext,
+      getLaunchDarklyVariation,
+    } = await import('@/lib/launchdarkly/server-client')
+
+    const result = await getLaunchDarklyVariation({
+      flagKey: 'entry-comments',
+      context: createLaunchDarklyContext({ key: 'user-1' }),
+      fallback: false,
+    })
+
+    expect(result).toBe(true)
+    expect(initMock).not.toHaveBeenCalled()
+    expect(variationMock).not.toHaveBeenCalled()
+  })
+
+  it('uses entry-comments override when configured to false', async () => {
+    process.env.LAUNCHDARKLY_FLAG_ENTRY_COMMENTS = 'false'
+
+    const {
+      createLaunchDarklyContext,
+      getLaunchDarklyVariation,
+    } = await import('@/lib/launchdarkly/server-client')
+
+    const result = await getLaunchDarklyVariation({
+      flagKey: 'entry-comments',
+      context: createLaunchDarklyContext({ key: 'user-1' }),
+      fallback: true,
+    })
+
+    expect(result).toBe(false)
+    expect(initMock).not.toHaveBeenCalled()
+    expect(variationMock).not.toHaveBeenCalled()
   })
 })
