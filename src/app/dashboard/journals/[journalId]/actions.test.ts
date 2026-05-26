@@ -14,6 +14,7 @@ const {
   sendInviteEmailMock,
   revalidatePathMock,
   headersMock,
+  getLaunchDarklyVariationMock,
 } = vi.hoisted(() => ({
   getClerkCurrentUserMock: vi.fn(),
   createEntryWithUploadedImagesForJournalMock: vi.fn(),
@@ -28,6 +29,7 @@ const {
   sendInviteEmailMock: vi.fn(),
   revalidatePathMock: vi.fn(),
   headersMock: vi.fn(),
+  getLaunchDarklyVariationMock: vi.fn(),
 }))
 
 vi.mock('@clerk/nextjs/server', () => ({
@@ -71,6 +73,11 @@ vi.mock('next/cache', () => ({
 
 vi.mock('next/headers', () => ({
   headers: headersMock,
+}))
+
+vi.mock('@/lib/launchdarkly/server-client', () => ({
+  createLaunchDarklyContext: vi.fn((input) => input),
+  getLaunchDarklyVariation: getLaunchDarklyVariationMock,
 }))
 
 import {
@@ -633,6 +640,8 @@ describe('createInviteAction', () => {
 describe('addCommentAction', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    // Enable comments feature by default
+    getLaunchDarklyVariationMock.mockResolvedValue(true)
   })
 
   it('returns an auth error when the user is signed out', async () => {
@@ -686,6 +695,23 @@ describe('addCommentAction', () => {
       error: 'You do not have permission to comment on this entry.',
       success: false,
     })
+  })
+
+  it('returns a feature disabled error when comments feature is disabled', async () => {
+    getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
+    getLaunchDarklyVariationMock.mockResolvedValue(false)
+
+    const result = await addCommentAction({
+      journalId: VALID_JOURNAL_ID,
+      entryId: VALID_ENTRY_ID,
+      content: 'Looks good.',
+    })
+
+    expect(result).toEqual({
+      error: 'Comments feature is not available at this time.',
+      success: false,
+    })
+    expect(createEntryCommentMock).not.toHaveBeenCalled()
   })
 
   it('creates a comment and revalidates the journal page on success', async () => {

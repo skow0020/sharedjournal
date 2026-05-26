@@ -12,6 +12,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import {
+  createLaunchDarklyContext,
+  getLaunchDarklyVariation,
+} from '@/lib/launchdarkly/server-client'
 import { Button } from '@/components/ui/button'
 import { OwnedPendingInvitations } from '@/app/dashboard/journals/[journalId]/owned-pending-invitations'
 import {
@@ -86,6 +90,16 @@ export default async function JournalDetailsPage({ params, searchParams }: Journ
     ? 1
     : parsedEntriesPage
 
+  // Check if comments feature is enabled via LaunchDarkly
+  const ldContext = createLaunchDarklyContext({
+    key: appUser.id,
+  })
+  const isCommentsFeatureEnabled = await getLaunchDarklyVariation({
+    flagKey: 'entry-comments',
+    context: ldContext,
+    fallback: false,
+  })
+
   const [totalEntryCount, entries, allPhotos] = await Promise.all([
     getJournalEntryCountForJournal(appUser.id, journalId),
     getJournalEntriesForJournal(appUser.id, journalId, {
@@ -94,15 +108,17 @@ export default async function JournalDetailsPage({ params, searchParams }: Journ
     getAllPhotosForJournal(appUser.id, journalId),
   ])
 
-  // Fetch comments for all entries (flat, not paginated)
-  const entryCommentsMap = Object.fromEntries(
-    await Promise.all(
-      entries.map(async (entry) => [entry.id, await getCommentsForEntry(entry.id)] as const),
-    ),
-  )
+  // Fetch comments for all entries only if feature is enabled
+  const entryCommentsMap = isCommentsFeatureEnabled
+    ? Object.fromEntries(
+        await Promise.all(
+          entries.map(async (entry) => [entry.id, await getCommentsForEntry(entry.id)] as const),
+        ),
+      )
+    : {}
 
-  // Determine if user can comment (editor or owner)
-  const canComment = journal.role === 'editor' || journal.role === 'owner'
+  // Determine if user can comment (editor or owner, and feature enabled)
+  const canComment = isCommentsFeatureEnabled && (journal.role === 'editor' || journal.role === 'owner')
   const collaborators = await getCollaboratorsForJournal(appUser.id, journalId)
   const pendingInvitations = journal.isOwner
     ? await getPendingInvitationsForOwnedJournal({
@@ -231,13 +247,15 @@ export default async function JournalDetailsPage({ params, searchParams }: Journ
                         }))}
                       />
                     ) : null}
-                    <EntryComments
-                      entryId={entry.id}
-                      journalId={journalId}
-                      action={addCommentAction}
-                      comments={entryCommentsMap[entry.id] || []}
-                      canComment={canComment}
-                    />
+                    {isCommentsFeatureEnabled ? (
+                      <EntryComments
+                        entryId={entry.id}
+                        journalId={journalId}
+                        action={addCommentAction}
+                        comments={entryCommentsMap[entry.id] || []}
+                        canComment={canComment}
+                      />
+                    ) : null}
                   </CardContent>
                 </Card>
               ))}

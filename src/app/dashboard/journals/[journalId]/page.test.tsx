@@ -10,6 +10,7 @@ const {
   getAllPhotosForJournalMock,
   getCommentsForEntryMock,
   getPendingInvitationsForOwnedJournalMock,
+  getLaunchDarklyVariationMock,
   notFoundMock,
   redirectMock,
   useRouterMock,
@@ -22,6 +23,7 @@ const {
   getAllPhotosForJournalMock: vi.fn(),
   getCommentsForEntryMock: vi.fn(),
   getPendingInvitationsForOwnedJournalMock: vi.fn(),
+  getLaunchDarklyVariationMock: vi.fn(async (params) => params.fallback),
   notFoundMock: vi.fn(() => {
     throw new Error('NEXT_NOT_FOUND')
   }),
@@ -99,6 +101,11 @@ vi.mock('@/data/comments', () => ({
   getCommentsForEntry: getCommentsForEntryMock,
 }))
 
+vi.mock('@/lib/launchdarkly/server-client', () => ({
+  createLaunchDarklyContext: vi.fn((input) => input),
+  getLaunchDarklyVariation: getLaunchDarklyVariationMock,
+}))
+
 vi.mock('@/app/dashboard/journals/[journalId]/journal-slideshow', () => ({
   JournalSlideshow: () => <div data-testid="journal-slideshow">Slideshow</div>,
 }))
@@ -168,6 +175,8 @@ describe('JournalDetailsPage', () => {
         emailDelivered: true,
       },
     ])
+    // Enable comments feature by default
+    getLaunchDarklyVariationMock.mockResolvedValue(true)
   })
 
   it('redirects to sign-in when user is not authenticated', async () => {

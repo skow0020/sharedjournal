@@ -14,6 +14,10 @@ import {
   setInvitationEmailDeliveryFlag,
 } from '@/data/invitations'
 import { getUserJournalById, updateJournalDetailsForOwner } from '@/data/journals'
+import {
+  createLaunchDarklyContext,
+  getLaunchDarklyVariation,
+} from '@/lib/launchdarkly/server-client'
 import { ENTRY_IMAGE_ALLOWED_MIME_TYPES, ENTRY_IMAGE_MAX_FILES } from '@/lib/entry-image-constants'
 import { isTempEntryImageStorageKeyForJournal } from '@/lib/entry-image-storage'
 import { getCurrentAppUser } from '@/lib/get-current-app-user'
@@ -445,6 +449,23 @@ export async function addCommentAction(
   if (!currentUser) {
     return {
       error: 'You must be signed in to comment.',
+      success: false,
+    }
+  }
+
+  // Check if comments feature is enabled
+  const ldContext = createLaunchDarklyContext({
+    key: currentUser.id,
+  })
+  const isCommentsFeatureEnabled = await getLaunchDarklyVariation({
+    flagKey: 'entry-comments',
+    context: ldContext,
+    fallback: false,
+  })
+
+  if (!isCommentsFeatureEnabled) {
+    return {
+      error: 'Comments feature is not available at this time.',
       success: false,
     }
   }

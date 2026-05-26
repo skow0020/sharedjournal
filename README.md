@@ -27,6 +27,12 @@ Create a `.env.local` file in the root of your project with the following variab
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
 CLERK_SECRET_KEY=sk_test_...
 
+# LaunchDarkly feature flags (server-side)
+LAUNCHDARKLY_SDK_KEY=sdk-...
+
+# Optional: LaunchDarkly client-side id (for future client SDK usage)
+NEXT_PUBLIC_LAUNCHDARKLY_CLIENT_SIDE_ID=...
+
 # Database (Neon/PostgreSQL)
 DATABASE_URL=postgresql://user:password@host:port/database
 
@@ -117,6 +123,35 @@ npm run db:migrate
 ```
 
 before testing checkout.
+
+### LaunchDarkly Feature Flags
+
+SharedJournal now includes a server-side LaunchDarkly helper at `src/lib/launchdarkly/server-client.ts`.
+
+Basic usage in a Server Component or Server Action:
+
+```tsx
+import {
+  createLaunchDarklyContext,
+  getLaunchDarklyVariation,
+} from '@/lib/launchdarkly/server-client'
+
+const context = createLaunchDarklyContext({
+  key: appUser.id,
+  name: appUser.displayName,
+})
+
+const isNewExperienceEnabled = await getLaunchDarklyVariation({
+  flagKey: 'new-experience',
+  context,
+  fallback: false,
+})
+```
+
+Notes:
+
+- Feature-flag evaluation should happen in Server Components / Server Actions.
+- `LAUNCHDARKLY_SDK_KEY` must be set in your environment for the helper to initialize.
 
 ### Clerk Authentication
 
