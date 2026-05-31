@@ -154,6 +154,25 @@ export const entryPhotos = pgTable(
 	],
 )
 
+export const entryComments = pgTable(
+	'entry_comments',
+	{
+		id: uuid('id').defaultRandom().primaryKey(),
+		entryId: uuid('entry_id')
+			.notNull()
+			.references(() => entries.id, { onDelete: 'cascade' }),
+		authorUserId: uuid('author_user_id')
+			.notNull()
+			.references(() => users.id, { onDelete: 'cascade' }),
+		content: text('content').notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+	},
+	(table) => [
+		index('entry_comments_entry_id_idx').on(table.entryId),
+		index('entry_comments_author_id_idx').on(table.authorUserId),
+	],
+)
+
 export const supportPayments = pgTable(
 	'support_payments',
 	{
@@ -182,6 +201,7 @@ export const usersRelations = relations(users, ({ many }) => ({
 	ownedJournals: many(journals),
 	journalMemberships: many(journalMembers),
 	writtenEntries: many(entries),
+	writtenComments: many(entryComments),
 	uploadedPhotos: many(entryPhotos),
 	supportPayments: many(supportPayments),
 	invitationsSent: many(journalInvitations, {
@@ -240,6 +260,7 @@ export const entriesRelations = relations(entries, ({ one, many }) => ({
 		references: [users.id],
 	}),
 	photos: many(entryPhotos),
+	comments: many(entryComments),
 }))
 
 export const entryPhotosRelations = relations(entryPhotos, ({ one }) => ({
@@ -249,6 +270,17 @@ export const entryPhotosRelations = relations(entryPhotos, ({ one }) => ({
 	}),
 	uploader: one(users, {
 		fields: [entryPhotos.uploaderUserId],
+		references: [users.id],
+	}),
+}))
+
+export const entryCommentsRelations = relations(entryComments, ({ one }) => ({
+	entry: one(entries, {
+		fields: [entryComments.entryId],
+		references: [entries.id],
+	}),
+	author: one(users, {
+		fields: [entryComments.authorUserId],
 		references: [users.id],
 	}),
 }))

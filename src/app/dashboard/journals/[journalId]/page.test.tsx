@@ -8,7 +8,9 @@ const {
   getJournalEntryCountForJournalMock,
   getJournalEntriesForJournalMock,
   getAllPhotosForJournalMock,
+  getCommentsForEntriesMock,
   getPendingInvitationsForOwnedJournalMock,
+  getLaunchDarklyVariationMock,
   notFoundMock,
   redirectMock,
   useRouterMock,
@@ -19,7 +21,9 @@ const {
   getJournalEntryCountForJournalMock: vi.fn(),
   getJournalEntriesForJournalMock: vi.fn(),
   getAllPhotosForJournalMock: vi.fn(),
+  getCommentsForEntriesMock: vi.fn(),
   getPendingInvitationsForOwnedJournalMock: vi.fn(),
+  getLaunchDarklyVariationMock: vi.fn(async (params) => params.fallback),
   notFoundMock: vi.fn(() => {
     throw new Error('NEXT_NOT_FOUND')
   }),
@@ -68,6 +72,7 @@ vi.mock('@/app/dashboard/delete-journal-button', () => ({
 }))
 
 vi.mock('@/app/dashboard/journals/[journalId]/actions', () => ({
+  addCommentAction: vi.fn(async () => ({ error: null, success: true })),
   cancelPendingInvitationAction: vi.fn(async () => ({ error: null, success: true })),
   cleanupEntryImageUploadsAction: vi.fn(),
   createEntryAction: vi.fn(),
@@ -90,6 +95,15 @@ vi.mock('@/data/entries', () => ({
   getJournalEntriesForJournal: getJournalEntriesForJournalMock,
   getAllPhotosForJournal: getAllPhotosForJournalMock,
   createEntryForJournal: vi.fn(),
+}))
+
+vi.mock('@/data/comments', () => ({
+  getCommentsForEntries: getCommentsForEntriesMock,
+}))
+
+vi.mock('@/lib/launchdarkly/server-client', () => ({
+  createLaunchDarklyContext: vi.fn((input) => input),
+  getLaunchDarklyVariation: getLaunchDarklyVariationMock,
 }))
 
 vi.mock('@/app/dashboard/journals/[journalId]/journal-slideshow', () => ({
@@ -149,6 +163,9 @@ describe('JournalDetailsPage', () => {
         photos: [],
       },
     ])
+    getCommentsForEntriesMock.mockResolvedValue({
+      'entry-1': [],
+    })
     getAllPhotosForJournalMock.mockResolvedValue([])
     getPendingInvitationsForOwnedJournalMock.mockResolvedValue([
       {
@@ -160,6 +177,8 @@ describe('JournalDetailsPage', () => {
         emailDelivered: true,
       },
     ])
+    // Enable comments feature by default
+    getLaunchDarklyVariationMock.mockResolvedValue(true)
   })
 
   it('redirects to sign-in when user is not authenticated', async () => {
@@ -321,5 +340,12 @@ describe('JournalDetailsPage', () => {
       limit: 20,
     })
     expect(screen.getByTestId('journal-entries-infinite-loader')).toHaveTextContent('Page 2 loader true')
+  })
+
+  it('fetches comments for rendered entries in a single batched call', async () => {
+    await renderJournalDetailsPage()
+
+    expect(getCommentsForEntriesMock).toHaveBeenCalledWith(['entry-1'])
+    expect(getCommentsForEntriesMock).toHaveBeenCalledTimes(1)
   })
 })

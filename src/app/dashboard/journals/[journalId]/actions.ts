@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
 import { z } from 'zod'
 
+import { createEntryComment } from '@/data/comments'
 import { createEntryWithUploadedImagesForJournal, deleteEntryForJournal } from '@/data/entries'
 import {
   createJournalInvitation,
@@ -13,6 +14,10 @@ import {
   setInvitationEmailDeliveryFlag,
 } from '@/data/invitations'
 import { getUserJournalById, updateJournalDetailsForOwner } from '@/data/journals'
+import {
+  createLaunchDarklyContext,
+  getLaunchDarklyVariation,
+} from '@/lib/launchdarkly/server-client'
 import { ENTRY_IMAGE_ALLOWED_MIME_TYPES, ENTRY_IMAGE_MAX_FILES } from '@/lib/entry-image-constants'
 import { isTempEntryImageStorageKeyForJournal } from '@/lib/entry-image-storage'
 import { getCurrentAppUser } from '@/lib/get-current-app-user'
@@ -63,6 +68,17 @@ export type InviteUserInput = {
   journalId: string
   journalTitle: string
   email: string
+}
+
+export type AddCommentInput = {
+  journalId: string
+  entryId: string
+  content: string
+}
+
+export type AddCommentState = {
+  error: string | null
+  success: boolean
 }
 
 export type UpdateJournalDetailsInput = {
@@ -134,6 +150,12 @@ const inviteUserSchema = z.object({
   journalId: z.string().trim().min(1, 'Journal is required.'),
   journalTitle: z.string().trim().min(1, 'Journal title is required.'),
   email: z.string().trim().email('Please provide a valid email address.').transform((value) => value.toLowerCase()),
+})
+
+const addCommentSchema = z.object({
+  journalId: z.string().uuid('Invalid journal id.'),
+  entryId: z.string().uuid('Invalid entry id.'),
+  content: z.string().trim().min(1, 'Comment is required.').max(2000, 'Comment must be 2000 characters or less.'),
 })
 
 const updateJournalDetailsSchema = z.object({
@@ -416,6 +438,65 @@ export async function createInviteAction(
     error: null,
     successMessage,
     inviteLink,
+  }
+}
+
+export async function addCommentAction(
+  input: AddCommentInput,
+): Promise<AddCommentState> {
+  const currentUser = await getCurrentAppUser()
+
+  if (!currentUser) {
+    return {
+      error: 'You must be signed in to comment.',
+      success: false,
+    }
+  }
+
+  // Check if comments feature is enabled
+  const ldContext = createLaunchDarklyContext({
+    key: currentUser.id,
+  })
+  const isCommentsFeatureEnabled = await getLaunchDarklyVariation({
+    flagKey: 'entry-comments',
+    context: ldContext,
+    fallback: false,
+  })
+
+  if (!isCommentsFeatureEnabled) {
+    return {
+      error: 'Comments feature is not available at this time.',
+      success: false,
+    }
+  }
+
+  const parsedInput = addCommentSchema.safeParse(input)
+
+  if (!parsedInput.success) {
+    return {
+      error: parsedInput.error.issues[0]?.message ?? 'Unable to add comment.',
+      success: false,
+    }
+  }
+
+  const comment = await createEntryComment({
+    entryId: parsedInput.data.entryId,
+    authorUserId: currentUser.id,
+    content: parsedInput.data.content,
+  })
+
+  if (!comment) {
+    return {
+      error: 'You do not have permission to comment on this entry.',
+      success: false,
+    }
+  }
+
+  revalidatePath(`/dashboard/journals/${comment.journalId}`)
+
+  return {
+    error: null,
+    success: true,
   }
 }
 

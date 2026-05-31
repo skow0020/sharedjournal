@@ -15,6 +15,13 @@
       "when": 1776648038228,
       "tag": "0001_same_satana",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1779238954965,
+      "tag": "0002_flashy_roxanne_simpson",
+      "breakpoints": true
     }
   ]
 }

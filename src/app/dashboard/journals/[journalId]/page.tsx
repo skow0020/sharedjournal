@@ -1,3 +1,5 @@
+import { getCommentsForEntries } from '@/data/comments'
+import { EntryComments } from './entry-comments'
 import { format, parseISO } from 'date-fns'
 import { ImagesIcon } from 'lucide-react'
 import Link from 'next/link'
@@ -10,9 +12,14 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import {
+  createLaunchDarklyContext,
+  getLaunchDarklyVariation,
+} from '@/lib/launchdarkly/server-client'
 import { Button } from '@/components/ui/button'
 import { OwnedPendingInvitations } from '@/app/dashboard/journals/[journalId]/owned-pending-invitations'
 import {
+  addCommentAction,
   cancelPendingInvitationAction,
   cleanupEntryImageUploadsAction,
   createEntryAction,
@@ -83,6 +90,16 @@ export default async function JournalDetailsPage({ params, searchParams }: Journ
     ? 1
     : parsedEntriesPage
 
+  // Check if comments feature is enabled via LaunchDarkly
+  const ldContext = createLaunchDarklyContext({
+    key: appUser.id,
+  })
+  const isCommentsFeatureEnabled = await getLaunchDarklyVariation({
+    flagKey: 'entry-comments',
+    context: ldContext,
+    fallback: false,
+  })
+
   const [totalEntryCount, entries, allPhotos] = await Promise.all([
     getJournalEntryCountForJournal(appUser.id, journalId),
     getJournalEntriesForJournal(appUser.id, journalId, {
@@ -90,6 +107,14 @@ export default async function JournalDetailsPage({ params, searchParams }: Journ
     }),
     getAllPhotosForJournal(appUser.id, journalId),
   ])
+
+  // Fetch comments for all entries only if feature is enabled
+  const entryCommentsMap = isCommentsFeatureEnabled
+    ? await getCommentsForEntries(entries.map((entry) => entry.id))
+    : {}
+
+  // Determine if user can comment (editor or owner, and feature enabled)
+  const canComment = isCommentsFeatureEnabled && (journal.role === 'editor' || journal.role === 'owner')
   const collaborators = await getCollaboratorsForJournal(appUser.id, journalId)
   const pendingInvitations = journal.isOwner
     ? await getPendingInvitationsForOwnedJournal({
@@ -216,6 +241,15 @@ export default async function JournalDetailsPage({ params, searchParams }: Journ
                           id: photo.id,
                           src: buildEntryPhotoProxyUrl(entry.id, photo.id),
                         }))}
+                      />
+                    ) : null}
+                    {isCommentsFeatureEnabled ? (
+                      <EntryComments
+                        entryId={entry.id}
+                        journalId={journalId}
+                        action={addCommentAction}
+                        comments={entryCommentsMap[entry.id] || []}
+                        canComment={canComment}
                       />
                     ) : null}
                   </CardContent>

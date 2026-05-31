@@ -92,6 +92,19 @@ export class JournalDetailPage {
     return this.page.getByText(content)
   }
 
+  commentInput() {
+    return this.page.getByPlaceholder('Add a comment...')
+  }
+
+  commentText(content: string) {
+    return this.page.getByText(content)
+  }
+
+  async addComment(content: string) {
+    await this.commentInput().fill(content)
+    await this.page.getByRole('button', { name: 'Post' }).click()
+  }
+
   private entryCard(title: string) {
     return this.page.locator('[data-slot="card"]').filter({ hasText: title }).first()
   }

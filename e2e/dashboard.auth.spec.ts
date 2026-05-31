@@ -2,11 +2,29 @@ import { expect, test } from '@playwright/test'
 import { DashboardPage } from './pages/dashboard.page'
 import { JournalDetailPage } from './pages/journal-detail.page'
 
-test('can create a journal, add an entry, and invite a collaborator', async ({ page }) => {
+test.beforeEach(async ({ request }) => {
+  const resetResponse = await request.post('/api/test/launchdarkly/entry-comments', {
+    data: {
+      enabled: false,
+    },
+  })
+
+  expect(resetResponse.ok()).toBeTruthy()
+})
+
+test('can create a journal, add an entry, comment on it, and invite a collaborator', async ({ page, request }) => {
+  const toggleResponse = await request.post('/api/test/launchdarkly/entry-comments', {
+    data: {
+      enabled: true,
+    },
+  })
+  expect(toggleResponse.ok()).toBeTruthy()
+
   const journalTitle = `E2E Journal ${Date.now()}`
   const journalDescription = 'Journal created by Playwright end-to-end coverage.'
   const entryTitle = 'First E2E entry'
   const entryContent = 'Entry content written by Playwright for lifecycle coverage.'
+  const commentContent = `E2E comment ${Date.now()}`
   const inviteeEmail = `invitee+${Date.now()}@example.com`
 
   const dashboardPage = new DashboardPage(page)
@@ -34,6 +52,10 @@ test('can create a journal, add an entry, and invite a collaborator', async ({ p
   await expect(journalDetailPage.entriesHeading()).toBeVisible()
   await expect(journalDetailPage.entryTitle(entryTitle)).toBeVisible()
   await expect(journalDetailPage.entryContent(entryContent)).toBeVisible()
+
+  await expect(journalDetailPage.commentInput()).toBeVisible()
+  await journalDetailPage.addComment(commentContent)
+  await expect(journalDetailPage.commentText(commentContent)).toBeVisible()
 
   await journalDetailPage.deleteEntry(entryTitle)
   await expect(journalDetailPage.entryTitle(entryTitle)).not.toBeVisible()
