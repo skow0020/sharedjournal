@@ -14,14 +14,16 @@ export const CreateEntryCommentSchema = z.object({
 export type CreateEntryCommentInput = z.infer<typeof CreateEntryCommentSchema>
 
 export async function createEntryComment(input: CreateEntryCommentInput) {
+  const parsedInput = CreateEntryCommentSchema.parse(input)
+
   const [accessibleEntry] = await db
     .select({ id: entries.id })
     .from(entries)
     .innerJoin(journalMembers, eq(journalMembers.journalId, entries.journalId))
     .where(
       and(
-        eq(entries.id, input.entryId),
-        eq(journalMembers.userId, input.authorUserId),
+        eq(entries.id, parsedInput.entryId),
+        eq(journalMembers.userId, parsedInput.authorUserId),
         inArray(journalMembers.role, ['owner', 'editor']),
       ),
     )
@@ -32,9 +34,9 @@ export async function createEntryComment(input: CreateEntryCommentInput) {
   }
 
   const [comment] = await db.insert(entryComments).values({
-    entryId: input.entryId,
-    authorUserId: input.authorUserId,
-    content: encryptEntryContent(input.content.trim()),
+    entryId: parsedInput.entryId,
+    authorUserId: parsedInput.authorUserId,
+    content: encryptEntryContent(parsedInput.content),
   }).returning()
 
   if (!comment) {
