@@ -37,14 +37,16 @@ export async function createEntryComment(input: CreateEntryCommentInput) {
     content: encryptEntryContent(input.content.trim()),
   }).returning()
 
+  if (!comment) {
+    return null
+  }
+
   const decryptedContent = decryptEntryContent(comment.content)
 
-  return comment
-    ? {
-        ...comment,
-        content: decryptedContent,
-      }
-    : null
+  return {
+    ...comment,
+    content: decryptedContent,
+  }
 }
 
 export async function getCommentsForEntry(entryId: string) {
