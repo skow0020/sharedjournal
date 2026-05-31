@@ -8,7 +8,7 @@ const {
   getJournalEntryCountForJournalMock,
   getJournalEntriesForJournalMock,
   getAllPhotosForJournalMock,
-  getCommentsForEntryMock,
+  getCommentsForEntriesMock,
   getPendingInvitationsForOwnedJournalMock,
   getLaunchDarklyVariationMock,
   notFoundMock,
@@ -21,7 +21,7 @@ const {
   getJournalEntryCountForJournalMock: vi.fn(),
   getJournalEntriesForJournalMock: vi.fn(),
   getAllPhotosForJournalMock: vi.fn(),
-  getCommentsForEntryMock: vi.fn(),
+  getCommentsForEntriesMock: vi.fn(),
   getPendingInvitationsForOwnedJournalMock: vi.fn(),
   getLaunchDarklyVariationMock: vi.fn(async (params) => params.fallback),
   notFoundMock: vi.fn(() => {
@@ -98,7 +98,7 @@ vi.mock('@/data/entries', () => ({
 }))
 
 vi.mock('@/data/comments', () => ({
-  getCommentsForEntry: getCommentsForEntryMock,
+  getCommentsForEntries: getCommentsForEntriesMock,
 }))
 
 vi.mock('@/lib/launchdarkly/server-client', () => ({
@@ -163,7 +163,9 @@ describe('JournalDetailsPage', () => {
         photos: [],
       },
     ])
-    getCommentsForEntryMock.mockResolvedValue([])
+    getCommentsForEntriesMock.mockResolvedValue({
+      'entry-1': [],
+    })
     getAllPhotosForJournalMock.mockResolvedValue([])
     getPendingInvitationsForOwnedJournalMock.mockResolvedValue([
       {
@@ -338,5 +340,12 @@ describe('JournalDetailsPage', () => {
       limit: 20,
     })
     expect(screen.getByTestId('journal-entries-infinite-loader')).toHaveTextContent('Page 2 loader true')
+  })
+
+  it('fetches comments for rendered entries in a single batched call', async () => {
+    await renderJournalDetailsPage()
+
+    expect(getCommentsForEntriesMock).toHaveBeenCalledWith(['entry-1'])
+    expect(getCommentsForEntriesMock).toHaveBeenCalledTimes(1)
   })
 })

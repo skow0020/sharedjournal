@@ -12,6 +12,18 @@ export const CreateEntryCommentSchema = z.object({
   content: z.string().trim().min(1).max(2000),
 })
 export type CreateEntryCommentInput = z.infer<typeof CreateEntryCommentSchema>
+export type EntryCommentForEntry = {
+  id: string
+  entryId: string
+  authorUserId: string
+  content: string
+  createdAt: Date
+  author: {
+    displayName: string | null
+  }
+}
+
+type CommentsByEntryId = Record<string, EntryCommentForEntry[]>
 
 export async function createEntryComment(input: CreateEntryCommentInput) {
   const parsedInput = CreateEntryCommentSchema.parse(input)
@@ -51,20 +63,31 @@ export async function createEntryComment(input: CreateEntryCommentInput) {
   }
 }
 
-export async function getCommentsForEntry(entryId: string) {
+export async function getCommentsForEntry(entryId: string): Promise<EntryCommentForEntry[]> {
+  const commentsByEntry = await getCommentsForEntries([entryId])
+  return commentsByEntry[entryId] ?? []
+}
+
+export async function getCommentsForEntries(entryIds: string[]): Promise<CommentsByEntryId> {
+  if (entryIds.length === 0) {
+    return {}
+  }
+
   const comments = await db.query.entryComments.findMany({
-    where: eq(entryComments.entryId, entryId),
+    where: inArray(entryComments.entryId, entryIds),
     orderBy: [asc(entryComments.createdAt)],
     with: {
       author: true,
     },
   })
 
-  const decryptedComments = [] as typeof comments
+  const commentsByEntryId = Object.fromEntries(
+    entryIds.map((entryId) => [entryId, []]),
+  ) as CommentsByEntryId
 
   for (const comment of comments) {
     try {
-      decryptedComments.push({
+      commentsByEntryId[comment.entryId]?.push({
         ...comment,
         content: decryptEntryContent(comment.content),
       })
@@ -78,5 +101,5 @@ export async function getCommentsForEntry(entryId: string) {
     }
   }
 
-  return decryptedComments
+  return commentsByEntryId
 }

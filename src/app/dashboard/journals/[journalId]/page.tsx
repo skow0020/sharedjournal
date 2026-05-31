@@ -1,4 +1,4 @@
-import { getCommentsForEntry } from '@/data/comments'
+import { getCommentsForEntries } from '@/data/comments'
 import { EntryComments } from './entry-comments'
 import { format, parseISO } from 'date-fns'
 import { ImagesIcon } from 'lucide-react'
@@ -110,11 +110,7 @@ export default async function JournalDetailsPage({ params, searchParams }: Journ
 
   // Fetch comments for all entries only if feature is enabled
   const entryCommentsMap = isCommentsFeatureEnabled
-    ? Object.fromEntries(
-        await Promise.all(
-          entries.map(async (entry) => [entry.id, await getCommentsForEntry(entry.id)] as const),
-        ),
-      )
+    ? await getCommentsForEntries(entries.map((entry) => entry.id))
     : {}
 
   // Determine if user can comment (editor or owner, and feature enabled)

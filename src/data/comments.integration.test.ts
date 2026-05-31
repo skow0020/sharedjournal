@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { createEntryComment, getCommentsForEntry } from '@/data/comments'
+import { createEntryComment, getCommentsForEntries, getCommentsForEntry } from '@/data/comments'
 import { db } from '@/db'
 import { entries, entryComments, journalMembers, journals, users } from '@/db/schema'
 import { isEncryptedEntryContent } from '@/lib/entry-content-crypto'
@@ -144,5 +144,28 @@ describe('comments data helpers', () => {
     const comments = await getCommentsForEntry(entryId)
 
     expect(comments).toEqual([])
+  })
+
+  it('returns comments grouped by entry id in a single batched read', async () => {
+    const secondEntry = await createEntry(journalId, ownerId)
+
+    await createEntryComment({
+      entryId,
+      authorUserId: ownerId,
+      content: 'First entry comment',
+    })
+
+    await createEntryComment({
+      entryId: secondEntry.id,
+      authorUserId: editorId,
+      content: 'Second entry comment',
+    })
+
+    const commentsByEntry = await getCommentsForEntries([entryId, secondEntry.id])
+
+    expect(commentsByEntry[entryId]).toHaveLength(1)
+    expect(commentsByEntry[entryId]?.[0]?.content).toBe('First entry comment')
+    expect(commentsByEntry[secondEntry.id]).toHaveLength(1)
+    expect(commentsByEntry[secondEntry.id]?.[0]?.content).toBe('Second entry comment')
   })
 })
