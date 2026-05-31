@@ -716,7 +716,14 @@ describe('addCommentAction', () => {
 
   it('creates a comment and revalidates the journal page on success', async () => {
     getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
-    createEntryCommentMock.mockResolvedValue({ id: 'comment-1' })
+    createEntryCommentMock.mockResolvedValue({
+      id: 'comment-1',
+      entryId: VALID_ENTRY_ID,
+      authorUserId: 'user-1',
+      journalId: '08f7f9ef-a4ea-445f-a29f-b865208ce13a',
+      content: 'Great entry!',
+      createdAt: new Date('2026-03-14T10:00:00.000Z'),
+    })
 
     const result = await addCommentAction({
       journalId: VALID_JOURNAL_ID,
@@ -729,7 +736,7 @@ describe('addCommentAction', () => {
       authorUserId: 'user-1',
       content: 'Great entry!',
     })
-    expect(revalidatePathMock).toHaveBeenCalledWith(`/dashboard/journals/${VALID_JOURNAL_ID}`)
+    expect(revalidatePathMock).toHaveBeenCalledWith('/dashboard/journals/08f7f9ef-a4ea-445f-a29f-b865208ce13a')
     expect(result).toEqual({
       error: null,
       success: true,

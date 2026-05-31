@@ -12,6 +12,14 @@ export const CreateEntryCommentSchema = z.object({
   content: z.string().trim().min(1).max(2000),
 })
 export type CreateEntryCommentInput = z.infer<typeof CreateEntryCommentSchema>
+export type CreatedEntryComment = {
+  id: string
+  entryId: string
+  authorUserId: string
+  journalId: string
+  content: string
+  createdAt: Date
+}
 export type EntryCommentForEntry = {
   id: string
   entryId: string
@@ -25,11 +33,11 @@ export type EntryCommentForEntry = {
 
 type CommentsByEntryId = Record<string, EntryCommentForEntry[]>
 
-export async function createEntryComment(input: CreateEntryCommentInput) {
+export async function createEntryComment(input: CreateEntryCommentInput): Promise<CreatedEntryComment | null> {
   const parsedInput = CreateEntryCommentSchema.parse(input)
 
   const [accessibleEntry] = await db
-    .select({ id: entries.id })
+    .select({ id: entries.id, journalId: entries.journalId })
     .from(entries)
     .innerJoin(journalMembers, eq(journalMembers.journalId, entries.journalId))
     .where(
@@ -59,6 +67,7 @@ export async function createEntryComment(input: CreateEntryCommentInput) {
 
   return {
     ...comment,
+    journalId: accessibleEntry.journalId,
     content: decryptedContent,
   }
 }

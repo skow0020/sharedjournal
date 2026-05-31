@@ -492,7 +492,7 @@ export async function addCommentAction(
     }
   }
 
-  revalidatePath(`/dashboard/journals/${parsedInput.data.journalId}`)
+  revalidatePath(`/dashboard/journals/${comment.journalId}`)
 
   return {
     error: null,
