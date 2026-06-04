@@ -9,10 +9,17 @@ on:
       - reopened
       - synchronize
       - ready_for_review
+  push:
+    branches:
+      - main
 
 permissions:
   contents: write
   pull-requests: write
+
+concurrency:
+  group: dependabot-auto-merge-main
+  cancel-in-progress: false
 
 jobs:
   auto-approve-and-enable-merge:
@@ -45,3 +52,32 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.DEPENDABOT_AUTO_MERGE_TOKEN }}
           PR_URL: ${{ github.event.pull_request.html_url }}
+
+  update-dependabot-branches:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Update next behind Dependabot PR branch
+        env:
+          GH_TOKEN: ${{ secrets.DEPENDABOT_AUTO_MERGE_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          pr_number=$(gh pr list \
+            --repo "$REPO" \
+            --base main \
+            --state open \
+            --json number,author,isDraft,mergeStateStatus,updatedAt \
+            --limit 100 \
+            --jq 'map(select((.author.login == "dependabot[bot]" or .author.login == "app/dependabot") and (.isDraft == false) and (.mergeStateStatus == "BEHIND"))) | sort_by(.updatedAt) | .[0].number // empty')
+
+          if [[ -z "$pr_number" ]]; then
+            echo "No behind Dependabot PR to update."
+            exit 0
+          fi
+
+          echo "Updating Dependabot PR #${pr_number}"
+          gh pr update-branch "$pr_number" --repo "$REPO" || echo "Skipping #${pr_number} (could not update automatically)."
+
