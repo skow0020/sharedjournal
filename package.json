@@ -20,7 +20,7 @@
     "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
-    "@launchdarkly/node-server-sdk": "^9.10.13",
+    "@launchdarkly/node-server-sdk": "^9.11.1",
     "@clerk/nextjs": "^7.4.2",
     "@neondatabase/serverless": "^1.1.0",
     "@vercel/analytics": "^2.0.1",
