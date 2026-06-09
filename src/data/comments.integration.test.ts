@@ -1,7 +1,12 @@
 import { eq } from 'drizzle-orm'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { createEntryComment, getCommentsForEntries, getCommentsForEntry } from '@/data/comments'
+import {
+  canUserCommentOnEntry,
+  createEntryComment,
+  getCommentsForEntries,
+  getCommentsForEntry,
+} from '@/data/comments'
 import { db } from '@/db'
 import { entries, entryComments, journalMembers, journals, users } from '@/db/schema'
 import { isEncryptedEntryContent } from '@/lib/entry-content-crypto'
@@ -138,6 +143,37 @@ describe('comments data helpers', () => {
       .where(eq(entryComments.entryId, entryId))
 
     expect(commentsInDb).toHaveLength(0)
+  })
+
+  it('returns role-based access from canUserCommentOnEntry', async () => {
+    const ownerCanComment = await canUserCommentOnEntry({
+      entryId,
+      journalId,
+      userId: ownerId,
+    })
+
+    const editorCanComment = await canUserCommentOnEntry({
+      entryId,
+      journalId,
+      userId: editorId,
+    })
+
+    const viewerCanComment = await canUserCommentOnEntry({
+      entryId,
+      journalId,
+      userId: viewerId,
+    })
+
+    const outsiderCanComment = await canUserCommentOnEntry({
+      entryId,
+      journalId,
+      userId: outsiderId,
+    })
+
+    expect(ownerCanComment).toBe(true)
+    expect(editorCanComment).toBe(true)
+    expect(viewerCanComment).toBe(false)
+    expect(outsiderCanComment).toBe(false)
   })
 
   it('returns empty list when entry has no comments', async () => {

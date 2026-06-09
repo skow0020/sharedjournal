@@ -33,6 +33,28 @@ export type EntryCommentForEntry = {
 
 type CommentsByEntryId = Record<string, EntryCommentForEntry[]>
 
+export async function canUserCommentOnEntry(input: {
+  entryId: string
+  journalId: string
+  userId: string
+}): Promise<boolean> {
+  const [accessibleEntry] = await db
+    .select({ id: entries.id })
+    .from(entries)
+    .innerJoin(journalMembers, eq(journalMembers.journalId, entries.journalId))
+    .where(
+      and(
+        eq(entries.id, input.entryId),
+        eq(entries.journalId, input.journalId),
+        eq(journalMembers.userId, input.userId),
+        inArray(journalMembers.role, ['owner', 'editor']),
+      ),
+    )
+    .limit(1)
+
+  return Boolean(accessibleEntry)
+}
+
 export async function createEntryComment(input: CreateEntryCommentInput): Promise<CreatedEntryComment | null> {
   const parsedInput = CreateEntryCommentSchema.parse(input)
 
