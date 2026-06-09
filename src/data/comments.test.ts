@@ -52,7 +52,36 @@ vi.mock('@/lib/entry-content-crypto', () => ({
   encryptEntryContent: encryptEntryContentMock,
 }))
 
-import { createEntryComment } from '@/data/comments'
+import { canUserCommentOnEntry, createEntryComment } from '@/data/comments'
+
+describe('canUserCommentOnEntry', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    selectLimitMock.mockResolvedValue([{ id: 'entry-id' }])
+  })
+
+  it('returns true when the user can comment on the entry', async () => {
+    const result = await canUserCommentOnEntry({
+      entryId: '11111111-1111-4111-8111-111111111111',
+      journalId: '33333333-3333-4333-8333-333333333333',
+      userId: '22222222-2222-4222-8222-222222222222',
+    })
+
+    expect(result).toBe(true)
+  })
+
+  it('returns false when the user cannot comment on the entry', async () => {
+    selectLimitMock.mockResolvedValue([])
+
+    const result = await canUserCommentOnEntry({
+      entryId: '11111111-1111-4111-8111-111111111111',
+      journalId: '33333333-3333-4333-8333-333333333333',
+      userId: '22222222-2222-4222-8222-222222222222',
+    })
+
+    expect(result).toBe(false)
+  })
+})
 
 describe('createEntryComment', () => {
   beforeEach(() => {

@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const {
   getClerkCurrentUserMock,
+  canUserCommentOnEntryMock,
   createEntryWithUploadedImagesForJournalMock,
   createEntryCommentMock,
   deleteEntryForJournalMock,
@@ -18,6 +19,7 @@ const {
   moderateContentMock,
 } = vi.hoisted(() => ({
   getClerkCurrentUserMock: vi.fn(),
+  canUserCommentOnEntryMock: vi.fn(),
   createEntryWithUploadedImagesForJournalMock: vi.fn(),
   createEntryCommentMock: vi.fn(),
   deleteEntryForJournalMock: vi.fn(),
@@ -48,6 +50,7 @@ vi.mock('@/data/entries', () => ({
 }))
 
 vi.mock('@/data/comments', () => ({
+  canUserCommentOnEntry: canUserCommentOnEntryMock,
   createEntryComment: createEntryCommentMock,
 }))
 
@@ -105,6 +108,7 @@ const VALID_ENTRY_ID = '26a0908b-c293-43f5-94c0-9b5d53fcc592'
 describe('createEntryAction', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    getUserJournalByIdMock.mockResolvedValue({ id: 'journal-1' })
     moderateContentMock.mockResolvedValue({ decision: 'allow' })
   })
 
@@ -157,6 +161,25 @@ describe('createEntryAction', () => {
       error: 'You do not have permission to add entries to this journal.',
       redirectTo: null,
     })
+  })
+
+  it('returns a permission error before moderation when the user cannot access the journal', async () => {
+    getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
+    getUserJournalByIdMock.mockResolvedValue(null)
+
+    const result = await createEntryAction({
+      journalId: 'journal-1',
+      title: 'Morning Reflection',
+      content: 'Notes',
+      entryDate: '2026-03-14',
+    })
+
+    expect(result).toEqual({
+      error: 'You do not have permission to add entries to this journal.',
+      redirectTo: null,
+    })
+    expect(moderateContentMock).not.toHaveBeenCalled()
+    expect(createEntryWithUploadedImagesForJournalMock).not.toHaveBeenCalled()
   })
 
   it('trims entry values and returns the journal redirect path on success', async () => {
@@ -691,6 +714,7 @@ describe('addCommentAction', () => {
     vi.clearAllMocks()
     // Enable comments feature by default
     getLaunchDarklyVariationMock.mockResolvedValue(true)
+    canUserCommentOnEntryMock.mockResolvedValue(true)
     moderateContentMock.mockResolvedValue({ decision: 'allow' })
   })
 
@@ -745,6 +769,24 @@ describe('addCommentAction', () => {
       error: 'You do not have permission to comment on this entry.',
       success: false,
     })
+  })
+
+  it('returns a permission error before moderation when the user cannot comment on the entry', async () => {
+    getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
+    canUserCommentOnEntryMock.mockResolvedValue(false)
+
+    const result = await addCommentAction({
+      journalId: VALID_JOURNAL_ID,
+      entryId: VALID_ENTRY_ID,
+      content: 'Looks good.',
+    })
+
+    expect(result).toEqual({
+      error: 'You do not have permission to comment on this entry.',
+      success: false,
+    })
+    expect(moderateContentMock).not.toHaveBeenCalled()
+    expect(createEntryCommentMock).not.toHaveBeenCalled()
   })
 
   it('returns a feature disabled error when comments feature is disabled', async () => {

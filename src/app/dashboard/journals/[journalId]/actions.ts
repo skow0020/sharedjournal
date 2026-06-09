@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
 import { z } from 'zod'
 
-import { createEntryComment } from '@/data/comments'
+import { canUserCommentOnEntry, createEntryComment } from '@/data/comments'
 import { createEntryWithUploadedImagesForJournal, deleteEntryForJournal } from '@/data/entries'
 import {
   createJournalInvitation,
@@ -272,6 +272,15 @@ export async function createEntryAction(
     }
   }
 
+  const journal = await getUserJournalById(currentUser.id, parsedInput.data.journalId)
+
+  if (!journal) {
+    return {
+      error: 'You do not have permission to add entries to this journal.',
+      redirectTo: null,
+    }
+  }
+
   const hasInvalidStorageKey = parsedInput.data.uploadedImages.some(
     (image) => !isTempEntryImageStorageKeyForJournal(image.tempStorageKey, parsedInput.data.journalId),
   )
@@ -512,6 +521,19 @@ export async function addCommentAction(
   if (!parsedInput.success) {
     return {
       error: parsedInput.error.issues[0]?.message ?? 'Unable to add comment.',
+      success: false,
+    }
+  }
+
+  const canComment = await canUserCommentOnEntry({
+    entryId: parsedInput.data.entryId,
+    journalId: parsedInput.data.journalId,
+    userId: currentUser.id,
+  })
+
+  if (!canComment) {
+    return {
+      error: 'You do not have permission to comment on this entry.',
       success: false,
     }
   }
