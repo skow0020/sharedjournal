@@ -1,6 +1,7 @@
 import Link from 'next/link'
 
 import { SUPPORT_EMAIL_HREF } from '@/lib/support-contact'
+import { CoffeeIcon } from 'lucide-react'
 
 type DashboardLayoutProps = Readonly<{
   children: React.ReactNode
@@ -26,8 +27,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             >
               Support
             </a>
-            <Link href="/buy-me-coffee" className="text-muted-foreground underline-offset-4 hover:underline">
-              Buy me coffee
+            <Link
+              href="/buy-me-coffee"
+              className="text-muted-foreground inline-flex items-center gap-1 underline-offset-4 hover:underline"
+            >
+              <CoffeeIcon className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>Buy me coffee</span>
             </Link>
             <Link href="/legal" className="text-muted-foreground underline-offset-4 hover:underline">
               Legal

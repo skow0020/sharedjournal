@@ -12,6 +12,7 @@ import {
 import { PageFlairShell } from '@/components/page-flair-shell'
 import { getSupportPaymentForUserByCheckoutSession } from '@/data/support-payments'
 import { getCurrentAppUser } from '@/lib/get-current-app-user'
+import { CoffeeIcon } from 'lucide-react'
 
 type SupportSuccessPageProps = {
   searchParams?: Promise<{
@@ -47,9 +48,13 @@ export default async function SupportSuccessPage({ searchParams }: SupportSucces
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Link href="/buy-me-coffee" className="text-sm underline underline-offset-4 hover:no-underline">
-              Return to Buy me coffee
-            </Link>
+            <Link
+              href="/buy-me-coffee"
+              className="text-muted-foreground inline-flex items-center gap-1 underline-offset-4 hover:underline"
+            >
+              <CoffeeIcon className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>Buy me coffee</span>
+            </Link>          
           </CardContent>
         </Card>
       </PageFlairShell>
@@ -75,7 +80,13 @@ export default async function SupportSuccessPage({ searchParams }: SupportSucces
             <Link href="/buy-me-coffee" className="text-sm underline underline-offset-4 hover:no-underline">
               Return to Buy me coffee
             </Link>
-          </CardContent>
+            <Link
+              href="/buy-me-coffee"
+              className="text-muted-foreground inline-flex items-center gap-1 underline-offset-4 hover:underline"
+            >
+              <CoffeeIcon className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>Buy me coffee</span>
+            </Link>          </CardContent>
         </Card>
       </PageFlairShell>
     )

@@ -1,4 +1,5 @@
 import { auth } from '@clerk/nextjs/server'
+import { CoffeeIcon } from 'lucide-react'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
@@ -194,7 +195,11 @@ export default async function Home() {
           </p>
           <LandingHeroCta />
           <p className="text-muted-foreground text-xs">
-            <Link href="/buy-me-coffee" className="underline underline-offset-4 hover:no-underline">
+            <Link
+              href="/buy-me-coffee"
+              className="inline-flex items-center gap-1 underline underline-offset-4 hover:no-underline"
+            >
+              <CoffeeIcon className="h-3.5 w-3.5 text-[#8b5e3c]" aria-hidden="true" />
               Buy me coffee
             </Link>{' '}
             ·{' '}
