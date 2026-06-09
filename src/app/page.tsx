@@ -194,27 +194,27 @@ export default async function Home() {
             Create your first journal in minutes. No credit card required.
           </p>
           <LandingHeroCta />
-          <p className="text-muted-foreground text-xs">
+          <nav
+            aria-label="Footer links"
+            className="text-muted-foreground flex flex-wrap items-center justify-center gap-3 text-xs"
+          >
             <Link
               href="/buy-me-coffee"
-              className="inline-flex items-center gap-1 underline underline-offset-4 hover:no-underline"
+              className="inline-flex items-center gap-1 underline-offset-4 hover:underline"
             >
-              <CoffeeIcon className="h-3.5 w-3.5 text-[#8b5e3c]" aria-hidden="true" />
-              Buy me coffee
-            </Link>{' '}
-            ·{' '}
-            <Link href="/legal" className="underline underline-offset-4 hover:no-underline">
+              <CoffeeIcon className="h-3.5 w-3.5 shrink-0 text-[#8b5e3c]" aria-hidden="true" />
+              <span>Buy me coffee</span>
+            </Link>
+            <Link href="/legal" className="inline-flex items-center underline-offset-4 hover:underline">
               Legal
-            </Link>{' '}
-            ·{' '}
-            <Link href="/privacy" className="underline underline-offset-4 hover:no-underline">
+            </Link>
+            <Link href="/privacy" className="inline-flex items-center underline-offset-4 hover:underline">
               Privacy Policy
-            </Link>{' '}
-            ·{' '}
-            <Link href="/terms" className="underline underline-offset-4 hover:no-underline">
+            </Link>
+            <Link href="/terms" className="inline-flex items-center underline-offset-4 hover:underline">
               Terms of Service
             </Link>
-          </p>
+          </nav>
         </div>
       </section>
     </main>
