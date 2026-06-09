@@ -18,6 +18,7 @@ import {
   createLaunchDarklyContext,
   getLaunchDarklyVariation,
 } from '@/lib/launchdarkly/server-client'
+import { moderateContent } from '@/lib/content-moderation'
 import { ENTRY_IMAGE_ALLOWED_MIME_TYPES, ENTRY_IMAGE_MAX_FILES } from '@/lib/entry-image-constants'
 import { isTempEntryImageStorageKeyForJournal } from '@/lib/entry-image-storage'
 import { getCurrentAppUser } from '@/lib/get-current-app-user'
@@ -173,6 +174,10 @@ const cancelPendingInvitationSchema = z.object({
   invitationId: z.string().trim().min(1, 'Invitation is required.'),
 })
 
+const MODERATION_BLOCKED_ENTRY_ERROR = 'Your entry could not be saved because it violates our content guidelines.'
+const MODERATION_BLOCKED_COMMENT_ERROR = 'Your comment could not be posted because it violates our content guidelines.'
+const MODERATION_RETRY_ERROR = 'We could not process your request right now. Please try again.'
+
 function normalizeBaseUrl(value: string): string {
   const trimmed = value.trim()
 
@@ -230,6 +235,22 @@ async function getAppBaseUrl(): Promise<string> {
   return 'http://localhost:3000'
 }
 
+async function getRequestCorrelationId(): Promise<string | undefined> {
+  try {
+    const requestHeaders = await headers()
+
+    if (!requestHeaders || typeof requestHeaders.get !== 'function') {
+      return undefined
+    }
+
+    return getFirstHeaderValue(requestHeaders.get('x-request-id'))
+      ?? getFirstHeaderValue(requestHeaders.get('x-vercel-id'))
+      ?? undefined
+  } catch {
+    return undefined
+  }
+}
+
 export async function createEntryAction(
   input: CreateEntryInput,
 ): Promise<CreateEntryState> {
@@ -258,6 +279,22 @@ export async function createEntryAction(
   if (hasInvalidStorageKey) {
     return {
       error: 'One or more uploaded images are invalid for this journal.',
+      redirectTo: null,
+    }
+  }
+
+  const moderationResult = await moderateContent({
+    content: parsedInput.data.content,
+    contentType: 'entry',
+    actionName: 'createEntryAction',
+    requestId: await getRequestCorrelationId(),
+  })
+
+  if (moderationResult.decision !== 'allow') {
+    return {
+      error: moderationResult.reasonCode === 'provider_error_fail_closed'
+        ? MODERATION_RETRY_ERROR
+        : MODERATION_BLOCKED_ENTRY_ERROR,
       redirectTo: null,
     }
   }
@@ -475,6 +512,22 @@ export async function addCommentAction(
   if (!parsedInput.success) {
     return {
       error: parsedInput.error.issues[0]?.message ?? 'Unable to add comment.',
+      success: false,
+    }
+  }
+
+  const moderationResult = await moderateContent({
+    content: parsedInput.data.content,
+    contentType: 'comment',
+    actionName: 'addCommentAction',
+    requestId: await getRequestCorrelationId(),
+  })
+
+  if (moderationResult.decision !== 'allow') {
+    return {
+      error: moderationResult.reasonCode === 'provider_error_fail_closed'
+        ? MODERATION_RETRY_ERROR
+        : MODERATION_BLOCKED_COMMENT_ERROR,
       success: false,
     }
   }

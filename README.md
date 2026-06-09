@@ -23,6 +23,10 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 Create a `.env.local` file in the root of your project with the following variables:
 
 ```bash
+cp .env.example .env.local
+```
+
+```bash
 # Clerk Authentication
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
 CLERK_SECRET_KEY=sk_test_...
@@ -53,6 +57,33 @@ RESEND_FROM_EMAIL=SharedJournal <invites@notify.sharedjournal.app>
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 ```
+
+### Content Moderation Quickstart
+
+SharedJournal can moderate entry and comment content before writing to the database.
+
+Add these variables to `.env.local` to enable moderation locally:
+
+```bash
+# Content moderation
+CONTENT_MODERATION_ENABLED=true
+CONTENT_MODERATION_PROVIDER=openai
+CONTENT_MODERATION_API_KEY=sk-...
+
+# Behavior when provider is unavailable:
+# open   -> allow writes (default)
+# closed -> block writes and return retry message
+CONTENT_MODERATION_FAIL_MODE=open
+```
+
+Behavior summary:
+
+- `CONTENT_MODERATION_ENABLED` must be exactly `true` to enforce moderation.
+- With `CONTENT_MODERATION_FAIL_MODE=open`, provider errors allow writes.
+- With `CONTENT_MODERATION_FAIL_MODE=closed`, provider errors block writes with a generic retry error.
+- Moderation runs before encryption and persistence for entry creation and comment creation.
+
+For full implementation details, see `docs/content-moderation-implementation.md`.
 
 ### Stripe Integration (Support Payments)
 

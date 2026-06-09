@@ -15,6 +15,7 @@ const {
   revalidatePathMock,
   headersMock,
   getLaunchDarklyVariationMock,
+  moderateContentMock,
 } = vi.hoisted(() => ({
   getClerkCurrentUserMock: vi.fn(),
   createEntryWithUploadedImagesForJournalMock: vi.fn(),
@@ -30,6 +31,7 @@ const {
   revalidatePathMock: vi.fn(),
   headersMock: vi.fn(),
   getLaunchDarklyVariationMock: vi.fn(),
+  moderateContentMock: vi.fn(),
 }))
 
 vi.mock('@clerk/nextjs/server', () => ({
@@ -80,6 +82,10 @@ vi.mock('@/lib/launchdarkly/server-client', () => ({
   getLaunchDarklyVariation: getLaunchDarklyVariationMock,
 }))
 
+vi.mock('@/lib/content-moderation', () => ({
+  moderateContent: moderateContentMock,
+}))
+
 import {
   addCommentAction,
   cleanupEntryImageUploadsAction,
@@ -99,6 +105,7 @@ const VALID_ENTRY_ID = '26a0908b-c293-43f5-94c0-9b5d53fcc592'
 describe('createEntryAction', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    moderateContentMock.mockResolvedValue({ decision: 'allow' })
   })
 
   it('returns an auth error when the user is signed out', async () => {
@@ -219,6 +226,48 @@ describe('createEntryAction', () => {
 
     expect(result).toEqual({
       error: 'One or more uploaded images are invalid for this journal.',
+      redirectTo: null,
+    })
+    expect(createEntryWithUploadedImagesForJournalMock).not.toHaveBeenCalled()
+  })
+
+  it('blocks entry creation when moderation disallows content', async () => {
+    getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
+    moderateContentMock.mockResolvedValue({
+      decision: 'block',
+      reasonCode: 'policy_violation',
+    })
+
+    const result = await createEntryAction({
+      journalId: 'journal-1',
+      title: 'Morning Reflection',
+      content: 'disallowed text',
+      entryDate: '2026-03-14',
+    })
+
+    expect(result).toEqual({
+      error: 'Your entry could not be saved because it violates our content guidelines.',
+      redirectTo: null,
+    })
+    expect(createEntryWithUploadedImagesForJournalMock).not.toHaveBeenCalled()
+  })
+
+  it('returns retry error when moderation provider fails in fail-closed mode', async () => {
+    getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
+    moderateContentMock.mockResolvedValue({
+      decision: 'block',
+      reasonCode: 'provider_error_fail_closed',
+    })
+
+    const result = await createEntryAction({
+      journalId: 'journal-1',
+      title: 'Morning Reflection',
+      content: 'normal text',
+      entryDate: '2026-03-14',
+    })
+
+    expect(result).toEqual({
+      error: 'We could not process your request right now. Please try again.',
       redirectTo: null,
     })
     expect(createEntryWithUploadedImagesForJournalMock).not.toHaveBeenCalled()
@@ -642,6 +691,7 @@ describe('addCommentAction', () => {
     vi.clearAllMocks()
     // Enable comments feature by default
     getLaunchDarklyVariationMock.mockResolvedValue(true)
+    moderateContentMock.mockResolvedValue({ decision: 'allow' })
   })
 
   it('returns an auth error when the user is signed out', async () => {
@@ -741,6 +791,46 @@ describe('addCommentAction', () => {
       error: null,
       success: true,
     })
+  })
+
+  it('blocks comment creation when moderation disallows content', async () => {
+    getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
+    moderateContentMock.mockResolvedValue({
+      decision: 'block',
+      reasonCode: 'policy_violation',
+    })
+
+    const result = await addCommentAction({
+      journalId: VALID_JOURNAL_ID,
+      entryId: VALID_ENTRY_ID,
+      content: 'disallowed text',
+    })
+
+    expect(result).toEqual({
+      error: 'Your comment could not be posted because it violates our content guidelines.',
+      success: false,
+    })
+    expect(createEntryCommentMock).not.toHaveBeenCalled()
+  })
+
+  it('returns retry error when comment moderation fails in fail-closed mode', async () => {
+    getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
+    moderateContentMock.mockResolvedValue({
+      decision: 'block',
+      reasonCode: 'provider_error_fail_closed',
+    })
+
+    const result = await addCommentAction({
+      journalId: VALID_JOURNAL_ID,
+      entryId: VALID_ENTRY_ID,
+      content: 'normal text',
+    })
+
+    expect(result).toEqual({
+      error: 'We could not process your request right now. Please try again.',
+      success: false,
+    })
+    expect(createEntryCommentMock).not.toHaveBeenCalled()
   })
 })
 
