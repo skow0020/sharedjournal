@@ -10,6 +10,7 @@ const originalFailMode = process.env.CONTENT_MODERATION_FAIL_MODE
 describe('moderateContent', () => {
   beforeEach(() => {
     vi.restoreAllMocks()
+    vi.unstubAllGlobals()
     process.env.CONTENT_MODERATION_PROVIDER = 'openai'
     process.env.CONTENT_MODERATION_API_KEY = 'test-key'
   })
