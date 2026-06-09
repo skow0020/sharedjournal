@@ -72,6 +72,29 @@ describe('moderateContent', () => {
     })
   })
 
+  it('sends moderation requests with no-store cache policy', async () => {
+    process.env.CONTENT_MODERATION_ENABLED = 'true'
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ results: [{ flagged: false }] }),
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    await moderateContent({
+      content: 'safe text',
+      contentType: 'entry',
+      actionName: 'createEntryAction',
+      requestId: 'req-cache',
+    })
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://api.openai.com/v1/moderations',
+      expect.objectContaining({
+        cache: 'no-store',
+      }),
+    )
+  })
+
   it('returns allow when provider outages occur and fail mode is open', async () => {
     process.env.CONTENT_MODERATION_ENABLED = 'true'
     process.env.CONTENT_MODERATION_FAIL_MODE = 'open'

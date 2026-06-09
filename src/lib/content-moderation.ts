@@ -73,6 +73,7 @@ async function moderateWithOpenAI(content: string): Promise<ProviderModerationRe
       model: 'omni-moderation-latest',
       input: content,
     }),
+    cache: 'no-store',
   })
 
   if (!response.ok) {
