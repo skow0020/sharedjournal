@@ -66,19 +66,46 @@ jobs:
         run: |
           set -euo pipefail
 
-          pr_number=$(gh pr list \
+          pr_candidates=$(gh pr list \
             --repo "$REPO" \
             --base main \
             --state open \
             --json number,author,isDraft,mergeStateStatus,updatedAt \
             --limit 100 \
-            --jq 'map(select((.author.login == "dependabot[bot]" or .author.login == "app/dependabot") and (.isDraft == false) and (.mergeStateStatus == "BEHIND"))) | sort_by(.updatedAt) | .[0].number // empty')
+            --jq 'map(select((.author.login == "dependabot[bot]" or .author.login == "app/dependabot") and (.isDraft == false))) | sort_by(.updatedAt) | .[] | [.number, (.mergeStateStatus // "UNKNOWN"), .updatedAt] | @tsv')
 
-          if [[ -z "$pr_number" ]]; then
-            echo "No behind Dependabot PR to update."
+          if [[ -z "$pr_candidates" ]]; then
+            echo "No open Dependabot PRs found."
             exit 0
           fi
 
-          echo "Updating Dependabot PR #${pr_number}"
-          gh pr update-branch "$pr_number" --repo "$REPO" || echo "Skipping #${pr_number} (could not update automatically)."
+          updated=0
+          cooldown_seconds=120
+          now_epoch=$(date -u +%s)
+
+          while IFS=$'\t' read -r pr_number merge_state updated_at; do
+            [[ -z "$pr_number" ]] && continue
+
+            pr_updated_epoch=$(date -u -d "$updated_at" +%s 2>/dev/null || echo 0)
+            age_seconds=$((now_epoch - pr_updated_epoch))
+
+            if [[ "$pr_updated_epoch" -gt 0 && "$age_seconds" -lt "$cooldown_seconds" ]]; then
+              echo "Skipping #${pr_number} (updated ${age_seconds}s ago; waiting at least ${cooldown_seconds}s)."
+              continue
+            fi
+
+            echo "Trying Dependabot PR #${pr_number} (mergeStateStatus=${merge_state})"
+
+            if gh pr update-branch "$pr_number" --repo "$REPO"; then
+              echo "Updated Dependabot PR #${pr_number}."
+              updated=1
+              break
+            fi
+
+            echo "Skipping #${pr_number} (not behind, conflicted, or cannot update automatically)."
+          done <<< "$pr_candidates"
+
+          if [[ "$updated" -eq 0 ]]; then
+            echo "No Dependabot PR branch could be updated."
+          fi
 
