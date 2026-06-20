@@ -64,8 +64,8 @@ describe('EntryComments', () => {
       />,
     )
 
-    expect(screen.queryByPlaceholderText('Add a comment...')).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Post' })).not.toBeInTheDocument()
+    expect(screen.queryByPlaceholderText('Add a reflection...')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Reflect' })).not.toBeInTheDocument()
   })
 
   it('submits trimmed content and refreshes on success', async () => {
@@ -82,8 +82,8 @@ describe('EntryComments', () => {
       />,
     )
 
-    await user.type(screen.getByPlaceholderText('Add a comment...'), '  Great note  ')
-    await user.click(screen.getByRole('button', { name: 'Post' }))
+    await user.type(screen.getByPlaceholderText('Add a reflection...'), '  Great note  ')
+    await user.click(screen.getByRole('button', { name: 'Reflect' }))
 
     await waitFor(() => {
       expect(action).toHaveBeenCalledWith({
@@ -109,8 +109,8 @@ describe('EntryComments', () => {
       />,
     )
 
-    await user.type(screen.getByPlaceholderText('Add a comment...'), 'Attempted comment')
-    await user.click(screen.getByRole('button', { name: 'Post' }))
+    await user.type(screen.getByPlaceholderText('Add a reflection...'), 'Attempted reflection')
+    await user.click(screen.getByRole('button', { name: 'Reflect' }))
 
     expect(await screen.findByText('Not authorized')).toBeInTheDocument()
     expect(refreshMock).not.toHaveBeenCalled()

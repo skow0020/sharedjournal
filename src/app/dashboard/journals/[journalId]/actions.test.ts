@@ -728,7 +728,7 @@ describe('addCommentAction', () => {
     })
 
     expect(result).toEqual({
-      error: 'You must be signed in to comment.',
+      error: 'You must be signed in to reflect.',
       success: false,
     })
     expect(createEntryCommentMock).not.toHaveBeenCalled()
@@ -766,7 +766,7 @@ describe('addCommentAction', () => {
       content: 'Looks good.',
     })
     expect(result).toEqual({
-      error: 'You do not have permission to comment on this entry.',
+      error: 'You do not have permission to reflect on this entry.',
       success: false,
     })
   })
@@ -782,7 +782,7 @@ describe('addCommentAction', () => {
     })
 
     expect(result).toEqual({
-      error: 'You do not have permission to comment on this entry.',
+      error: 'You do not have permission to reflect on this entry.',
       success: false,
     })
     expect(moderateContentMock).not.toHaveBeenCalled()
@@ -800,7 +800,7 @@ describe('addCommentAction', () => {
     })
 
     expect(result).toEqual({
-      error: 'Comments feature is not available at this time.',
+      error: 'Reflections are not available at this time.',
       success: false,
     })
     expect(createEntryCommentMock).not.toHaveBeenCalled()
@@ -849,7 +849,7 @@ describe('addCommentAction', () => {
     })
 
     expect(result).toEqual({
-      error: 'Your comment could not be posted because it violates our content guidelines.',
+      error: 'Your reflection could not be posted because it violates our content guidelines.',
       success: false,
     })
     expect(createEntryCommentMock).not.toHaveBeenCalled()

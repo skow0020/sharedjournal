@@ -156,7 +156,7 @@ const inviteUserSchema = z.object({
 const addCommentSchema = z.object({
   journalId: z.string().uuid('Invalid journal id.'),
   entryId: z.string().uuid('Invalid entry id.'),
-  content: z.string().trim().min(1, 'Comment is required.').max(2000, 'Comment must be 2000 characters or less.'),
+  content: z.string().trim().min(1, 'Reflection is required.').max(2000, 'Reflection must be 2000 characters or less.'),
 })
 
 const updateJournalDetailsSchema = z.object({
@@ -175,7 +175,7 @@ const cancelPendingInvitationSchema = z.object({
 })
 
 const MODERATION_BLOCKED_ENTRY_ERROR = 'Your entry could not be saved because it violates our content guidelines.'
-const MODERATION_BLOCKED_COMMENT_ERROR = 'Your comment could not be posted because it violates our content guidelines.'
+const MODERATION_BLOCKED_COMMENT_ERROR = 'Your reflection could not be posted because it violates our content guidelines.'
 const MODERATION_RETRY_ERROR = 'We could not process your request right now. Please try again.'
 
 function normalizeBaseUrl(value: string): string {
@@ -494,7 +494,7 @@ export async function addCommentAction(
 
   if (!currentUser) {
     return {
-      error: 'You must be signed in to comment.',
+      error: 'You must be signed in to reflect.',
       success: false,
     }
   }
@@ -511,7 +511,7 @@ export async function addCommentAction(
 
   if (!isCommentsFeatureEnabled) {
     return {
-      error: 'Comments feature is not available at this time.',
+      error: 'Reflections are not available at this time.',
       success: false,
     }
   }
@@ -520,7 +520,7 @@ export async function addCommentAction(
 
   if (!parsedInput.success) {
     return {
-      error: parsedInput.error.issues[0]?.message ?? 'Unable to add comment.',
+      error: parsedInput.error.issues[0]?.message ?? 'Unable to add reflection.',
       success: false,
     }
   }
@@ -533,7 +533,7 @@ export async function addCommentAction(
 
   if (!canComment) {
     return {
-      error: 'You do not have permission to comment on this entry.',
+      error: 'You do not have permission to reflect on this entry.',
       success: false,
     }
   }
@@ -562,7 +562,7 @@ export async function addCommentAction(
 
   if (!comment) {
     return {
-      error: 'You do not have permission to comment on this entry.',
+      error: 'You do not have permission to reflect on this entry.',
       success: false,
     }
   }

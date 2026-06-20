@@ -93,7 +93,7 @@ export class JournalDetailPage {
   }
 
   commentInput() {
-    return this.page.getByPlaceholder('Add a comment...')
+    return this.page.getByPlaceholder('Add a reflection...')
   }
 
   commentText(content: string) {
@@ -102,7 +102,7 @@ export class JournalDetailPage {
 
   async addComment(content: string) {
     await this.commentInput().fill(content)
-    await this.page.getByRole('button', { name: 'Post' }).click()
+    await this.page.getByRole('button', { name: 'Reflect' }).click()
   }
 
   private entryCard(title: string) {
