@@ -74,11 +74,11 @@ function CommentForm({
         required
         minLength={1}
         maxLength={2000}
-        placeholder="Add a comment..."
+        placeholder="Add a reflection..."
       />
       {state.error ? <p className="text-destructive text-sm">{state.error}</p> : null}
       <Button type="submit" disabled={pending} size="sm">
-        {pending ? 'Posting...' : 'Post'}
+        {pending ? 'Reflecting...' : 'Reflect'}
       </Button>
     </form>
   )

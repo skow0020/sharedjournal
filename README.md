@@ -60,7 +60,7 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 
 ### Content Moderation Quickstart
 
-SharedJournal can moderate entry and comment content before writing to the database.
+SharedJournal can moderate entry and reflection content before writing to the database.
 
 Add these variables to `.env.local` to enable moderation locally:
 
@@ -81,7 +81,7 @@ Behavior summary:
 - `CONTENT_MODERATION_ENABLED` must be exactly `true` to enforce moderation.
 - With `CONTENT_MODERATION_FAIL_MODE=open`, provider errors allow writes.
 - With `CONTENT_MODERATION_FAIL_MODE=closed`, provider errors block writes with a generic retry error.
-- Moderation runs before encryption and persistence for entry creation and comment creation.
+- Moderation runs before encryption and persistence for entry creation and reflection creation.
 
 For full implementation details, see `docs/content-moderation-implementation.md`.
 
