@@ -277,9 +277,10 @@ export async function generateOwnerExportAction(
       exp: Math.floor(expiresAt.getTime() / 1000),
     })
 
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
     return {
       error: null,
-      downloadUrl: `/api/exports/download?token=${encodeURIComponent(token)}`,
+      downloadUrl: `${baseUrl}/api/exports/download?token=${encodeURIComponent(token)}`,
       expiresAt: expiresAt.toISOString(),
     }
   } catch (error) {

@@ -1,7 +1,7 @@
 'use client'
 
 import { format } from 'date-fns'
-import { DownloadIcon } from 'lucide-react'
+import { CheckCircle2, Copy, DownloadIcon } from 'lucide-react'
 import { useState, useTransition } from 'react'
 
 import {
@@ -66,7 +66,7 @@ export function ExportJournalsButton({ action }: ExportJournalsButtonProps) {
         <DialogHeader>
           <DialogTitle>Export your journals</DialogTitle>
           <DialogDescription>
-            Generate a ZIP export of all journals you own, including entries, reflections, collaborators, and photo files.
+            Generate a ZIP export of all journals you own, including entries, reflections, collaborators, and photo files. A download link will appear here.
           </DialogDescription>
         </DialogHeader>
 
@@ -74,19 +74,27 @@ export function ExportJournalsButton({ action }: ExportJournalsButtonProps) {
           {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
 
           {state.downloadUrl ? (
-            <div className="space-y-2 rounded-md border p-3">
-              <p className="text-sm">Your export is ready to download.</p>
+            <div className="space-y-3 rounded-md border border-green-200 bg-green-50 p-4 dark:border-green-900 dark:bg-green-950">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="size-5 text-green-600 dark:text-green-400" aria-hidden />
+                <p className="font-medium text-green-900 dark:text-green-100">Export ready!</p>
+              </div>
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                Your ZIP export is ready to download. Download via the link below.
+              </p>
               {expiresAt ? (
-                <p className="text-muted-foreground text-xs">
-                  Link expires {format(expiresAt, 'MMM d, yyyy h:mm a')}
+                <p className="text-xs text-gray-600 dark:text-gray-400">
+                  Link expires in 24 hours ({format(expiresAt, 'MMM d, h:mm a')})
                 </p>
               ) : null}
-              <a
-                href={state.downloadUrl}
-                className="text-sm font-medium text-primary underline-offset-4 hover:underline"
-              >
-                Download export ZIP
-              </a>
+              <div className="flex gap-2">
+                <Button asChild variant="default" size="sm">
+                  <a href={state.downloadUrl}>
+                    <DownloadIcon className="size-4" aria-hidden />
+                    Download ZIP
+                  </a>
+                </Button>
+              </div>
             </div>
           ) : null}
         </div>
@@ -96,7 +104,7 @@ export function ExportJournalsButton({ action }: ExportJournalsButtonProps) {
             Close
           </Button>
           <Button type="button" onClick={handleGenerate} disabled={pending}>
-            {pending ? 'Generating export...' : 'Generate export'}
+            {pending ? 'Generating your export...' : 'Generate export'}
           </Button>
         </DialogFooter>
       </DialogContent>
