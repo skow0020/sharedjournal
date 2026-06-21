@@ -12,8 +12,10 @@ import {
   createJournalAction,
   declineDashboardInvitationAction,
   deleteJournalAction,
+  generateOwnerExportAction,
 } from '@/app/dashboard/actions'
 import { CreateJournalModal } from '@/app/dashboard/create-journal-modal'
+import { ExportJournalsButton } from '@/app/dashboard/export-journals-button'
 import { JournalCard } from '@/app/dashboard/journal-card'
 import { PendingInvitationRow } from '@/app/dashboard/pending-invitation-row'
 import { Button } from '@/components/ui/button'
@@ -77,7 +79,10 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       <section className="space-y-4">
         <div className="flex items-start justify-between gap-4">
           <h1 className="text-3xl font-semibold tracking-tight">Your Journals</h1>
-          <CreateJournalModal action={createJournalAction} />
+          <div className="flex items-center gap-2">
+            <ExportJournalsButton action={generateOwnerExportAction} />
+            <CreateJournalModal action={createJournalAction} />
+          </div>
         </div>
       </section>
 

@@ -39,6 +39,12 @@ vi.mock('@/app/dashboard/create-journal-modal', () => ({
   ),
 }))
 
+vi.mock('@/app/dashboard/export-journals-button', () => ({
+  ExportJournalsButton: ({ children }: { children?: ReactNode }) => (
+    <div data-testid="export-journals-button">{children ?? 'Export journals button'}</div>
+  ),
+}))
+
 vi.mock('@/app/dashboard/delete-journal-button', () => ({
   DeleteJournalButton: ({ journalId }: { journalId: string }) => (
     <div data-testid={`delete-journal-${journalId}`}>Delete</div>
@@ -63,6 +69,18 @@ vi.mock('@/data/journals', () => ({
   getUserJournalCount: getUserJournalCountMock,
   getUserJournals: getUserJournalsMock,
   createJournalForOwner: createJournalForOwnerMock,
+}))
+
+vi.mock('@/data/exports', () => ({
+  buildOwnerJournalsExportPayload: vi.fn(),
+}))
+
+vi.mock('@/lib/journal-export', () => ({
+  createOwnerJournalsExportZipAndUpload: vi.fn(),
+}))
+
+vi.mock('@/lib/export-link-token', () => ({
+  createExportDownloadToken: vi.fn(),
 }))
 
 import DashboardPage from '@/app/dashboard/page'
@@ -103,6 +121,7 @@ describe('DashboardPage', () => {
     expect(screen.getByText('No journals found')).toBeInTheDocument()
     expect(screen.getByText('You are not a member of any journals yet.')).toBeInTheDocument()
     expect(screen.getByTestId('create-journal-modal')).toBeInTheDocument()
+    expect(screen.getByTestId('export-journals-button')).toBeInTheDocument()
   })
 
   it('handles missing searchParams prop by defaulting to page 1', async () => {
