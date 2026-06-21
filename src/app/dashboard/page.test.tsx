@@ -10,6 +10,7 @@ const {
   getRecentPhotosForJournalsMock,
   getUserJournalCountMock,
   getUserJournalsMock,
+  getLaunchDarklyVariationMock,
   createJournalForOwnerMock,
   redirectMock,
 } = vi.hoisted(() => ({
@@ -20,6 +21,7 @@ const {
   getRecentPhotosForJournalsMock: vi.fn(),
   getUserJournalCountMock: vi.fn(),
   getUserJournalsMock: vi.fn(),
+  getLaunchDarklyVariationMock: vi.fn(),
   createJournalForOwnerMock: vi.fn(),
   redirectMock: vi.fn(() => {
     throw new Error('NEXT_REDIRECT')
@@ -57,6 +59,11 @@ vi.mock('@/lib/get-current-app-user', () => ({
 
 vi.mock('@/lib/get-current-user-email', () => ({
   getCurrentUserEmail: getCurrentUserEmailMock,
+}))
+
+vi.mock('@/lib/launchdarkly/server-client', () => ({
+  createLaunchDarklyContext: vi.fn((input) => input),
+  getLaunchDarklyVariation: getLaunchDarklyVariationMock,
 }))
 
 vi.mock('@/data/invitations', () => ({
@@ -102,6 +109,7 @@ describe('DashboardPage', () => {
     getUserJournalsMock.mockResolvedValue([])
     getCollaboratorsForJournalsMock.mockResolvedValue(new Map())
     getRecentPhotosForJournalsMock.mockResolvedValue(new Map())
+    getLaunchDarklyVariationMock.mockResolvedValue(true)
     getPendingInvitationsForEmailMock.mockResolvedValue([])
   })
 
@@ -122,6 +130,15 @@ describe('DashboardPage', () => {
     expect(screen.getByText('You are not a member of any journals yet.')).toBeInTheDocument()
     expect(screen.getByTestId('create-journal-modal')).toBeInTheDocument()
     expect(screen.getByTestId('export-journals-button')).toBeInTheDocument()
+  })
+
+  it('hides export button when owner journal export flag is disabled', async () => {
+    getLaunchDarklyVariationMock.mockResolvedValue(false)
+
+    await renderDashboardPage()
+
+    expect(screen.queryByTestId('export-journals-button')).not.toBeInTheDocument()
+    expect(screen.getByTestId('create-journal-modal')).toBeInTheDocument()
   })
 
   it('handles missing searchParams prop by defaulting to page 1', async () => {
