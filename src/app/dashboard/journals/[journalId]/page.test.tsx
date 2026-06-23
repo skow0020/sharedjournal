@@ -81,6 +81,10 @@ vi.mock('@/app/dashboard/journals/[journalId]/actions', () => ({
   updateJournalDetailsAction: vi.fn(),
 }))
 
+vi.mock('@/app/dashboard/actions', () => ({
+  deleteJournalAction: vi.fn(async () => ({ error: null, success: true })),
+}))
+
 vi.mock('@/lib/get-current-app-user', () => ({
   getCurrentAppUser: getCurrentAppUserMock,
 }))

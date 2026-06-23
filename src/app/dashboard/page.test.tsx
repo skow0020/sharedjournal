@@ -10,6 +10,7 @@ const {
   getRecentPhotosForJournalsMock,
   getUserJournalCountMock,
   getUserJournalsMock,
+  getLaunchDarklyVariationMock,
   createJournalForOwnerMock,
   redirectMock,
 } = vi.hoisted(() => ({
@@ -20,6 +21,7 @@ const {
   getRecentPhotosForJournalsMock: vi.fn(),
   getUserJournalCountMock: vi.fn(),
   getUserJournalsMock: vi.fn(),
+  getLaunchDarklyVariationMock: vi.fn(),
   createJournalForOwnerMock: vi.fn(),
   redirectMock: vi.fn(() => {
     throw new Error('NEXT_REDIRECT')
@@ -39,6 +41,12 @@ vi.mock('@/app/dashboard/create-journal-modal', () => ({
   ),
 }))
 
+vi.mock('@/app/dashboard/export-journals-button', () => ({
+  ExportJournalsButton: ({ children }: { children?: ReactNode }) => (
+    <div data-testid="export-journals-button">{children ?? 'Export journals button'}</div>
+  ),
+}))
+
 vi.mock('@/app/dashboard/delete-journal-button', () => ({
   DeleteJournalButton: ({ journalId }: { journalId: string }) => (
     <div data-testid={`delete-journal-${journalId}`}>Delete</div>
@@ -53,6 +61,11 @@ vi.mock('@/lib/get-current-user-email', () => ({
   getCurrentUserEmail: getCurrentUserEmailMock,
 }))
 
+vi.mock('@/lib/launchdarkly/server-client', () => ({
+  createLaunchDarklyContext: vi.fn((input) => input),
+  getLaunchDarklyVariation: getLaunchDarklyVariationMock,
+}))
+
 vi.mock('@/data/invitations', () => ({
   getPendingInvitationsForEmail: getPendingInvitationsForEmailMock,
 }))
@@ -63,6 +76,18 @@ vi.mock('@/data/journals', () => ({
   getUserJournalCount: getUserJournalCountMock,
   getUserJournals: getUserJournalsMock,
   createJournalForOwner: createJournalForOwnerMock,
+}))
+
+vi.mock('@/data/exports', () => ({
+  buildOwnerJournalsExportPayload: vi.fn(),
+}))
+
+vi.mock('@/lib/journal-export', () => ({
+  createOwnerJournalsExportZipAndUpload: vi.fn(),
+}))
+
+vi.mock('@/lib/export-link-token', () => ({
+  createExportDownloadToken: vi.fn(),
 }))
 
 import DashboardPage from '@/app/dashboard/page'
@@ -84,6 +109,7 @@ describe('DashboardPage', () => {
     getUserJournalsMock.mockResolvedValue([])
     getCollaboratorsForJournalsMock.mockResolvedValue(new Map())
     getRecentPhotosForJournalsMock.mockResolvedValue(new Map())
+    getLaunchDarklyVariationMock.mockResolvedValue(true)
     getPendingInvitationsForEmailMock.mockResolvedValue([])
   })
 
@@ -102,6 +128,16 @@ describe('DashboardPage', () => {
     expect(screen.getByRole('heading', { name: 'Your Journals' })).toBeInTheDocument()
     expect(screen.getByText('No journals found')).toBeInTheDocument()
     expect(screen.getByText('You are not a member of any journals yet.')).toBeInTheDocument()
+    expect(screen.getByTestId('create-journal-modal')).toBeInTheDocument()
+    expect(screen.getByTestId('export-journals-button')).toBeInTheDocument()
+  })
+
+  it('hides export button when owner journal export flag is disabled', async () => {
+    getLaunchDarklyVariationMock.mockResolvedValue(false)
+
+    await renderDashboardPage()
+
+    expect(screen.queryByTestId('export-journals-button')).not.toBeInTheDocument()
     expect(screen.getByTestId('create-journal-modal')).toBeInTheDocument()
   })
 
