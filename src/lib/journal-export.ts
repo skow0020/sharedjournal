@@ -1,4 +1,5 @@
 import { get, put } from '@vercel/blob'
+import pLimit from 'p-limit'
 import JSZip from 'jszip'
 
 import type { OwnerJournalExportPayload } from '@/data/exports'
@@ -39,30 +40,80 @@ export async function createOwnerJournalsExportZipAndUpload(
 
   zip.file('export.json', JSON.stringify(input.payload, null, 2))
 
+  // Use concurrency limit to avoid overwhelming serverless memory/connections
+  const limit = pLimit(5)
+
+  // Collect all photo fetch tasks while maintaining order
+  type PhotoFetchTask = {
+    journalId: string
+    entryId: string
+    photoId: string
+    storageKey: string
+    photoPath: string
+    promise: Promise<unknown>
+  }
+
+  const photoFetchTasks: PhotoFetchTask[] = []
+
   for (const journal of input.payload.journals) {
     const journalFolder = sanitizePathSegment(journal.title)
 
     for (const entry of journal.entries) {
       for (const photo of entry.photos) {
-        const blobResult = await get(photo.storageKey, { access: 'private' })
-
-        if (!blobResult || blobResult.statusCode !== 200 || !blobResult.stream) {
-          console.error('Unable to include export photo binary', {
-            journalId: journal.id,
-            entryId: entry.id,
-            photoId: photo.id,
-            storageKey: photo.storageKey,
-          })
-          continue
-        }
-
         const fileExtension = getFileExtensionFromStorageKey(photo.storageKey)
         const photoPath = `photos/${journalFolder}/${entry.id}/${String(photo.position + 1).padStart(2, '0')}-${photo.id}${fileExtension}`
-        const binary = await streamToUint8Array(blobResult.stream)
 
-        zip.file(photoPath, binary)
+        photoFetchTasks.push({
+          journalId: journal.id,
+          entryId: entry.id,
+          photoId: photo.id,
+          storageKey: photo.storageKey,
+          photoPath,
+          promise: limit(async () => {
+            try {
+              return await get(photo.storageKey, { access: 'private' })
+            } catch (error) {
+              console.error('Unable to include export photo binary', {
+                journalId: journal.id,
+                entryId: entry.id,
+                photoId: photo.id,
+                storageKey: photo.storageKey,
+                error: error instanceof Error ? error.message : String(error),
+              })
+              return null
+            }
+          }),
+        })
       }
     }
+  }
+
+  // Fetch all photos concurrently, then add to ZIP
+  const photoResults = await Promise.all(photoFetchTasks.map((task) => task.promise))
+
+  for (let i = 0; i < photoFetchTasks.length; i++) {
+    const task = photoFetchTasks[i]
+    const blobResult = photoResults[i] as unknown
+
+    if (
+      !blobResult ||
+      typeof blobResult !== 'object' ||
+      (blobResult as Record<string, unknown>).statusCode !== 200 ||
+      !(blobResult as Record<string, unknown>).stream
+    ) {
+      console.error('Unable to include export photo binary', {
+        journalId: task.journalId,
+        entryId: task.entryId,
+        photoId: task.photoId,
+        storageKey: task.storageKey,
+      })
+      continue
+    }
+
+    const binary = await streamToUint8Array(
+      (blobResult as Record<string, unknown>).stream as ReadableStream<Uint8Array>,
+    )
+    zip.file(task.photoPath, binary)
   }
 
   const zipBytes = await zip.generateAsync({

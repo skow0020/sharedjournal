@@ -60,6 +60,7 @@ updates:
           - "esbuild"
           - "tsx"
           - "typescript"
+          - "p-limit"
       vercel-stack:
         patterns:
           - "@vercel/analytics"
