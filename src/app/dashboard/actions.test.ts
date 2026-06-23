@@ -3,6 +3,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 const {
   createJournalForOwnerMock,
   deleteJournalOwnedByUserMock,
+  buildOwnerJournalsExportPayloadMock,
+  createOwnerJournalsExportZipAndUploadMock,
+  createExportDownloadTokenMock,
   getCurrentAppUserMock,
   getCurrentUserEmailMock,
   acceptJournalInvitationMock,
@@ -10,6 +13,9 @@ const {
 } = vi.hoisted(() => ({
   createJournalForOwnerMock: vi.fn(),
   deleteJournalOwnedByUserMock: vi.fn(),
+  buildOwnerJournalsExportPayloadMock: vi.fn(),
+  createOwnerJournalsExportZipAndUploadMock: vi.fn(),
+  createExportDownloadTokenMock: vi.fn(),
   getCurrentAppUserMock: vi.fn(),
   getCurrentUserEmailMock: vi.fn(),
   acceptJournalInvitationMock: vi.fn(),
@@ -19,6 +25,18 @@ const {
 vi.mock('@/data/journals', () => ({
   createJournalForOwner: createJournalForOwnerMock,
   deleteJournalOwnedByUser: deleteJournalOwnedByUserMock,
+}))
+
+vi.mock('@/data/exports', () => ({
+  buildOwnerJournalsExportPayload: buildOwnerJournalsExportPayloadMock,
+}))
+
+vi.mock('@/lib/journal-export', () => ({
+  createOwnerJournalsExportZipAndUpload: createOwnerJournalsExportZipAndUploadMock,
+}))
+
+vi.mock('@/lib/export-link-token', () => ({
+  createExportDownloadToken: createExportDownloadTokenMock,
 }))
 
 vi.mock('@/lib/get-current-app-user', () => ({
@@ -39,6 +57,7 @@ import {
   createJournalAction,
   declineDashboardInvitationAction,
   deleteJournalAction,
+  generateOwnerExportAction,
 } from '@/app/dashboard/actions'
 
 describe('createJournalAction', () => {
@@ -318,6 +337,91 @@ describe('declineDashboardInvitationAction', () => {
     expect(result).toEqual({
       error: null,
       success: true,
+    })
+  })
+})
+
+describe('generateOwnerExportAction', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns an auth error when no app user exists', async () => {
+    getCurrentAppUserMock.mockResolvedValue(null)
+
+    const result = await generateOwnerExportAction({})
+
+    expect(result).toEqual({
+      error: 'You must be signed in to export journals.',
+      downloadUrl: null,
+      expiresAt: null,
+    })
+  })
+
+  it('returns a no-owner-journals error when payload has no journals', async () => {
+    getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
+    getCurrentUserEmailMock.mockResolvedValue('owner@example.com')
+    buildOwnerJournalsExportPayloadMock.mockResolvedValue({
+      version: '1',
+      generatedAt: '2026-01-01T00:00:00.000Z',
+      ownerUserId: 'user-1',
+      ownerEmail: 'owner@example.com',
+      journals: [],
+    })
+
+    const result = await generateOwnerExportAction({})
+
+    expect(result).toEqual({
+      error: 'You do not have any owner journals to export.',
+      downloadUrl: null,
+      expiresAt: null,
+    })
+    expect(createOwnerJournalsExportZipAndUploadMock).not.toHaveBeenCalled()
+  })
+
+  it('returns signed download URL and expiry on success', async () => {
+    getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
+    getCurrentUserEmailMock.mockResolvedValue('owner@example.com')
+    buildOwnerJournalsExportPayloadMock.mockResolvedValue({
+      version: '1',
+      generatedAt: '2026-01-01T00:00:00.000Z',
+      ownerUserId: 'user-1',
+      ownerEmail: 'owner@example.com',
+      journals: [
+        {
+          id: 'journal-1',
+          title: 'Owned',
+          description: null,
+          createdAt: '2026-01-01T00:00:00.000Z',
+          updatedAt: '2026-01-01T00:00:00.000Z',
+          collaborators: [],
+          entries: [],
+        },
+      ],
+    })
+    createOwnerJournalsExportZipAndUploadMock.mockResolvedValue({
+      storageKey: 'exports/users/user-1/file.zip',
+      fileName: 'sharedjournal-export.zip',
+      sizeBytes: 1234,
+    })
+    createExportDownloadTokenMock.mockReturnValue('signed-token')
+
+    const result = await generateOwnerExportAction({})
+
+    expect(createOwnerJournalsExportZipAndUploadMock).toHaveBeenCalledWith({
+      ownerUserId: 'user-1',
+      payload: expect.any(Object),
+    })
+    expect(createExportDownloadTokenMock).toHaveBeenCalledWith({
+      userId: 'user-1',
+      storageKey: 'exports/users/user-1/file.zip',
+      fileName: 'sharedjournal-export.zip',
+      exp: expect.any(Number),
+    })
+    expect(result).toEqual({
+      error: null,
+      downloadUrl: '/api/exports/download?token=signed-token',
+      expiresAt: expect.any(String),
     })
   })
 })
