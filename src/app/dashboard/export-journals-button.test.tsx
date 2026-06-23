@@ -26,7 +26,7 @@ describe('ExportJournalsButton', () => {
       expect(action).toHaveBeenCalledWith({})
     })
 
-    expect(await screen.findByRole('link', { name: 'Download export ZIP' })).toHaveAttribute(
+    expect(await screen.findByRole('link', { name: 'Download ZIP' })).toHaveAttribute(
       'href',
       '/api/exports/download?token=abc',
     )
