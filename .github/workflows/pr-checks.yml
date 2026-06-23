@@ -41,6 +41,7 @@ jobs:
       E2E_CLERK_EMAIL: ${{ vars.E2E_CLERK_EMAIL }}
       E2E_CLERK_PASSWORD: ${{ secrets.E2E_CLERK_PASSWORD }}
       ENTRY_CONTENT_ENCRYPTION_KEY: ${{ secrets.ENTRY_CONTENT_ENCRYPTION_KEY }}
+      LAUNCHDARKLY_SDK_KEY: ${{ secrets.LAUNCHDARKLY_SDK_KEY }}
 
     steps:
       - name: Checkout
