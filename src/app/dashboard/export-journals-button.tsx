@@ -1,7 +1,7 @@
 'use client'
 
 import { format } from 'date-fns'
-import { CheckCircle2, Copy, DownloadIcon } from 'lucide-react'
+import { CheckCircle2, DownloadIcon } from 'lucide-react'
 import { useState, useTransition } from 'react'
 
 import {
