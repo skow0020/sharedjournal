@@ -14,12 +14,8 @@ import { Button } from '@/components/ui/button'
 
 type PendingInvitationRowProps = {
   invitation: PendingInvitation
-  acceptAction: (
-    input: DashboardInvitationActionInput,
-  ) => Promise<DashboardAcceptInvitationState>
-  declineAction: (
-    input: DashboardInvitationActionInput,
-  ) => Promise<DashboardDeclineInvitationState>
+  acceptAction: (input: DashboardInvitationActionInput) => Promise<DashboardAcceptInvitationState>
+  declineAction: (input: DashboardInvitationActionInput) => Promise<DashboardDeclineInvitationState>
 }
 
 export function PendingInvitationRow({
@@ -84,7 +80,13 @@ export function PendingInvitationRow({
         </div>
 
         <div className="flex items-center gap-2">
-          <Button type="button" size="sm" variant="outline" disabled className="disabled:opacity-100">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            disabled
+            className="disabled:opacity-100"
+          >
             Cancel
           </Button>
           <Button

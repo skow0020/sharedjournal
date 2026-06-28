@@ -1,11 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const {
-  initMock,
-  variationMock,
-  waitForInitializationMock,
-  mockClient,
-} = vi.hoisted(() => {
+const { initMock, variationMock, waitForInitializationMock, mockClient } = vi.hoisted(() => {
   const waitForInitializationMock = vi.fn()
   const variationMock = vi.fn()
   const mockClient = {
@@ -54,7 +49,9 @@ describe('launchdarkly/server-client', () => {
 
     const { getLaunchDarklyServerClient } = await import('@/lib/launchdarkly/server-client')
 
-    await expect(getLaunchDarklyServerClient()).rejects.toThrow('LAUNCHDARKLY_SDK_KEY is not configured.')
+    await expect(getLaunchDarklyServerClient()).rejects.toThrow(
+      'LAUNCHDARKLY_SDK_KEY is not configured.',
+    )
     expect(initMock).not.toHaveBeenCalled()
   })
 
@@ -81,12 +78,14 @@ describe('launchdarkly/server-client', () => {
       key: 'user-1',
     })
 
-    expect(createLaunchDarklyContext({
-      key: 'user-2',
-      email: 'user@example.com',
-      name: 'User Two',
-      anonymous: true,
-    })).toEqual({
+    expect(
+      createLaunchDarklyContext({
+        key: 'user-2',
+        email: 'user@example.com',
+        name: 'User Two',
+        anonymous: true,
+      }),
+    ).toEqual({
       kind: 'user',
       key: 'user-2',
       email: 'user@example.com',
@@ -99,10 +98,8 @@ describe('launchdarkly/server-client', () => {
     process.env.LAUNCHDARKLY_SDK_KEY = 'sdk-test-123'
     variationMock.mockResolvedValueOnce(false)
 
-    const {
-      createLaunchDarklyContext,
-      getLaunchDarklyVariation,
-    } = await import('@/lib/launchdarkly/server-client')
+    const { createLaunchDarklyContext, getLaunchDarklyVariation } =
+      await import('@/lib/launchdarkly/server-client')
 
     const context = createLaunchDarklyContext({ key: 'user-1' })
 
@@ -119,10 +116,8 @@ describe('launchdarkly/server-client', () => {
   it('uses entry-comments override when configured to true', async () => {
     process.env.LAUNCHDARKLY_FLAG_ENTRY_COMMENTS = 'true'
 
-    const {
-      createLaunchDarklyContext,
-      getLaunchDarklyVariation,
-    } = await import('@/lib/launchdarkly/server-client')
+    const { createLaunchDarklyContext, getLaunchDarklyVariation } =
+      await import('@/lib/launchdarkly/server-client')
 
     const result = await getLaunchDarklyVariation({
       flagKey: 'entry-comments',
@@ -138,10 +133,8 @@ describe('launchdarkly/server-client', () => {
   it('uses entry-comments override when configured to false', async () => {
     process.env.LAUNCHDARKLY_FLAG_ENTRY_COMMENTS = 'false'
 
-    const {
-      createLaunchDarklyContext,
-      getLaunchDarklyVariation,
-    } = await import('@/lib/launchdarkly/server-client')
+    const { createLaunchDarklyContext, getLaunchDarklyVariation } =
+      await import('@/lib/launchdarkly/server-client')
 
     const result = await getLaunchDarklyVariation({
       flagKey: 'entry-comments',

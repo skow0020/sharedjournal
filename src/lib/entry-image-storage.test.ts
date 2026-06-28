@@ -48,11 +48,17 @@ describe('entry-image-storage helpers', () => {
   })
 
   it('validates temp storage key prefix for a journal', () => {
-    expect(isTempEntryImageStorageKeyForJournal('tmp/journals/journal-1/a.jpg', 'journal-1')).toBe(true)
-    expect(isTempEntryImageStorageKeyForJournal('tmp/journals/journal-2/a.jpg', 'journal-1')).toBe(false)
+    expect(isTempEntryImageStorageKeyForJournal('tmp/journals/journal-1/a.jpg', 'journal-1')).toBe(
+      true,
+    )
+    expect(isTempEntryImageStorageKeyForJournal('tmp/journals/journal-2/a.jpg', 'journal-1')).toBe(
+      false,
+    )
   })
 
   it('builds entry photo proxy urls', () => {
-    expect(buildEntryPhotoProxyUrl('entry-1', 'photo-2')).toBe('/api/entries/entry-1/photos/photo-2')
+    expect(buildEntryPhotoProxyUrl('entry-1', 'photo-2')).toBe(
+      '/api/entries/entry-1/photos/photo-2',
+    )
   })
 })

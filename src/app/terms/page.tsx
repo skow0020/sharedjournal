@@ -2,13 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { format, parseISO } from 'date-fns'
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { PageFlairShell } from '@/components/page-flair-shell'
 import { SUPPORT_EMAIL, SUPPORT_EMAIL_HREF } from '@/lib/support-contact'
 
@@ -33,9 +27,7 @@ export default function TermsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Acceptable use</CardTitle>
-          <CardDescription>
-            Use SharedJournal lawfully and respect other users.
-          </CardDescription>
+          <CardDescription>Use SharedJournal lawfully and respect other users.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">
           <p>Do not use the service for unlawful, abusive, or unauthorized activity.</p>
@@ -48,29 +40,34 @@ export default function TermsPage() {
         <CardHeader>
           <CardTitle>Accounts and content</CardTitle>
           <CardDescription>
-            Account access and journal permissions are controlled by authentication and invitation rules.
+            Account access and journal permissions are controlled by authentication and invitation
+            rules.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">
           <p>You must keep your account credentials secure.</p>
           <p>Journal owners control collaborator access and invitations.</p>
-          <p>You retain rights to your content, and grant SharedJournal permission to store and display it.</p>
+          <p>
+            You retain rights to your content, and grant SharedJournal permission to store and
+            display it.
+          </p>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
           <CardTitle>Service terms</CardTitle>
-          <CardDescription>
-            SharedJournal is provided on an as-available basis.
-          </CardDescription>
+          <CardDescription>SharedJournal is provided on an as-available basis.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">
           <p>Features may change over time as the product evolves.</p>
           <p>We may suspend accounts that violate these terms.</p>
           <p>
             For support or legal questions, contact{' '}
-            <a href={SUPPORT_EMAIL_HREF} className="underline underline-offset-4 hover:no-underline">
+            <a
+              href={SUPPORT_EMAIL_HREF}
+              className="underline underline-offset-4 hover:no-underline"
+            >
               {SUPPORT_EMAIL}
             </a>
             .
@@ -81,23 +78,26 @@ export default function TermsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Support payments and refunds</CardTitle>
-          <CardDescription>
-            Support payments are optional one-time contributions.
-          </CardDescription>
+          <CardDescription>Support payments are optional one-time contributions.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">
           <p>
-            Support payments help fund SharedJournal operations and are not tax-deductible charitable
-            donations.
+            Support payments help fund SharedJournal operations and are not tax-deductible
+            charitable donations.
           </p>
           <p>
             Refund requests are reviewed case-by-case. Contact{' '}
-            <a href={SUPPORT_EMAIL_HREF} className="underline underline-offset-4 hover:no-underline">
+            <a
+              href={SUPPORT_EMAIL_HREF}
+              className="underline underline-offset-4 hover:no-underline"
+            >
               {SUPPORT_EMAIL}
             </a>{' '}
             with your payment details.
           </p>
-          <p>Payment processing is handled by Stripe according to Stripe&apos;s terms and policies.</p>
+          <p>
+            Payment processing is handled by Stripe according to Stripe&apos;s terms and policies.
+          </p>
         </CardContent>
       </Card>
 
@@ -105,7 +105,11 @@ export default function TermsPage() {
         These terms are a baseline policy and are not legal advice.
       </p>
       <p className="text-muted-foreground text-xs">
-        Return to <Link href="/" className="underline underline-offset-4 hover:no-underline">home</Link>.
+        Return to{' '}
+        <Link href="/" className="underline underline-offset-4 hover:no-underline">
+          home
+        </Link>
+        .
       </p>
     </PageFlairShell>
   )

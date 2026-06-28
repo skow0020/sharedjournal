@@ -7,19 +7,12 @@ import {
 } from '@/app/dashboard/journals/[journalId]/actions'
 import type { PendingJournalInvitation } from '@/data/invitations'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 type OwnedPendingInvitationsProps = {
   invitations: PendingJournalInvitation[]
   journalId: string
-  cancelAction: (
-    input: CancelPendingInvitationInput,
-  ) => Promise<CancelPendingInvitationState>
+  cancelAction: (input: CancelPendingInvitationInput) => Promise<CancelPendingInvitationState>
 }
 
 export function OwnedPendingInvitations({
@@ -78,7 +71,8 @@ export function OwnedPendingInvitations({
               <div className="min-w-0 space-y-2">
                 <CardTitle className="text-base break-all">{invitation.inviteeEmail}</CardTitle>
                 <CardDescription>
-                  {invitation.role} · {invitation.emailDelivered ? 'email delivered' : 'manual share needed'}
+                  {invitation.role} ·{' '}
+                  {invitation.emailDelivered ? 'email delivered' : 'manual share needed'}
                 </CardDescription>
               </div>
               <Button

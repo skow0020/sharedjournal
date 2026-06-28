@@ -25,7 +25,9 @@ type CancelSupportPaymentInput = {
   stripeCheckoutSessionId: string
 }
 
-export async function createSupportPayment(input: CreateSupportPaymentInput): Promise<{ id: string }> {
+export async function createSupportPayment(
+  input: CreateSupportPaymentInput,
+): Promise<{ id: string }> {
   const [createdPayment] = await db
     .insert(supportPayments)
     .values({

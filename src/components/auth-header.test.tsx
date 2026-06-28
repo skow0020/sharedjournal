@@ -15,19 +15,31 @@ vi.mock('next/navigation', () => ({
 }))
 
 vi.mock('@clerk/nextjs', () => ({
-  Show: ({ when, children }: { when: 'signed-in' | 'signed-out', children: ReactNode }) => {
+  Show: ({ when, children }: { when: 'signed-in' | 'signed-out'; children: ReactNode }) => {
     if (when === 'signed-in') {
       return authState.isSignedIn ? <>{children}</> : null
     }
 
     return authState.isSignedIn ? null : <>{children}</>
   },
-  SignInButton: ({ children, forceRedirectUrl }: { children: ReactNode, forceRedirectUrl?: string }) => (
+  SignInButton: ({
+    children,
+    forceRedirectUrl,
+  }: {
+    children: ReactNode
+    forceRedirectUrl?: string
+  }) => (
     <div data-testid="sign-in-wrapper" data-force-redirect-url={forceRedirectUrl}>
       {children}
     </div>
   ),
-  SignUpButton: ({ children, forceRedirectUrl }: { children: ReactNode, forceRedirectUrl?: string }) => (
+  SignUpButton: ({
+    children,
+    forceRedirectUrl,
+  }: {
+    children: ReactNode
+    forceRedirectUrl?: string
+  }) => (
     <div data-testid="sign-up-wrapper" data-force-redirect-url={forceRedirectUrl}>
       {children}
     </div>
@@ -68,8 +80,14 @@ describe('AuthHeader', () => {
 
     expect(screen.getByRole('button', { name: 'Sign In' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Sign Up' })).toBeInTheDocument()
-    expect(screen.getByTestId('sign-in-wrapper')).toHaveAttribute('data-force-redirect-url', '/auth/transition')
-    expect(screen.getByTestId('sign-up-wrapper')).toHaveAttribute('data-force-redirect-url', '/auth/transition')
+    expect(screen.getByTestId('sign-in-wrapper')).toHaveAttribute(
+      'data-force-redirect-url',
+      '/auth/transition',
+    )
+    expect(screen.getByTestId('sign-up-wrapper')).toHaveAttribute(
+      'data-force-redirect-url',
+      '/auth/transition',
+    )
   })
 
   it('shows user button for signed-in users', () => {

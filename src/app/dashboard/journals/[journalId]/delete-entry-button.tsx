@@ -74,7 +74,8 @@ export function DeleteEntryButton({ journalId, entryId, action }: DeleteEntryBut
         <DialogHeader>
           <DialogTitle>Delete entry</DialogTitle>
           <DialogDescription>
-            This will permanently remove this journal entry and its photos. This action cannot be undone.
+            This will permanently remove this journal entry and its photos. This action cannot be
+            undone.
           </DialogDescription>
         </DialogHeader>
         {state.error ? <p className="text-destructive text-sm">{state.error}</p> : null}

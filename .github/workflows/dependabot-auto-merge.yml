@@ -28,7 +28,6 @@ jobs:
       github.event.pull_request.user.login == 'dependabot[bot]' &&
       github.event.pull_request.draft == false
     runs-on: ubuntu-latest
-
     steps:
       - name: Fetch Dependabot metadata
         id: metadata
@@ -108,4 +107,3 @@ jobs:
           if [[ "$updated" -eq 0 ]]; then
             echo "No Dependabot PR branch could be updated."
           fi
-

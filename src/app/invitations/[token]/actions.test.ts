@@ -25,10 +25,7 @@ vi.mock('@/lib/get-current-user-email', () => ({
   getCurrentUserEmail: getCurrentUserEmailMock,
 }))
 
-import {
-  acceptInvitationAction,
-  declineInvitationAction,
-} from '@/app/invitations/[token]/actions'
+import { acceptInvitationAction, declineInvitationAction } from '@/app/invitations/[token]/actions'
 
 describe('acceptInvitationAction', () => {
   beforeEach(() => {

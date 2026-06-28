@@ -2,18 +2,18 @@ import type { ReactNode } from 'react'
 import { render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const {
-  getInvitationByTokenMock,
-  getCurrentAppUserMock,
-  getCurrentUserEmailMock,
-} = vi.hoisted(() => ({
-  getInvitationByTokenMock: vi.fn(),
-  getCurrentAppUserMock: vi.fn(),
-  getCurrentUserEmailMock: vi.fn(),
-}))
+const { getInvitationByTokenMock, getCurrentAppUserMock, getCurrentUserEmailMock } = vi.hoisted(
+  () => ({
+    getInvitationByTokenMock: vi.fn(),
+    getCurrentAppUserMock: vi.fn(),
+    getCurrentUserEmailMock: vi.fn(),
+  }),
+)
 
 vi.mock('@clerk/nextjs', () => ({
-  SignInButton: ({ children }: { children: ReactNode }) => <div data-testid="sign-in-button">{children}</div>,
+  SignInButton: ({ children }: { children: ReactNode }) => (
+    <div data-testid="sign-in-button">{children}</div>
+  ),
 }))
 
 vi.mock('@/data/invitations', () => ({
@@ -26,7 +26,9 @@ vi.mock('@/app/invitations/[token]/actions', () => ({
 }))
 
 vi.mock('@/app/invitations/[token]/invitation-response-actions', () => ({
-  InvitationResponseActions: () => <div data-testid="invitation-response-actions">Invitation response actions</div>,
+  InvitationResponseActions: () => (
+    <div data-testid="invitation-response-actions">Invitation response actions</div>
+  ),
 }))
 
 vi.mock('@/lib/get-current-app-user', () => ({
@@ -74,7 +76,9 @@ describe('InvitationPage', () => {
     await renderInvitationPage()
 
     expect(screen.getByText('Invitation not found')).toBeInTheDocument()
-    expect(screen.getByText('This invitation link is invalid or no longer exists.')).toBeInTheDocument()
+    expect(
+      screen.getByText('This invitation link is invalid or no longer exists.'),
+    ).toBeInTheDocument()
   })
 
   it('renders expired state', async () => {

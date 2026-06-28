@@ -64,13 +64,19 @@ export function EntryPhotoGallery({ photos }: EntryPhotoGalleryProps) {
         ))}
       </div>
 
-      <Dialog open={openIndex !== null} onOpenChange={(open) => { if (!open) setOpenIndex(null) }}>
+      <Dialog
+        open={openIndex !== null}
+        onOpenChange={(open) => {
+          if (!open) setOpenIndex(null)
+        }}
+      >
         <DialogContent withFlair={false} className="max-w-4xl gap-0 p-2">
           <DialogTitle className="sr-only">
             {openIndex !== null ? `Image ${openIndex + 1} of ${photos.length}` : 'Image'}
           </DialogTitle>
           <DialogDescription className="sr-only">
-            View journal entry image in a larger preview. Use left and right arrow keys to navigate photos.
+            View journal entry image in a larger preview. Use left and right arrow keys to navigate
+            photos.
           </DialogDescription>
           {openIndex !== null && (
             <div className="relative flex items-center justify-center">

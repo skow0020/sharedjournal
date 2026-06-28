@@ -19,7 +19,7 @@ import {
 // Helpers
 // ---------------------------------------------------------------------------
 
-async function createUser(overrides?: { clerkUserId?: string, displayName?: string }) {
+async function createUser(overrides?: { clerkUserId?: string; displayName?: string }) {
   const [user] = await db
     .insert(users)
     .values({
@@ -151,10 +151,22 @@ describe('getUserJournals', () => {
     await addMember(journal3.id, ownerId, 'owner')
     await addMember(journal4.id, ownerId, 'owner')
 
-    await db.update(journals).set({ updatedAt: new Date('2026-03-01T00:00:00.000Z') }).where(eq(journals.id, journalId1))
-    await db.update(journals).set({ updatedAt: new Date('2026-03-02T00:00:00.000Z') }).where(eq(journals.id, journalId2))
-    await db.update(journals).set({ updatedAt: new Date('2026-03-03T00:00:00.000Z') }).where(eq(journals.id, journal3.id))
-    await db.update(journals).set({ updatedAt: new Date('2026-03-04T00:00:00.000Z') }).where(eq(journals.id, journal4.id))
+    await db
+      .update(journals)
+      .set({ updatedAt: new Date('2026-03-01T00:00:00.000Z') })
+      .where(eq(journals.id, journalId1))
+    await db
+      .update(journals)
+      .set({ updatedAt: new Date('2026-03-02T00:00:00.000Z') })
+      .where(eq(journals.id, journalId2))
+    await db
+      .update(journals)
+      .set({ updatedAt: new Date('2026-03-03T00:00:00.000Z') })
+      .where(eq(journals.id, journal3.id))
+    await db
+      .update(journals)
+      .set({ updatedAt: new Date('2026-03-04T00:00:00.000Z') })
+      .where(eq(journals.id, journal4.id))
 
     const pageOne = await getUserJournals(ownerId, { limit: 2, offset: 0 })
     const pageTwo = await getUserJournals(ownerId, { limit: 2, offset: 2 })
@@ -453,9 +465,7 @@ describe('createJournalForOwner', () => {
     const [membership] = await db
       .select({ role: journalMembers.role })
       .from(journalMembers)
-      .where(
-        eq(journalMembers.journalId, result.id),
-      )
+      .where(eq(journalMembers.journalId, result.id))
 
     expect(membership.role).toBe('owner')
   })
@@ -710,8 +720,12 @@ describe('getRecentPhotosForJournals', () => {
     journalId1 = j1[0].id
     journalId2 = j2[0].id
 
-    await db.insert(journalMembers).values({ journalId: journalId1, userId: ownerId, role: 'owner' })
-    await db.insert(journalMembers).values({ journalId: journalId2, userId: ownerId, role: 'owner' })
+    await db
+      .insert(journalMembers)
+      .values({ journalId: journalId1, userId: ownerId, role: 'owner' })
+    await db
+      .insert(journalMembers)
+      .values({ journalId: journalId2, userId: ownerId, role: 'owner' })
   })
 
   afterEach(async () => {

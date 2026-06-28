@@ -3,10 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 
-import {
-  type CreateJournalInput,
-  type CreateJournalState,
-} from '@/app/dashboard/actions'
+import { type CreateJournalInput, type CreateJournalState } from '@/app/dashboard/actions'
 
 import { Button } from '@/components/ui/button'
 import {

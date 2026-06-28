@@ -9,13 +9,7 @@ import { type DeleteJournalInput, type DeleteJournalState } from '@/app/dashboar
 import { DeleteJournalButton } from '@/app/dashboard/delete-journal-button'
 import { CollaboratorsAccordion } from '@/app/dashboard/journals/collaborators-accordion'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import type { JournalCollaborator, JournalRecentPhoto, UserJournal } from '@/data/journals'
 import { buildEntryPhotoProxyUrl } from '@/lib/entry-image-storage'
 
@@ -32,17 +26,18 @@ function stopPropagation(event: MouseEvent<HTMLDivElement> | KeyboardEvent<HTMLD
 
 function InteractiveSection({ children }: { children: ReactNode }) {
   return (
-    <div
-      className="pointer-events-auto"
-      onClick={stopPropagation}
-      onKeyDown={stopPropagation}
-    >
+    <div className="pointer-events-auto" onClick={stopPropagation} onKeyDown={stopPropagation}>
       {children}
     </div>
   )
 }
 
-export function JournalCard({ journal, collaborators, deleteAction, recentPhotos }: JournalCardProps) {
+export function JournalCard({
+  journal,
+  collaborators,
+  deleteAction,
+  recentPhotos,
+}: JournalCardProps) {
   const router = useRouter()
 
   function handleNavigate() {
@@ -123,7 +118,6 @@ export function JournalCard({ journal, collaborators, deleteAction, recentPhotos
           </div>
         ) : null}
       </CardContent>
-
     </Card>
   )
 }

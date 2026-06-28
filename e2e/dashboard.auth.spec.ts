@@ -12,7 +12,10 @@ test.beforeEach(async ({ request }) => {
   expect(resetResponse.ok()).toBeTruthy()
 })
 
-test('can create a journal, add an entry, comment on it, and invite a collaborator', async ({ page, request }) => {
+test('can create a journal, add an entry, comment on it, and invite a collaborator', async ({
+  page,
+  request,
+}) => {
   const toggleResponse = await request.post('/api/test/launchdarkly/entry-comments', {
     data: {
       enabled: true,
@@ -230,7 +233,9 @@ test('can append journal entry content using mobile speech input', async ({ page
   await createEntryModal.startVoiceInput()
 
   await page.evaluate((text) => {
-    ;(window as unknown as { __emitSpeechTranscript?: (value: string) => void }).__emitSpeechTranscript?.(text)
+    ;(
+      window as unknown as { __emitSpeechTranscript?: (value: string) => void }
+    ).__emitSpeechTranscript?.(text)
   }, spokenContent)
 
   await expect(createEntryModal.contentInput()).toHaveValue(`${typedContent} ${spokenContent}`)

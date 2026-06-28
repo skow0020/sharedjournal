@@ -27,7 +27,7 @@ import { isEncryptedEntryContent } from '@/lib/entry-content-crypto'
 // Helpers
 // ---------------------------------------------------------------------------
 
-async function createUser(overrides?: { clerkUserId?: string, displayName?: string }) {
+async function createUser(overrides?: { clerkUserId?: string; displayName?: string }) {
   const [user] = await db
     .insert(users)
     .values({
@@ -48,15 +48,23 @@ async function createJournal(ownerUserId: string, title = 'Test Journal') {
   return journal
 }
 
-async function addMember(journalId: string, userId: string, role: 'owner' | 'editor' | 'viewer' = 'editor') {
+async function addMember(
+  journalId: string,
+  userId: string,
+  role: 'owner' | 'editor' | 'viewer' = 'editor',
+) {
   await db.insert(journalMembers).values({ journalId, userId, role })
 }
 
-async function createEntry(journalId: string, authorUserId: string, overrides?: {
-  title?: string
-  content?: string
-  entryDate?: string
-}) {
+async function createEntry(
+  journalId: string,
+  authorUserId: string,
+  overrides?: {
+    title?: string
+    content?: string
+    entryDate?: string
+  },
+) {
   const [entry] = await db
     .insert(entries)
     .values({
@@ -257,7 +265,10 @@ describe('getJournalEntriesByDate', () => {
 
     await createEntry(journalId, ownerId, { content: 'Entry on March 5', entryDate: '2026-03-05' })
     await createEntry(journalId, ownerId, { content: 'Entry on March 7', entryDate: '2026-03-07' })
-    await createEntry(journalId, ownerId, { content: 'Another on March 7', entryDate: '2026-03-07' })
+    await createEntry(journalId, ownerId, {
+      content: 'Another on March 7',
+      entryDate: '2026-03-07',
+    })
   })
 
   afterEach(async () => {
@@ -437,7 +448,7 @@ describe('deleteEntryForJournal', () => {
     await deleteUsers([ownerId, authorId, memberId, outsiderId])
   })
 
-  it('allows the journal owner to delete another user\'s entry', async () => {
+  it("allows the journal owner to delete another user's entry", async () => {
     const result = await deleteEntryForJournal({
       userId: ownerId,
       journalId,
@@ -502,12 +513,7 @@ describe('deleteEntryForJournal', () => {
   it('rejects an ex-member who authored an entry but was removed from the journal', async () => {
     await db
       .delete(journalMembers)
-      .where(
-        and(
-          eq(journalMembers.journalId, journalId),
-          eq(journalMembers.userId, authorId),
-        ),
-      )
+      .where(and(eq(journalMembers.journalId, journalId), eq(journalMembers.userId, authorId)))
 
     const result = await deleteEntryForJournal({
       userId: authorId,

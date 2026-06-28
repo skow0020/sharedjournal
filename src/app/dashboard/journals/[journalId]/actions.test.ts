@@ -407,7 +407,9 @@ describe('deleteEntryAction', () => {
       entryId: '26a0908b-c293-43f5-94c0-9b5d53fcc592',
     })
 
-    expect(revalidatePathMock).toHaveBeenCalledWith('/dashboard/journals/4f687c5a-6576-4e05-a0f8-e4cdfdebe295')
+    expect(revalidatePathMock).toHaveBeenCalledWith(
+      '/dashboard/journals/4f687c5a-6576-4e05-a0f8-e4cdfdebe295',
+    )
     expect(result).toEqual({
       error: null,
       success: true,
@@ -828,7 +830,9 @@ describe('addCommentAction', () => {
       authorUserId: 'user-1',
       content: 'Great entry!',
     })
-    expect(revalidatePathMock).toHaveBeenCalledWith('/dashboard/journals/08f7f9ef-a4ea-445f-a29f-b865208ce13a')
+    expect(revalidatePathMock).toHaveBeenCalledWith(
+      '/dashboard/journals/08f7f9ef-a4ea-445f-a29f-b865208ce13a',
+    )
     expect(result).toEqual({
       error: null,
       success: true,

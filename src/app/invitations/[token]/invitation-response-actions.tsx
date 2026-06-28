@@ -23,9 +23,7 @@ export function InvitationResponseActions({
   const router = useRouter()
   const [pending, startTransition] = useTransition()
 
-  function runAction(
-    action: (input: InvitationActionInput) => Promise<InvitationActionResult>,
-  ) {
+  function runAction(action: (input: InvitationActionInput) => Promise<InvitationActionResult>) {
     startTransition(async () => {
       const result = await action({ token })
       router.push(result.redirectTo)
@@ -37,7 +35,12 @@ export function InvitationResponseActions({
       <Button type="button" disabled={pending} onClick={() => runAction(acceptAction)}>
         Accept invite
       </Button>
-      <Button type="button" variant="outline" disabled={pending} onClick={() => runAction(declineAction)}>
+      <Button
+        type="button"
+        variant="outline"
+        disabled={pending}
+        onClick={() => runAction(declineAction)}
+      >
         Decline
       </Button>
     </div>

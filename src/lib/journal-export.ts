@@ -18,7 +18,11 @@ export type UploadedOwnerJournalExport = {
 }
 
 function sanitizePathSegment(value: string): string {
-  const sanitized = value.trim().replace(NON_ALPHANUMERIC, '-').replace(/-+/g, '-').replace(/^-|-$/g, '')
+  const sanitized = value
+    .trim()
+    .replace(NON_ALPHANUMERIC, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
   return sanitized || 'untitled'
 }
 

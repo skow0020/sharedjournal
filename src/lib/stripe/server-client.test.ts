@@ -23,9 +23,9 @@ describe('getStripeServerClient', () => {
 
     StripeMock.mockImplementation(function StripeConstructor() {
       return {
-      webhooks: {
-        constructEvent: vi.fn(),
-      },
+        webhooks: {
+          constructEvent: vi.fn(),
+        },
       }
     })
   })

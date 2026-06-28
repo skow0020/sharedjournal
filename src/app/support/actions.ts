@@ -11,7 +11,9 @@ import { getStripeServerClient } from '@/lib/stripe/server-client'
 const supportAmountSchema = z
   .number()
   .int()
-  .refine((value): value is SupportAmountCents => SUPPORT_AMOUNTS.includes(value as SupportAmountCents))
+  .refine((value): value is SupportAmountCents =>
+    SUPPORT_AMOUNTS.includes(value as SupportAmountCents),
+  )
 
 const supportCheckoutSchema = z.object({
   amountCents: supportAmountSchema,
@@ -73,7 +75,7 @@ export async function createSupportCheckoutAction(
   const stripe = getStripeServerClient()
   const baseUrl = resolveAppBaseUrl()
 
-  let checkoutSession: { id: string, url: string | null }
+  let checkoutSession: { id: string; url: string | null }
 
   try {
     checkoutSession = await stripe.checkout.sessions.create({

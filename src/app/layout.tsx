@@ -1,8 +1,5 @@
 import type { Metadata } from 'next'
-import {
-  ClerkProvider,
-  GoogleOneTap,
-} from '@clerk/nextjs'
+import { ClerkProvider, GoogleOneTap } from '@clerk/nextjs'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { Analytics } from '@vercel/analytics/next'
@@ -41,7 +38,12 @@ export default function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
           suppressHydrationWarning
         >
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
             <AuthHeader />
             <GoogleOneTap
               signInForceRedirectUrl="/auth/transition"

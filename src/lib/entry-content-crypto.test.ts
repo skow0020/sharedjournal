@@ -63,20 +63,38 @@ describe('entry-content-crypto', () => {
 
     process.env.ENTRY_CONTENT_ENCRYPTION_KEY = Buffer.alloc(32, 99).toString('base64')
 
-    expect(() => decryptEntryContent(encryptedValue)).toThrow('Unable to decrypt journal entry content.')
+    expect(() => decryptEntryContent(encryptedValue)).toThrow(
+      'Unable to decrypt journal entry content.',
+    )
 
     process.env.ENTRY_CONTENT_ENCRYPTION_KEY = testEntryContentEncryptionKey
   })
 
   it('throws when encrypted payload has an invalid IV segment length', () => {
-    const invalidIvPayload = ['enc', 'v1', Buffer.alloc(4).toString('base64url'), Buffer.alloc(16).toString('base64url'), Buffer.from('secret').toString('base64url')].join(':')
+    const invalidIvPayload = [
+      'enc',
+      'v1',
+      Buffer.alloc(4).toString('base64url'),
+      Buffer.alloc(16).toString('base64url'),
+      Buffer.from('secret').toString('base64url'),
+    ].join(':')
 
-    expect(() => decryptEntryContent(invalidIvPayload)).toThrow('Unable to decrypt journal entry content.')
+    expect(() => decryptEntryContent(invalidIvPayload)).toThrow(
+      'Unable to decrypt journal entry content.',
+    )
   })
 
   it('throws when encrypted payload has an invalid auth tag segment length', () => {
-    const invalidAuthTagPayload = ['enc', 'v1', Buffer.alloc(12).toString('base64url'), Buffer.alloc(8).toString('base64url'), Buffer.from('secret').toString('base64url')].join(':')
+    const invalidAuthTagPayload = [
+      'enc',
+      'v1',
+      Buffer.alloc(12).toString('base64url'),
+      Buffer.alloc(8).toString('base64url'),
+      Buffer.from('secret').toString('base64url'),
+    ].join(':')
 
-    expect(() => decryptEntryContent(invalidAuthTagPayload)).toThrow('Unable to decrypt journal entry content.')
+    expect(() => decryptEntryContent(invalidAuthTagPayload)).toThrow(
+      'Unable to decrypt journal entry content.',
+    )
   })
 })

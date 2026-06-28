@@ -22,26 +22,31 @@ SharedJournal is a Next.js 16 application using the App Router architecture. It 
 ## Architecture
 
 ### App Router Structure
+
 - Uses Next.js App Router (`src/app/` directory)
 - `layout.tsx` - Root layout with font configuration (Geist Sans/Mono)
 - `page.tsx` - Main page component
 - `globals.css` - Global styles with Tailwind CSS v4 using `@import "tailwindcss"`
 
 ### Tailwind CSS v4
+
 - Uses inline theme configuration in `@theme inline` block
 - CSS custom properties for color scheme variables (`--background`, `--foreground`)
 - Dark mode support via `prefers-color-scheme: dark` media query
 - Font variables: `--font-geist-sans` and `--font-geist-mono`
 
 ### Path Aliases
+
 - `@/*` maps to `./src/*` (configured in tsconfig.json)
 
 ### TypeScript Config
+
 - Strict mode enabled
 - Target: ES2017
 - Module resolution: bundler
 - JSX: react-jsx
 
 ### ESLint
+
 - Uses `eslint-config-next` with core-web-vitals and TypeScript rules
 - Note: `next-env.d.ts` is explicitly ignored (line 14 of eslint.config.mjs), but still included in TypeScript compilation

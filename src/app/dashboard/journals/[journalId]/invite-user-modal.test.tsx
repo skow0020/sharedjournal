@@ -79,7 +79,9 @@ describe('InviteUserModal', () => {
         inviteLink: null,
       }))
 
-      render(<InviteUserModal journalId="journal-1" journalTitle="Family Journal" action={action} />)
+      render(
+        <InviteUserModal journalId="journal-1" journalTitle="Family Journal" action={action} />,
+      )
       await user.click(screen.getByRole('button', { name: 'Invite' }))
 
       expect(await axe(document.body)).toHaveNoViolations()

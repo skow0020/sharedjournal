@@ -1,6 +1,4 @@
-import {
-  ENTRY_IMAGE_ALLOWED_MIME_TYPES,
-} from '@/lib/entry-image-constants'
+import { ENTRY_IMAGE_ALLOWED_MIME_TYPES } from '@/lib/entry-image-constants'
 
 const NON_ALPHANUMERIC_FILENAME = /[^a-zA-Z0-9.-]/g
 const MULTIPLE_DASHES = /-+/g
@@ -32,7 +30,9 @@ function getBaseName(fileName: string): string {
 }
 
 export function isAllowedEntryImageMimeType(mimeType: string): boolean {
-  return ENTRY_IMAGE_ALLOWED_MIME_TYPES.includes(mimeType as (typeof ENTRY_IMAGE_ALLOWED_MIME_TYPES)[number])
+  return ENTRY_IMAGE_ALLOWED_MIME_TYPES.includes(
+    mimeType as (typeof ENTRY_IMAGE_ALLOWED_MIME_TYPES)[number],
+  )
 }
 
 export function buildTempEntryImageStorageKey(input: {
@@ -59,7 +59,10 @@ export function buildFinalEntryImageStorageKey(input: {
   return `journals/${input.journalId}/entries/${input.entryId}/${position}-${baseName}${extension}`
 }
 
-export function isTempEntryImageStorageKeyForJournal(storageKey: string, journalId: string): boolean {
+export function isTempEntryImageStorageKeyForJournal(
+  storageKey: string,
+  journalId: string,
+): boolean {
   return storageKey.startsWith(`tmp/journals/${journalId}/`)
 }
 

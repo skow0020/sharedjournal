@@ -3,10 +3,7 @@
 import { MoreHorizontalIcon } from 'lucide-react'
 import { useState } from 'react'
 
-import {
-  type DeleteJournalInput,
-  type DeleteJournalState,
-} from '@/app/dashboard/actions'
+import { type DeleteJournalInput, type DeleteJournalState } from '@/app/dashboard/actions'
 import { DeleteJournalButton } from '@/app/dashboard/delete-journal-button'
 import {
   type UpdateJournalDetailsInput,

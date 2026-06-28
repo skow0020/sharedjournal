@@ -255,7 +255,10 @@ describe('DashboardPage', () => {
 
     expect(getUserJournalsMock).toHaveBeenCalledWith('user-1', { limit: 5, offset: 5 })
     expect(screen.getByText('Page 2 of 2')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Previous' })).toHaveAttribute('href', '/dashboard?page=1')
+    expect(screen.getByRole('link', { name: 'Previous' })).toHaveAttribute(
+      'href',
+      '/dashboard?page=1',
+    )
     expect(screen.getByRole('button', { name: 'Next' })).toBeDisabled()
   })
 
@@ -299,7 +302,10 @@ describe('DashboardPage', () => {
 
     expect(getUserJournalsMock).toHaveBeenCalledWith('user-1', { limit: 5, offset: 5 })
     expect(screen.getByText('Page 2 of 2')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Previous' })).toHaveAttribute('href', '/dashboard?page=1')
+    expect(screen.getByRole('link', { name: 'Previous' })).toHaveAttribute(
+      'href',
+      '/dashboard?page=1',
+    )
     expect(screen.getByRole('button', { name: 'Next' })).toBeDisabled()
   })
 

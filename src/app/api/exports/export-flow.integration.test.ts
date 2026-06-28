@@ -107,8 +107,12 @@ describe('owner export generation to download route flow', () => {
 
     expect(response.status).toBe(200)
     expect(response.headers.get('Content-Type')).toBe('application/zip')
-    expect(response.headers.get('Content-Disposition')).toBe('attachment; filename="sharedjournal-export.zip"')
-    expect(getBlobMock).toHaveBeenCalledWith('exports/users/user-1/generated.zip', { access: 'private' })
+    expect(response.headers.get('Content-Disposition')).toBe(
+      'attachment; filename="sharedjournal-export.zip"',
+    )
+    expect(getBlobMock).toHaveBeenCalledWith('exports/users/user-1/generated.zip', {
+      access: 'private',
+    })
 
     const downloaded = new Uint8Array(await response.arrayBuffer())
     expect(Array.from(downloaded)).toEqual(Array.from(zipBytes))

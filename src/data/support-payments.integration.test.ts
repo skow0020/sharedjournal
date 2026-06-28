@@ -316,12 +316,7 @@ describe('support payments data helpers', () => {
         failureMessage: supportPayments.failureMessage,
       })
       .from(supportPayments)
-      .where(
-        and(
-          eq(supportPayments.id, payment.id),
-          eq(supportPayments.userId, user.id),
-        ),
-      )
+      .where(and(eq(supportPayments.id, payment.id), eq(supportPayments.userId, user.id)))
 
     expect(row.status).toBe('completed')
     expect(row.failureMessage).toBeNull()

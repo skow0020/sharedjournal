@@ -157,8 +157,14 @@ let userId: string
 let journalId: string
 
 beforeEach(async () => {
-  const [user] = await db.insert(users).values({ clerkUserId: `test_${crypto.randomUUID()}` }).returning({ id: users.id })
-  const [journal] = await db.insert(journals).values({ ownerUserId: user.id, title: 'Test' }).returning({ id: journals.id })
+  const [user] = await db
+    .insert(users)
+    .values({ clerkUserId: `test_${crypto.randomUUID()}` })
+    .returning({ id: users.id })
+  const [journal] = await db
+    .insert(journals)
+    .values({ ownerUserId: user.id, title: 'Test' })
+    .returning({ id: journals.id })
   await db.insert(journalMembers).values({ journalId: journal.id, userId: user.id, role: 'owner' })
   userId = user.id
   journalId = journal.id

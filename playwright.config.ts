@@ -9,10 +9,7 @@ export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
   retries: process.env.CI ? 1 : 0,
-  reporter: [
-    ['html'],
-    ['line']
-  ],
+  reporter: [['html'], ['line']],
   use: {
     baseURL: 'http://127.0.0.1:3000',
     screenshot: 'only-on-failure',

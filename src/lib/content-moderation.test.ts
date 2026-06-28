@@ -55,10 +55,13 @@ describe('moderateContent', () => {
 
   it('returns block when provider flags content', async () => {
     process.env.CONTENT_MODERATION_ENABLED = 'true'
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({ results: [{ flagged: true }] }),
-    }))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ results: [{ flagged: true }] }),
+      }),
+    )
 
     const result = await moderateContent({
       content: 'disallowed text',
@@ -99,10 +102,13 @@ describe('moderateContent', () => {
   it('returns allow when provider outages occur and fail mode is open', async () => {
     process.env.CONTENT_MODERATION_ENABLED = 'true'
     process.env.CONTENT_MODERATION_FAIL_MODE = 'open'
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-      ok: false,
-      status: 503,
-    }))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 503,
+      }),
+    )
 
     const result = await moderateContent({
       content: 'safe text',

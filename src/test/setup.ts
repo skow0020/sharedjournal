@@ -7,9 +7,9 @@ import * as axeMatchers from 'vitest-axe/matchers'
 expect.extend(axeMatchers)
 
 if (!process.env.ENTRY_CONTENT_ENCRYPTION_KEY) {
-	process.env.ENTRY_CONTENT_ENCRYPTION_KEY = Buffer.alloc(32, 7).toString('base64')
+  process.env.ENTRY_CONTENT_ENCRYPTION_KEY = Buffer.alloc(32, 7).toString('base64')
 }
 
 afterEach(() => {
-	cleanup()
+  cleanup()
 })

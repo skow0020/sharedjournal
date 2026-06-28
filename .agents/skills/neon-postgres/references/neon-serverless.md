@@ -33,19 +33,19 @@ Always use environment variables:
 
 ```typescript
 // For HTTP queries
-import { neon } from "@neondatabase/serverless";
-const sql = neon(process.env.DATABASE_URL!);
+import { neon } from '@neondatabase/serverless'
+const sql = neon(process.env.DATABASE_URL!)
 
 // For WebSocket connections
-import { Pool } from "@neondatabase/serverless";
-const pool = new Pool({ connectionString: process.env.DATABASE_URL! });
+import { Pool } from '@neondatabase/serverless'
+const pool = new Pool({ connectionString: process.env.DATABASE_URL! })
 ```
 
 **Never hardcode credentials:**
 
 ```typescript
 // AVOID
-const sql = neon("postgres://username:password@host.neon.tech/neondb");
+const sql = neon('postgres://username:password@host.neon.tech/neondb')
 ```
 
 ## HTTP Queries with `neon` function
@@ -57,33 +57,33 @@ Ideal for simple, "one-shot" queries in serverless/edge environments. Uses HTTP 
 Use tagged template literals for safe parameter interpolation:
 
 ```typescript
-const [post] = await sql`SELECT * FROM posts WHERE id = ${postId}`;
+const [post] = await sql`SELECT * FROM posts WHERE id = ${postId}`
 ```
 
 For manually constructed queries:
 
 ```typescript
-const [post] = await sql.query("SELECT * FROM posts WHERE id = $1", [postId]);
+const [post] = await sql.query('SELECT * FROM posts WHERE id = $1', [postId])
 ```
 
 **Never concatenate user input:**
 
 ```typescript
 // AVOID: SQL Injection Risk
-const [post] = await sql("SELECT * FROM posts WHERE id = " + postId);
+const [post] = await sql('SELECT * FROM posts WHERE id = ' + postId)
 ```
 
 ### Configuration Options
 
 ```typescript
 // Return rows as arrays instead of objects
-const sqlArrayMode = neon(process.env.DATABASE_URL!, { arrayMode: true });
-const rows = await sqlArrayMode`SELECT id, title FROM posts`;
+const sqlArrayMode = neon(process.env.DATABASE_URL!, { arrayMode: true })
+const rows = await sqlArrayMode`SELECT id, title FROM posts`
 // rows -> [[1, "First Post"], [2, "Second Post"]]
 
 // Get full results including row count and field metadata
-const sqlFull = neon(process.env.DATABASE_URL!, { fullResults: true });
-const result = await sqlFull`SELECT * FROM posts LIMIT 1`;
+const sqlFull = neon(process.env.DATABASE_URL!, { fullResults: true })
+const result = await sqlFull`SELECT * FROM posts LIMIT 1`
 // result -> { rows: [...], fields: [...], rowCount: 1, ... }
 ```
 
@@ -96,13 +96,13 @@ Use for `node-postgres` compatibility, interactive transactions, or session supp
 For Node.js v21 and earlier:
 
 ```typescript
-import { Pool, neonConfig } from "@neondatabase/serverless";
-import ws from "ws";
+import { Pool, neonConfig } from '@neondatabase/serverless'
+import ws from 'ws'
 
 // Required for Node.js < v22
-neonConfig.webSocketConstructor = ws;
+neonConfig.webSocketConstructor = ws
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL! });
+const pool = new Pool({ connectionString: process.env.DATABASE_URL! })
 ```
 
 ### Serverless Lifecycle Management
@@ -112,18 +112,18 @@ Create, use, and close the pool within the same invocation:
 ```typescript
 // Vercel Edge Functions example
 export default async (req: Request, ctx: ExecutionContext) => {
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL! });
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL! })
 
   try {
-    const { rows } = await pool.query("SELECT * FROM users");
-    return new Response(JSON.stringify(rows));
+    const { rows } = await pool.query('SELECT * FROM users')
+    return new Response(JSON.stringify(rows))
   } catch (err) {
-    console.error(err);
-    return new Response("Database error", { status: 500 });
+    console.error(err)
+    return new Response('Database error', { status: 500 })
   } finally {
-    ctx.waitUntil(pool.end());
+    ctx.waitUntil(pool.end())
   }
-};
+}
 ```
 
 **Avoid** creating a global `Pool` instance outside the handler.
@@ -141,10 +141,10 @@ const [newUser, newProfile] = await sql.transaction(
     sql`INSERT INTO profiles(user_id, bio) VALUES(${userId}, ${bio})`,
   ],
   {
-    isolationLevel: "ReadCommitted",
+    isolationLevel: 'ReadCommitted',
     readOnly: false,
   },
-);
+)
 ```
 
 ### Interactive Transactions
@@ -152,26 +152,21 @@ const [newUser, newProfile] = await sql.transaction(
 For complex transactions with conditional logic:
 
 ```typescript
-const pool = new Pool({ connectionString: process.env.DATABASE_URL! });
-const client = await pool.connect();
+const pool = new Pool({ connectionString: process.env.DATABASE_URL! })
+const client = await pool.connect()
 try {
-  await client.query("BEGIN");
+  await client.query('BEGIN')
   const {
     rows: [{ id }],
-  } = await client.query("INSERT INTO users(name) VALUES($1) RETURNING id", [
-    name,
-  ]);
-  await client.query("INSERT INTO profiles(user_id, bio) VALUES($1, $2)", [
-    id,
-    bio,
-  ]);
-  await client.query("COMMIT");
+  } = await client.query('INSERT INTO users(name) VALUES($1) RETURNING id', [name])
+  await client.query('INSERT INTO profiles(user_id, bio) VALUES($1, $2)', [id, bio])
+  await client.query('COMMIT')
 } catch (err) {
-  await client.query("ROLLBACK");
-  throw err;
+  await client.query('ROLLBACK')
+  throw err
 } finally {
-  client.release();
-  await pool.end();
+  client.release()
+  await pool.end()
 }
 ```
 
@@ -180,9 +175,9 @@ try {
 ```javascript
 // For Vercel Edge Functions, specify nearest region
 export const config = {
-  runtime: "edge",
-  regions: ["iad1"], // Region nearest to your Neon DB
-};
+  runtime: 'edge',
+  regions: ['iad1'], // Region nearest to your Neon DB
+}
 
 // For Cloudflare Workers, consider using Hyperdrive
 // https://neon.com/blog/hyperdrive-neon-faq
@@ -195,34 +190,34 @@ For Drizzle ORM integration with the serverless driver, see `neon-drizzle.md`.
 ### Prisma
 
 ```typescript
-import { neonConfig } from "@neondatabase/serverless";
-import { PrismaNeon, PrismaNeonHTTP } from "@prisma/adapter-neon";
-import { PrismaClient } from "@prisma/client";
-import ws from "ws";
+import { neonConfig } from '@neondatabase/serverless'
+import { PrismaNeon, PrismaNeonHTTP } from '@prisma/adapter-neon'
+import { PrismaClient } from '@prisma/client'
+import ws from 'ws'
 
-const connectionString = process.env.DATABASE_URL;
-neonConfig.webSocketConstructor = ws;
+const connectionString = process.env.DATABASE_URL
+neonConfig.webSocketConstructor = ws
 
 // HTTP adapter
-const adapterHttp = new PrismaNeonHTTP(connectionString!, {});
-export const prismaClientHttp = new PrismaClient({ adapter: adapterHttp });
+const adapterHttp = new PrismaNeonHTTP(connectionString!, {})
+export const prismaClientHttp = new PrismaClient({ adapter: adapterHttp })
 
 // WebSocket adapter
-const adapterWs = new PrismaNeon({ connectionString });
-export const prismaClientWs = new PrismaClient({ adapter: adapterWs });
+const adapterWs = new PrismaNeon({ connectionString })
+export const prismaClientWs = new PrismaClient({ adapter: adapterWs })
 ```
 
 ### Kysely
 
 ```typescript
-import { Pool } from "@neondatabase/serverless";
-import { Kysely, PostgresDialect } from "kysely";
+import { Pool } from '@neondatabase/serverless'
+import { Kysely, PostgresDialect } from 'kysely'
 
 const dialect = new PostgresDialect({
   pool: new Pool({ connectionString: process.env.DATABASE_URL }),
-});
+})
 
-const db = new Kysely({ dialect });
+const db = new Kysely({ dialect })
 ```
 
 **NOTE:** Do not pass the `neon()` function to ORMs that expect a `node-postgres` compatible `Pool`.
@@ -231,20 +226,20 @@ const db = new Kysely({ dialect });
 
 ```javascript
 // Pool error handling
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-pool.on("error", (err) => {
-  console.error("Unexpected error on idle client", err);
-  process.exit(-1);
-});
+const pool = new Pool({ connectionString: process.env.DATABASE_URL })
+pool.on('error', (err) => {
+  console.error('Unexpected error on idle client', err)
+  process.exit(-1)
+})
 
 // Query error handling
 try {
-  const [post] = await sql`SELECT * FROM posts WHERE id = ${postId}`;
+  const [post] = await sql`SELECT * FROM posts WHERE id = ${postId}`
   if (!post) {
-    return new Response("Not found", { status: 404 });
+    return new Response('Not found', { status: 404 })
   }
 } catch (err) {
-  console.error("Database query failed:", err);
-  return new Response("Server error", { status: 500 });
+  console.error('Database query failed:', err)
+  return new Response('Server error', { status: 500 })
 }
 ```

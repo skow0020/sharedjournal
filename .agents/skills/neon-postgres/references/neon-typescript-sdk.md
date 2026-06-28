@@ -15,9 +15,9 @@ npm install @neondatabase/api-client
 ## Authentication
 
 ```typescript
-import { createApiClient } from "@neondatabase/api-client";
+import { createApiClient } from '@neondatabase/api-client'
 
-const apiClient = createApiClient({ apiKey: process.env.NEON_API_KEY! });
+const apiClient = createApiClient({ apiKey: process.env.NEON_API_KEY! })
 ```
 
 ## Org-Aware Workflow
@@ -26,11 +26,11 @@ All Neon accounts are organization-based. You must discover the user's org first
 
 ```typescript
 // 1. Get the user's organizations
-const { data: orgs } = await apiClient.getCurrentUserOrganizations();
-const orgId = orgs.organizations[0].id;
+const { data: orgs } = await apiClient.getCurrentUserOrganizations()
+const orgId = orgs.organizations[0].id
 
 // 2. List projects within the org
-const { data: projects } = await apiClient.listProjects({ org_id: orgId });
+const { data: projects } = await apiClient.listProjects({ org_id: orgId })
 ```
 
 ## Method Quick Reference
@@ -113,22 +113,22 @@ const { data: projects } = await apiClient.listProjects({ org_id: orgId });
 
 ```typescript
 try {
-  const response = await apiClient.getProject(projectId);
-  return response.data;
+  const response = await apiClient.getProject(projectId)
+  return response.data
 } catch (error: any) {
   if (error.isAxiosError) {
-    const status = error.response?.status;
+    const status = error.response?.status
     // 401 = bad API key, 404 = not found, 429 = rate limited
-    console.error("API error:", status, error.response?.data?.message);
+    console.error('API error:', status, error.response?.data?.message)
   }
-  return null;
+  return null
 }
 ```
 
 ## Key Types
 
 ```typescript
-import { EndpointType, MemberRole } from "@neondatabase/api-client";
+import { EndpointType, MemberRole } from '@neondatabase/api-client'
 
 // EndpointType.ReadWrite, EndpointType.ReadOnly
 // MemberRole.Admin, MemberRole.Member

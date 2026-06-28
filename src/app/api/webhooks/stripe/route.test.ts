@@ -24,10 +24,7 @@ vi.mock('@/lib/stripe/webhook', () => ({
 
 import { POST } from '@/app/api/webhooks/stripe/route'
 
-function makeRequest(input: {
-  signature?: string
-  payload?: string
-}) {
+function makeRequest(input: { signature?: string; payload?: string }) {
   const headers = new Headers()
 
   if (input.signature) {

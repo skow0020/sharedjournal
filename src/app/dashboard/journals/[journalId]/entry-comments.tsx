@@ -84,7 +84,13 @@ function CommentForm({
   )
 }
 
-export function EntryComments({ entryId, journalId, action, comments, canComment }: EntryCommentsProps) {
+export function EntryComments({
+  entryId,
+  journalId,
+  action,
+  comments,
+  canComment,
+}: EntryCommentsProps) {
   return (
     <div className="mt-4">
       <div className="space-y-3">
@@ -97,9 +103,7 @@ export function EntryComments({ entryId, journalId, action, comments, canComment
           </div>
         ))}
       </div>
-      {canComment ? (
-        <CommentForm entryId={entryId} journalId={journalId} action={action} />
-      ) : null}
+      {canComment ? <CommentForm entryId={entryId} journalId={journalId} action={action} /> : null}
     </div>
   )
 }

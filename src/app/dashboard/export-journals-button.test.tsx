@@ -45,7 +45,9 @@ describe('ExportJournalsButton', () => {
     await user.click(screen.getByRole('button', { name: 'Export journals' }))
     await user.click(screen.getByRole('button', { name: 'Generate export' }))
 
-    expect(await screen.findByText('Unable to generate export right now. Please try again.')).toBeInTheDocument()
+    expect(
+      await screen.findByText('Unable to generate export right now. Please try again.'),
+    ).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Download export ZIP' })).not.toBeInTheDocument()
   })
 })
