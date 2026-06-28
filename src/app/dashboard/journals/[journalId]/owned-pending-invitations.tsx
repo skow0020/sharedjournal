@@ -1,8 +1,6 @@
 'use client'
-
-import { useEffect, useState, useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-
 import {
   type CancelPendingInvitationInput,
   type CancelPendingInvitationState,
@@ -35,23 +33,17 @@ export function OwnedPendingInvitations({
   const [activeInvitationId, setActiveInvitationId] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
 
-  useEffect(() => {
-    setVisibleInvitations(invitations)
-  }, [invitations])
-
   function handleCancel(invitationId: string) {
     setActiveInvitationId(invitationId)
     setErrorByInvitationId((currentErrors) => ({
       ...currentErrors,
       [invitationId]: null,
     }))
-
     startTransition(async () => {
       const result = await cancelAction({
         journalId,
         invitationId,
       })
-
       if (result.error) {
         setErrorByInvitationId((currentErrors) => ({
           ...currentErrors,
@@ -60,7 +52,6 @@ export function OwnedPendingInvitations({
         setActiveInvitationId(null)
         return
       }
-
       setVisibleInvitations((currentInvitations) =>
         currentInvitations.filter((invitation) => invitation.id !== invitationId),
       )
