@@ -18,7 +18,7 @@ export default defineConfig({
     pool: 'forks',
     coverage: {
       include: ['src/data/**/*.{ts,tsx}'],
-      exclude: ['src/data**/*.test.{ts,tsx}'],
+      exclude: ['src/data/**/*.test.{ts,tsx}'],
       reporter: ['text', 'html'],
       thresholds: {
         statements: 74,
