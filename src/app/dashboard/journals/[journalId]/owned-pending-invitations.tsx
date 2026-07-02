@@ -1,5 +1,5 @@
 'use client'
-import { useState, useTransition } from 'react'
+import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   type CancelPendingInvitationInput,
@@ -21,10 +21,15 @@ export function OwnedPendingInvitations({
   cancelAction,
 }: OwnedPendingInvitationsProps) {
   const router = useRouter()
-  const [visibleInvitations, setVisibleInvitations] = useState(invitations)
+  const [cancelledInvitationIds, setCancelledInvitationIds] = useState<string[]>([])
   const [errorByInvitationId, setErrorByInvitationId] = useState<Record<string, string | null>>({})
   const [activeInvitationId, setActiveInvitationId] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
+
+  const visibleInvitations = useMemo(
+    () => invitations.filter((invitation) => !cancelledInvitationIds.includes(invitation.id)),
+    [cancelledInvitationIds, invitations],
+  )
 
   function handleCancel(invitationId: string) {
     setActiveInvitationId(invitationId)
@@ -45,8 +50,8 @@ export function OwnedPendingInvitations({
         setActiveInvitationId(null)
         return
       }
-      setVisibleInvitations((currentInvitations) =>
-        currentInvitations.filter((invitation) => invitation.id !== invitationId),
+      setCancelledInvitationIds((currentIds) =>
+        currentIds.includes(invitationId) ? currentIds : [...currentIds, invitationId],
       )
       setErrorByInvitationId((currentErrors) => {
         const nextErrors = { ...currentErrors }

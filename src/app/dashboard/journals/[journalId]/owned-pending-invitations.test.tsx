@@ -128,4 +128,31 @@ describe('OwnedPendingInvitations', () => {
     expect(await screen.findByText('This invitation is no longer pending.')).toBeInTheDocument()
     expect(screen.getByText('friend@example.com')).toBeInTheDocument()
   })
+
+  it('resyncs visible invitations when invitations prop changes', () => {
+    const cancelAction = vi.fn(async () => ({ error: null, success: true }))
+
+    const { rerender } = render(
+      <OwnedPendingInvitations
+        invitations={[buildInvitation()]}
+        journalId="journal-1"
+        cancelAction={cancelAction}
+      />,
+    )
+
+    expect(screen.getByText('friend@example.com')).toBeInTheDocument()
+
+    rerender(
+      <OwnedPendingInvitations
+        invitations={[
+          buildInvitation(),
+          buildInvitation({ id: 'invite-2', inviteeEmail: 'new@example.com' }),
+        ]}
+        journalId="journal-1"
+        cancelAction={cancelAction}
+      />,
+    )
+
+    expect(screen.getByText('new@example.com')).toBeInTheDocument()
+  })
 })
