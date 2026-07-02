@@ -28,10 +28,9 @@ function buildInvitation(overrides?: Partial<PendingJournalInvitation>): Pending
 }
 
 describe('OwnedPendingInvitations', () => {
-  it('syncs visible invitations when invitations prop changes', () => {
+  it('removes invitation optimistically on successful cancel', async () => {
     const cancelAction = vi.fn(async () => ({ error: null, success: true }))
-
-    const { rerender } = render(
+    render(
       <OwnedPendingInvitations
         invitations={[buildInvitation()]}
         journalId="journal-1"
@@ -39,18 +38,25 @@ describe('OwnedPendingInvitations', () => {
       />,
     )
 
-    expect(screen.getByText('friend@example.com')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: /cancel/i }))
 
-    rerender(
+    expect(screen.queryByText('friend@example.com')).not.toBeInTheDocument()
+  })
+
+  it('shows error and keeps invitation visible if cancel fails', async () => {
+    const cancelAction = vi.fn(async () => ({ error: 'Something went wrong', success: false }))
+    render(
       <OwnedPendingInvitations
-        invitations={[buildInvitation({ id: 'invite-2', inviteeEmail: 'updated@example.com' })]}
+        invitations={[buildInvitation()]}
         journalId="journal-1"
         cancelAction={cancelAction}
       />,
     )
 
-    expect(screen.queryByText('friend@example.com')).not.toBeInTheDocument()
-    expect(screen.getByText('updated@example.com')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: /cancel/i }))
+
+    expect(screen.getByText('friend@example.com')).toBeInTheDocument()
+    expect(screen.getByText('Something went wrong')).toBeInTheDocument()
   })
 
   it('renders pending invitations with cancel buttons', () => {
@@ -121,5 +127,32 @@ describe('OwnedPendingInvitations', () => {
 
     expect(await screen.findByText('This invitation is no longer pending.')).toBeInTheDocument()
     expect(screen.getByText('friend@example.com')).toBeInTheDocument()
+  })
+
+  it('resyncs visible invitations when invitations prop changes', () => {
+    const cancelAction = vi.fn(async () => ({ error: null, success: true }))
+
+    const { rerender } = render(
+      <OwnedPendingInvitations
+        invitations={[buildInvitation()]}
+        journalId="journal-1"
+        cancelAction={cancelAction}
+      />,
+    )
+
+    expect(screen.getByText('friend@example.com')).toBeInTheDocument()
+
+    rerender(
+      <OwnedPendingInvitations
+        invitations={[
+          buildInvitation(),
+          buildInvitation({ id: 'invite-2', inviteeEmail: 'new@example.com' }),
+        ]}
+        journalId="journal-1"
+        cancelAction={cancelAction}
+      />,
+    )
+
+    expect(screen.getByText('new@example.com')).toBeInTheDocument()
   })
 })

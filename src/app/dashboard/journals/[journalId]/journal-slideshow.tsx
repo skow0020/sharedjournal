@@ -25,8 +25,8 @@ type JournalSlideshowProps = {
 function shuffled<T>(arr: T[]): T[] {
   const copy = [...arr]
   for (let i = copy.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [copy[i], copy[j]] = [copy[j], copy[i]]
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[copy[i], copy[j]] = [copy[j], copy[i]]
   }
   return copy
 }
@@ -94,13 +94,16 @@ export function JournalSlideshow({ photos, trigger }: JournalSlideshowProps) {
     <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogTrigger asChild>{trigger}</DialogTrigger>
-        <DialogContent withFlair={false} className="max-w-none h-screen w-screen gap-0 rounded-none border-0 bg-black p-0">
+        <DialogContent
+          withFlair={false}
+          className="max-w-none h-screen w-screen gap-0 rounded-none border-0 bg-black p-0"
+        >
           <DialogTitle className="sr-only">
             Slideshow — photo {currentIndex + 1} of {total}
           </DialogTitle>
           <DialogDescription className="sr-only">
-            Full-screen photo slideshow. Use left and right arrow keys to navigate, Space to
-            play or pause, and Escape to close.
+            Full-screen photo slideshow. Use left and right arrow keys to navigate, Space to play or
+            pause, and Escape to close.
           </DialogDescription>
 
           {currentPhoto ? (

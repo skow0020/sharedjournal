@@ -1,13 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { PageFlairShell } from '@/components/page-flair-shell'
 import { SUPPORT_EMAIL, SUPPORT_EMAIL_HREF } from '@/lib/support-contact'
 
@@ -35,7 +29,10 @@ export default function LegalPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Link href="/privacy" className="text-sm underline underline-offset-4 hover:no-underline">
+            <Link
+              href="/privacy"
+              className="text-sm underline underline-offset-4 hover:no-underline"
+            >
               Read Privacy Policy
             </Link>
           </CardContent>
@@ -44,9 +41,7 @@ export default function LegalPage() {
         <Card>
           <CardHeader>
             <CardTitle>Terms of Service</CardTitle>
-            <CardDescription>
-              Review the terms that apply when using SharedJournal.
-            </CardDescription>
+            <CardDescription>Review the terms that apply when using SharedJournal.</CardDescription>
           </CardHeader>
           <CardContent>
             <Link href="/terms" className="text-sm underline underline-offset-4 hover:no-underline">
@@ -65,14 +60,17 @@ export default function LegalPage() {
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
           <p>
-            See Privacy Policy and Terms of Service for payment processor details, non-tax-deductible
-            wording, and case-by-case refund handling.
+            See Privacy Policy and Terms of Service for payment processor details,
+            non-tax-deductible wording, and case-by-case refund handling.
           </p>
         </CardContent>
       </Card>
 
       <p className="text-muted-foreground text-xs">
-        Questions: <a href={SUPPORT_EMAIL_HREF} className="underline underline-offset-4 hover:no-underline">{SUPPORT_EMAIL}</a>
+        Questions:{' '}
+        <a href={SUPPORT_EMAIL_HREF} className="underline underline-offset-4 hover:no-underline">
+          {SUPPORT_EMAIL}
+        </a>
       </p>
     </PageFlairShell>
   )

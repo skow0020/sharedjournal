@@ -60,7 +60,13 @@ vi.mock('@/app/dashboard/journals/[journalId]/owner-actions-menu', () => ({
 }))
 
 vi.mock('@/app/dashboard/journals/[journalId]/journal-entries-infinite-loader', () => ({
-  JournalEntriesInfiniteLoader: ({ currentPage, hasMore }: { currentPage: number, hasMore: boolean }) => (
+  JournalEntriesInfiniteLoader: ({
+    currentPage,
+    hasMore,
+  }: {
+    currentPage: number
+    hasMore: boolean
+  }) => (
     <div data-testid="journal-entries-infinite-loader">
       Page {currentPage} loader {String(hasMore)}
     </div>
@@ -126,7 +132,10 @@ vi.mock('@/lib/invitations/send-invite-email', () => ({
 
 import JournalDetailsPage from '@/app/dashboard/journals/[journalId]/page'
 
-async function renderJournalDetailsPage(journalId = 'journal-1', searchParams?: { entriesPage?: string }) {
+async function renderJournalDetailsPage(
+  journalId = 'journal-1',
+  searchParams?: { entriesPage?: string },
+) {
   const page = await JournalDetailsPage({
     params: Promise.resolve({ journalId }),
     searchParams: Promise.resolve(searchParams ?? {}),
@@ -219,7 +228,9 @@ describe('JournalDetailsPage', () => {
     expect(screen.getByText('Morning Reflection')).toBeInTheDocument()
     expect(screen.getByText('Wrote about goals for the day.')).toBeInTheDocument()
     expect(screen.getByTestId('delete-entry-button')).toBeInTheDocument()
-    expect(screen.getByTestId('journal-entries-infinite-loader')).toHaveTextContent('Page 1 loader false')
+    expect(screen.getByTestId('journal-entries-infinite-loader')).toHaveTextContent(
+      'Page 1 loader false',
+    )
 
     expect(screen.getByTestId('create-entry-modal')).toBeInTheDocument()
     expect(screen.getByTestId('invite-user-modal')).toBeInTheDocument()
@@ -343,7 +354,9 @@ describe('JournalDetailsPage', () => {
     expect(getJournalEntriesForJournalMock).toHaveBeenCalledWith('user-1', 'journal-1', {
       limit: 20,
     })
-    expect(screen.getByTestId('journal-entries-infinite-loader')).toHaveTextContent('Page 2 loader true')
+    expect(screen.getByTestId('journal-entries-infinite-loader')).toHaveTextContent(
+      'Page 2 loader true',
+    )
   })
 
   it('fetches comments for rendered entries in a single batched call', async () => {

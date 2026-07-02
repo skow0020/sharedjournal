@@ -9,10 +9,18 @@ describe('LegalPage', () => {
     render(<LegalPage />)
 
     expect(screen.getByRole('heading', { name: 'Legal' })).toBeInTheDocument()
-    expect(screen.getByText(/Legal policies for SharedJournal users in the United States/i)).toBeInTheDocument()
+    expect(
+      screen.getByText(/Legal policies for SharedJournal users in the United States/i),
+    ).toBeInTheDocument()
 
-    expect(screen.getByRole('link', { name: 'Read Privacy Policy' })).toHaveAttribute('href', '/privacy')
-    expect(screen.getByRole('link', { name: 'Read Terms of Service' })).toHaveAttribute('href', '/terms')
+    expect(screen.getByRole('link', { name: 'Read Privacy Policy' })).toHaveAttribute(
+      'href',
+      '/privacy',
+    )
+    expect(screen.getByRole('link', { name: 'Read Terms of Service' })).toHaveAttribute(
+      'href',
+      '/terms',
+    )
     expect(screen.getByRole('link', { name: SUPPORT_EMAIL })).toHaveAttribute(
       'href',
       SUPPORT_EMAIL_HREF,

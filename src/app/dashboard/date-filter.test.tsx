@@ -3,12 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { axe } from 'vitest-axe'
 
-const {
-  replaceMock,
-  useRouterMock,
-  usePathnameMock,
-  useSearchParamsMock,
-} = vi.hoisted(() => ({
+const { replaceMock, useRouterMock, usePathnameMock, useSearchParamsMock } = vi.hoisted(() => ({
   replaceMock: vi.fn(),
   useRouterMock: vi.fn(),
   usePathnameMock: vi.fn(),

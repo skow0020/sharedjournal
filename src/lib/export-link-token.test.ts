@@ -1,9 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import {
-  createExportDownloadToken,
-  verifyExportDownloadToken,
-} from '@/lib/export-link-token'
+import { createExportDownloadToken, verifyExportDownloadToken } from '@/lib/export-link-token'
 
 describe('export-link-token', () => {
   beforeEach(() => {
@@ -71,11 +68,13 @@ describe('export-link-token', () => {
   it('throws when secret is missing for token creation', () => {
     vi.unstubAllEnvs()
 
-    expect(() => createExportDownloadToken({
-      userId: 'user-1',
-      storageKey: 'exports/users/user-1/a.zip',
-      fileName: 'export.zip',
-      exp: Math.floor(Date.now() / 1000) + 60,
-    })).toThrow('EXPORT_LINK_SIGNING_SECRET is required for export download links.')
+    expect(() =>
+      createExportDownloadToken({
+        userId: 'user-1',
+        storageKey: 'exports/users/user-1/a.zip',
+        fileName: 'export.zip',
+        exp: Math.floor(Date.now() / 1000) + 60,
+      }),
+    ).toThrow('EXPORT_LINK_SIGNING_SECRET is required for export download links.')
   })
 })

@@ -174,7 +174,10 @@ describe('buildOwnerJournalsExportPayload', () => {
     expect(payload.ownerEmail).toBe('owner@example.com')
 
     // Owned journals only, ordered by updatedAt DESC.
-    expect(payload.journals.map((journal) => journal.id)).toEqual([newerJournal.id, olderJournal.id])
+    expect(payload.journals.map((journal) => journal.id)).toEqual([
+      newerJournal.id,
+      olderJournal.id,
+    ])
 
     const exportedNewerJournal = payload.journals[0]
     expect(exportedNewerJournal?.collaborators).toEqual(

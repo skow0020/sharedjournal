@@ -16,9 +16,7 @@ export class InviteUserModal {
   }
 
   invitationSentText(emailPrefix: string) {
-    return this.page.getByText(
-      new RegExp(`Invitation (sent to|created for) ${emailPrefix}`, 'i'),
-    )
+    return this.page.getByText(new RegExp(`Invitation (sent to|created for) ${emailPrefix}`, 'i'))
   }
 
   inviteLinkText() {

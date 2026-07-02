@@ -18,7 +18,7 @@ import {
 // Helpers
 // ---------------------------------------------------------------------------
 
-async function createUser(overrides?: { clerkUserId?: string, displayName?: string }) {
+async function createUser(overrides?: { clerkUserId?: string; displayName?: string }) {
   const [user] = await db
     .insert(users)
     .values({
@@ -342,9 +342,7 @@ describe('acceptJournalInvitation', () => {
     const [membership] = await db
       .select({ role: journalMembers.role })
       .from(journalMembers)
-      .where(
-        and(eq(journalMembers.journalId, journalId), eq(journalMembers.userId, acceptorId)),
-      )
+      .where(and(eq(journalMembers.journalId, journalId), eq(journalMembers.userId, acceptorId)))
 
     expect(membership.role).toBe('editor')
 
@@ -445,9 +443,7 @@ describe('acceptJournalInvitation', () => {
     const memberships = await db
       .select({ id: journalMembers.id })
       .from(journalMembers)
-      .where(
-        and(eq(journalMembers.journalId, journalId), eq(journalMembers.userId, acceptorId)),
-      )
+      .where(and(eq(journalMembers.journalId, journalId), eq(journalMembers.userId, acceptorId)))
 
     expect(memberships).toHaveLength(1)
   })

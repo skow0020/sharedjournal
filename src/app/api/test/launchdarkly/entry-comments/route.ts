@@ -12,7 +12,8 @@ export async function POST(request: Request) {
   }
 
   const payload = await request.json().catch(() => null)
-  const enabled = payload && typeof payload === 'object' ? (payload as { enabled?: unknown }).enabled : undefined
+  const enabled =
+    payload && typeof payload === 'object' ? (payload as { enabled?: unknown }).enabled : undefined
 
   if (!isEnabledValue(enabled)) {
     return NextResponse.json({ error: 'enabled must be a boolean.' }, { status: 400 })

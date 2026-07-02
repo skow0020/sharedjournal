@@ -1,35 +1,12 @@
 import { defineConfig, globalIgnores } from 'eslint/config'
-import stylistic from '@stylistic/eslint-plugin'
+import eslintConfigPrettier from 'eslint-config-prettier'
 import nextVitals from 'eslint-config-next/core-web-vitals'
 import nextTs from 'eslint-config-next/typescript'
 
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
-  {
-    plugins: {
-      '@stylistic': stylistic,
-    },
-    rules: {
-      quotes: ['error', 'single', { avoidEscape: true, allowTemplateLiterals: true }],
-      semi: ['error', 'never'],
-      '@stylistic/semi': ['error', 'never'],
-      '@stylistic/member-delimiter-style': [
-        'error',
-        {
-          multiline: {
-            delimiter: 'none',
-            requireLast: false,
-          },
-          singleline: {
-            delimiter: 'comma',
-            requireLast: false,
-          },
-          multilineDetection: 'brackets',
-        },
-      ],
-    },
-  },
+  eslintConfigPrettier,
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:

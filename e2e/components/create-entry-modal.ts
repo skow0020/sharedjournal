@@ -8,10 +8,7 @@ export class CreateEntryModal {
   }
 
   async fillTitle(title: string) {
-    await this.page
-      .getByRole('dialog', { name: 'Create an entry' })
-      .getByLabel('Title')
-      .fill(title)
+    await this.page.getByRole('dialog', { name: 'Create an entry' }).getByLabel('Title').fill(title)
   }
 
   async fillContent(content: string) {

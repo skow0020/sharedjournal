@@ -154,45 +154,47 @@ export async function buildOwnerJournalsExportPayload(input: {
 
   const entryIds = exportEntries.map((entry) => entry.id)
 
-  const photoRows = entryIds.length > 0
-    ? await db
-      .select({
-        id: entryPhotos.id,
-        entryId: entryPhotos.entryId,
-        mimeType: entryPhotos.mimeType,
-        width: entryPhotos.width,
-        height: entryPhotos.height,
-        position: entryPhotos.position,
-        createdAt: entryPhotos.createdAt,
-        storageKey: entryPhotos.storageKey,
-      })
-      .from(entryPhotos)
-      .where(inArray(entryPhotos.entryId, entryIds))
-      .orderBy(asc(entryPhotos.entryId), asc(entryPhotos.position), asc(entryPhotos.createdAt))
-    : []
+  const photoRows =
+    entryIds.length > 0
+      ? await db
+          .select({
+            id: entryPhotos.id,
+            entryId: entryPhotos.entryId,
+            mimeType: entryPhotos.mimeType,
+            width: entryPhotos.width,
+            height: entryPhotos.height,
+            position: entryPhotos.position,
+            createdAt: entryPhotos.createdAt,
+            storageKey: entryPhotos.storageKey,
+          })
+          .from(entryPhotos)
+          .where(inArray(entryPhotos.entryId, entryIds))
+          .orderBy(asc(entryPhotos.entryId), asc(entryPhotos.position), asc(entryPhotos.createdAt))
+      : []
 
-  const reflectionRows = entryIds.length > 0
-    ? await db
-      .select({
-        id: entryComments.id,
-        entryId: entryComments.entryId,
-        authorUserId: entryComments.authorUserId,
-        authorDisplayName: users.displayName,
-        content: entryComments.content,
-        createdAt: entryComments.createdAt,
-      })
-      .from(entryComments)
-      .innerJoin(users, eq(users.id, entryComments.authorUserId))
-      .innerJoin(entries, eq(entries.id, entryComments.entryId))
-      .innerJoin(journals, eq(journals.id, entries.journalId))
-      .where(
-        and(
-          inArray(entryComments.entryId, entryIds),
-          eq(journals.ownerUserId, input.ownerUserId),
-        ),
-      )
-      .orderBy(asc(entryComments.entryId), asc(entryComments.createdAt))
-    : []
+  const reflectionRows =
+    entryIds.length > 0
+      ? await db
+          .select({
+            id: entryComments.id,
+            entryId: entryComments.entryId,
+            authorUserId: entryComments.authorUserId,
+            authorDisplayName: users.displayName,
+            content: entryComments.content,
+            createdAt: entryComments.createdAt,
+          })
+          .from(entryComments)
+          .innerJoin(users, eq(users.id, entryComments.authorUserId))
+          .innerJoin(entries, eq(entries.id, entryComments.entryId))
+          .innerJoin(journals, eq(journals.id, entries.journalId))
+          .where(
+            and(
+              inArray(entryComments.entryId, entryIds),
+              eq(journals.ownerUserId, input.ownerUserId),
+            ),
+          )
+          .orderBy(asc(entryComments.entryId), asc(entryComments.createdAt))
+      : []
 
   const photosByEntryId = new Map<string, OwnerJournalExportPhoto[]>()
 

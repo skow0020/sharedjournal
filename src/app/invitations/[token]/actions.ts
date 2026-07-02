@@ -2,10 +2,7 @@
 
 import { z } from 'zod'
 
-import {
-  acceptJournalInvitation,
-  declineJournalInvitation,
-} from '@/data/invitations'
+import { acceptJournalInvitation, declineJournalInvitation } from '@/data/invitations'
 import { getCurrentAppUser } from '@/lib/get-current-app-user'
 import { getCurrentUserEmail } from '@/lib/get-current-user-email'
 

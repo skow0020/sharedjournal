@@ -1,11 +1,7 @@
 import * as AccordionPrimitive from '@radix-ui/react-accordion'
 import { ChevronDownIcon } from 'lucide-react'
 
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-} from '@/components/ui/accordion'
+import { Accordion, AccordionContent, AccordionItem } from '@/components/ui/accordion'
 import type { JournalCollaborator } from '@/data/journals'
 
 type CollaboratorsAccordionProps = {
@@ -13,14 +9,9 @@ type CollaboratorsAccordionProps = {
   maxVisible?: number
 }
 
-export function CollaboratorsAccordion({
-  collaborators,
-  maxVisible,
-}: CollaboratorsAccordionProps) {
+export function CollaboratorsAccordion({ collaborators, maxVisible }: CollaboratorsAccordionProps) {
   const visibleCollaborators =
-    typeof maxVisible === 'number'
-      ? collaborators.slice(0, maxVisible)
-      : collaborators
+    typeof maxVisible === 'number' ? collaborators.slice(0, maxVisible) : collaborators
   const hiddenCount = collaborators.length - visibleCollaborators.length
 
   return (
@@ -28,12 +19,15 @@ export function CollaboratorsAccordion({
       <AccordionItem value="collaborators" className="border-none">
         <AccordionPrimitive.Header className="flex">
           <AccordionPrimitive.Trigger
-              data-slot="accordion-trigger"
-              className="text-muted-foreground focus-visible:ring-ring/50 py-1 text-sm font-medium outline-none hover:underline focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 !inline-flex !w-auto !flex-none !justify-start !gap-1 pr-0 [&[data-state=open]>svg]:rotate-180"
-            >
-              Collaborators ({collaborators.length})
-              <ChevronDownIcon className="pointer-events-none size-4 shrink-0 transition-transform duration-200" aria-hidden="true" />
-            </AccordionPrimitive.Trigger>
+            data-slot="accordion-trigger"
+            className="text-muted-foreground focus-visible:ring-ring/50 py-1 text-sm font-medium outline-none hover:underline focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 !inline-flex !w-auto !flex-none !justify-start !gap-1 pr-0 [&[data-state=open]>svg]:rotate-180"
+          >
+            Collaborators ({collaborators.length})
+            <ChevronDownIcon
+              className="pointer-events-none size-4 shrink-0 transition-transform duration-200"
+              aria-hidden="true"
+            />
+          </AccordionPrimitive.Trigger>
         </AccordionPrimitive.Header>
         <AccordionContent>
           {visibleCollaborators.length > 0 ? (

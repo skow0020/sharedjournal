@@ -70,9 +70,7 @@ const dashboardInvitationActionSchema = z.object({
 
 const generateOwnerExportSchema = z.object({}).strict()
 
-export async function createJournalAction(
-  input: CreateJournalInput,
-): Promise<CreateJournalState> {
+export async function createJournalAction(input: CreateJournalInput): Promise<CreateJournalState> {
   const currentUser = await getCurrentAppUser()
 
   if (!currentUser) {
@@ -103,9 +101,7 @@ export async function createJournalAction(
   }
 }
 
-export async function deleteJournalAction(
-  input: DeleteJournalInput,
-): Promise<DeleteJournalState> {
+export async function deleteJournalAction(input: DeleteJournalInput): Promise<DeleteJournalState> {
   const currentUser = await getCurrentAppUser()
 
   if (!currentUser) {
@@ -269,7 +265,7 @@ export async function generateOwnerExportAction(
       payload,
     })
 
-    const expiresAt = new Date(Date.now() + (24 * 60 * 60 * 1000))
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000)
     const token = createExportDownloadToken({
       userId: currentUser.id,
       storageKey: uploadedExport.storageKey,

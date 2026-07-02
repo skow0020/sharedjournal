@@ -5,13 +5,7 @@ import { useAuth } from '@clerk/nextjs'
 import { LoaderCircleIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { PageFlairShell } from '@/components/page-flair-shell'
 
 export default function SignOutTransitionPage() {

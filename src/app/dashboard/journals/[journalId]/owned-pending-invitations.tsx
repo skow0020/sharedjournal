@@ -1,27 +1,18 @@
 'use client'
-
-import { useEffect, useState, useTransition } from 'react'
+import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-
 import {
   type CancelPendingInvitationInput,
   type CancelPendingInvitationState,
 } from '@/app/dashboard/journals/[journalId]/actions'
 import type { PendingJournalInvitation } from '@/data/invitations'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 type OwnedPendingInvitationsProps = {
   invitations: PendingJournalInvitation[]
   journalId: string
-  cancelAction: (
-    input: CancelPendingInvitationInput,
-  ) => Promise<CancelPendingInvitationState>
+  cancelAction: (input: CancelPendingInvitationInput) => Promise<CancelPendingInvitationState>
 }
 
 export function OwnedPendingInvitations({
@@ -30,14 +21,15 @@ export function OwnedPendingInvitations({
   cancelAction,
 }: OwnedPendingInvitationsProps) {
   const router = useRouter()
-  const [visibleInvitations, setVisibleInvitations] = useState(invitations)
+  const [cancelledInvitationIds, setCancelledInvitationIds] = useState<string[]>([])
   const [errorByInvitationId, setErrorByInvitationId] = useState<Record<string, string | null>>({})
   const [activeInvitationId, setActiveInvitationId] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
 
-  useEffect(() => {
-    setVisibleInvitations(invitations)
-  }, [invitations])
+  const visibleInvitations = useMemo(
+    () => invitations.filter((invitation) => !cancelledInvitationIds.includes(invitation.id)),
+    [cancelledInvitationIds, invitations],
+  )
 
   function handleCancel(invitationId: string) {
     setActiveInvitationId(invitationId)
@@ -45,13 +37,11 @@ export function OwnedPendingInvitations({
       ...currentErrors,
       [invitationId]: null,
     }))
-
     startTransition(async () => {
       const result = await cancelAction({
         journalId,
         invitationId,
       })
-
       if (result.error) {
         setErrorByInvitationId((currentErrors) => ({
           ...currentErrors,
@@ -60,9 +50,8 @@ export function OwnedPendingInvitations({
         setActiveInvitationId(null)
         return
       }
-
-      setVisibleInvitations((currentInvitations) =>
-        currentInvitations.filter((invitation) => invitation.id !== invitationId),
+      setCancelledInvitationIds((currentIds) =>
+        currentIds.includes(invitationId) ? currentIds : [...currentIds, invitationId],
       )
       setErrorByInvitationId((currentErrors) => {
         const nextErrors = { ...currentErrors }
@@ -87,7 +76,8 @@ export function OwnedPendingInvitations({
               <div className="min-w-0 space-y-2">
                 <CardTitle className="text-base break-all">{invitation.inviteeEmail}</CardTitle>
                 <CardDescription>
-                  {invitation.role} · {invitation.emailDelivered ? 'email delivered' : 'manual share needed'}
+                  {invitation.role} ·{' '}
+                  {invitation.emailDelivered ? 'email delivered' : 'manual share needed'}
                 </CardDescription>
               </div>
               <Button

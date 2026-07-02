@@ -51,9 +51,7 @@ describe('JournalEntriesInfiniteLoader', () => {
   })
 
   it('renders nothing when there are no more entries to load', () => {
-    const { container } = render(
-      <JournalEntriesInfiniteLoader currentPage={1} hasMore={false} />,
-    )
+    const { container } = render(<JournalEntriesInfiniteLoader currentPage={1} hasMore={false} />)
 
     expect(container).toBeEmptyDOMElement()
     expect(replaceMock).not.toHaveBeenCalled()

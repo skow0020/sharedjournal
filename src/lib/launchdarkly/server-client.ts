@@ -1,8 +1,4 @@
-import {
-  init,
-  type LDClient,
-  type LDContext,
-} from '@launchdarkly/node-server-sdk'
+import { init, type LDClient, type LDContext } from '@launchdarkly/node-server-sdk'
 
 let launchDarklyClient: LDClient | null = null
 let launchDarklyInitialization: Promise<LDClient> | null = null
@@ -57,9 +53,10 @@ export async function getLaunchDarklyServerClient(): Promise<LDClient> {
 
   const client = init(getLaunchDarklySdkKey())
 
-  launchDarklyInitialization = client.waitForInitialization({
-    timeout: LAUNCHDARKLY_INITIALIZATION_TIMEOUT_SECONDS,
-  })
+  launchDarklyInitialization = client
+    .waitForInitialization({
+      timeout: LAUNCHDARKLY_INITIALIZATION_TIMEOUT_SECONDS,
+    })
     .then(() => {
       launchDarklyClient = client
       return client

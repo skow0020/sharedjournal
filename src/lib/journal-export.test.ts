@@ -1,10 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import JSZip from 'jszip'
 
-const {
-  getBlobMock,
-  putBlobMock,
-} = vi.hoisted(() => ({
+const { getBlobMock, putBlobMock } = vi.hoisted(() => ({
   getBlobMock: vi.fn(),
   putBlobMock: vi.fn(),
 }))
@@ -99,7 +96,7 @@ describe('createOwnerJournalsExportZipAndUpload', () => {
         statusCode: 200,
         stream: new ReadableStream<Uint8Array>({
           start(controller) {
-            controller.enqueue(new Uint8Array([0xFF, 0xD8, 0xFF, 0xE0])) // JPEG header
+            controller.enqueue(new Uint8Array([0xff, 0xd8, 0xff, 0xe0])) // JPEG header
             controller.close()
           },
         }),
@@ -109,7 +106,7 @@ describe('createOwnerJournalsExportZipAndUpload', () => {
         statusCode: 200,
         stream: new ReadableStream<Uint8Array>({
           start(controller) {
-            controller.enqueue(new Uint8Array([0x89, 0x50, 0x4E, 0x47])) // PNG header
+            controller.enqueue(new Uint8Array([0x89, 0x50, 0x4e, 0x47])) // PNG header
             controller.close()
           },
         }),
@@ -127,7 +124,9 @@ describe('createOwnerJournalsExportZipAndUpload', () => {
     })
 
     // Verify filename format: sharedjournal-export-{date}.zip
-    expect(result.fileName).toMatch(/^sharedjournal-export-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}\.zip$/)
+    expect(result.fileName).toMatch(
+      /^sharedjournal-export-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}\.zip$/,
+    )
     expect(result.storageKey).toMatch(/^exports\/users\/owner-1\/[a-f0-9-]{36}\.zip$/)
     expect(result.sizeBytes).toBeGreaterThan(0)
 
@@ -144,8 +143,12 @@ describe('createOwnerJournalsExportZipAndUpload', () => {
 
     // Verify blob.get was called for each photo
     expect(getBlobMock).toHaveBeenCalledTimes(2)
-    expect(getBlobMock).toHaveBeenNthCalledWith(1, 'entries/owner-1/entry-1/photo-1.jpg', { access: 'private' })
-    expect(getBlobMock).toHaveBeenNthCalledWith(2, 'entries/owner-1/entry-1/photo-2.png', { access: 'private' })
+    expect(getBlobMock).toHaveBeenNthCalledWith(1, 'entries/owner-1/entry-1/photo-1.jpg', {
+      access: 'private',
+    })
+    expect(getBlobMock).toHaveBeenNthCalledWith(2, 'entries/owner-1/entry-1/photo-2.png', {
+      access: 'private',
+    })
 
     // Parse and inspect ZIP contents
     const zipBuffer = putBlobMock.mock.calls[0]![1] as Buffer
@@ -174,8 +177,8 @@ describe('createOwnerJournalsExportZipAndUpload', () => {
 
     const photo1Bytes = await photoFile1.async('uint8array')
     const photo2Bytes = await photoFile2.async('uint8array')
-    expect(Array.from(photo1Bytes)).toEqual([0xFF, 0xD8, 0xFF, 0xE0])
-    expect(Array.from(photo2Bytes)).toEqual([0x89, 0x50, 0x4E, 0x47])
+    expect(Array.from(photo1Bytes)).toEqual([0xff, 0xd8, 0xff, 0xe0])
+    expect(Array.from(photo2Bytes)).toEqual([0x89, 0x50, 0x4e, 0x47])
   })
 
   it('skips photos that fail to fetch and logs error', async () => {
@@ -303,7 +306,7 @@ describe('createOwnerJournalsExportZipAndUpload', () => {
       statusCode: 200,
       stream: new ReadableStream<Uint8Array>({
         start(controller) {
-          controller.enqueue(new Uint8Array([0xFF, 0xD8, 0xFF, 0xE0]))
+          controller.enqueue(new Uint8Array([0xff, 0xd8, 0xff, 0xe0]))
           controller.close()
         },
       }),

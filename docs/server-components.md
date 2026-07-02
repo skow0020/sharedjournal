@@ -27,16 +27,16 @@ export default async function Page({ params }: PageProps) {
 
 ```tsx
 // ❌ Do not destructure params fields in the argument list.
-export default async function Page({ params: { journalId } }: {
+export default async function Page({
+  params: { journalId },
+}: {
   params: Promise<{ journalId: string }>
 }) {
   // ...
 }
 
 // ❌ Do not access params values before awaiting.
-export default async function Page({ params }: {
-  params: Promise<{ journalId: string }>
-}) {
+export default async function Page({ params }: { params: Promise<{ journalId: string }> }) {
   const journalId = params.journalId
   // ...
 }

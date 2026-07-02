@@ -34,13 +34,22 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <CoffeeIcon className="h-3.5 w-3.5" aria-hidden="true" />
               <span>Buy me coffee</span>
             </Link>
-            <Link href="/legal" className="text-muted-foreground underline-offset-4 hover:underline">
+            <Link
+              href="/legal"
+              className="text-muted-foreground underline-offset-4 hover:underline"
+            >
               Legal
             </Link>
-            <Link href="/privacy" className="text-muted-foreground underline-offset-4 hover:underline">
+            <Link
+              href="/privacy"
+              className="text-muted-foreground underline-offset-4 hover:underline"
+            >
               Privacy
             </Link>
-            <Link href="/terms" className="text-muted-foreground underline-offset-4 hover:underline">
+            <Link
+              href="/terms"
+              className="text-muted-foreground underline-offset-4 hover:underline"
+            >
               Terms
             </Link>
             <Link href="/" className="text-muted-foreground underline-offset-4 hover:underline">

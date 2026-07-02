@@ -11,7 +11,7 @@ import { db } from '@/db'
 import { entries, entryComments, journalMembers, journals, users } from '@/db/schema'
 import { isEncryptedEntryContent } from '@/lib/entry-content-crypto'
 
-async function createUser(overrides?: { clerkUserId?: string, displayName?: string }) {
+async function createUser(overrides?: { clerkUserId?: string; displayName?: string }) {
   const [user] = await db
     .insert(users)
     .values({

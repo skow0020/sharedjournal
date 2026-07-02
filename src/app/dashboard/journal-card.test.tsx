@@ -16,7 +16,13 @@ vi.mock('next/navigation', () => ({
 }))
 
 vi.mock('@/app/dashboard/delete-journal-button', () => ({
-  DeleteJournalButton: ({ journalId, trigger }: { journalId: string, trigger?: React.ReactNode }) => (
+  DeleteJournalButton: ({
+    journalId,
+    trigger,
+  }: {
+    journalId: string
+    trigger?: React.ReactNode
+  }) => (
     <div data-testid={`delete-journal-${journalId}`}>
       {trigger ?? <button type="button">Delete</button>}
     </div>
@@ -24,7 +30,13 @@ vi.mock('@/app/dashboard/delete-journal-button', () => ({
 }))
 
 vi.mock('@/app/dashboard/journals/collaborators-accordion', () => ({
-  CollaboratorsAccordion: ({ collaborators, maxVisible }: { collaborators: unknown[], maxVisible?: number }) => {
+  CollaboratorsAccordion: ({
+    collaborators,
+    maxVisible,
+  }: {
+    collaborators: unknown[]
+    maxVisible?: number
+  }) => {
     collaboratorsAccordionMock({ collaborators, maxVisible })
     return (
       <button type="button" data-testid="collaborators-accordion">

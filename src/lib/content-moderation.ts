@@ -80,7 +80,7 @@ async function moderateWithOpenAI(content: string): Promise<ProviderModerationRe
     throw new Error(`Moderation provider error (${response.status}).`)
   }
 
-  const responseBody = await response.json() as {
+  const responseBody = (await response.json()) as {
     results?: Array<{
       flagged?: boolean
     }>
@@ -104,11 +104,12 @@ export async function moderateContent(input: ModerateContentInput): Promise<Mode
   }
 
   try {
-    const moderationResult = provider === 'openai'
-      ? await moderateWithOpenAI(input.content)
-      : (() => {
-          throw new Error(`Unsupported moderation provider: ${provider}`)
-        })()
+    const moderationResult =
+      provider === 'openai'
+        ? await moderateWithOpenAI(input.content)
+        : (() => {
+            throw new Error(`Unsupported moderation provider: ${provider}`)
+          })()
 
     const decision: ModerationDecision = moderationResult.flagged ? 'block' : 'allow'
 

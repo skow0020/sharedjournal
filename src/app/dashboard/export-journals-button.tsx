@@ -66,7 +66,8 @@ export function ExportJournalsButton({ action }: ExportJournalsButtonProps) {
         <DialogHeader>
           <DialogTitle>Export your journals</DialogTitle>
           <DialogDescription>
-            Generate a ZIP export of all journals you own, including entries, reflections, collaborators, and photo files. A download link will appear here.
+            Generate a ZIP export of all journals you own, including entries, reflections,
+            collaborators, and photo files. A download link will appear here.
           </DialogDescription>
         </DialogHeader>
 

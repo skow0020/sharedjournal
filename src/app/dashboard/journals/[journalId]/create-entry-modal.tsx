@@ -79,7 +79,9 @@ type BrowserSpeechRecognition = {
 
 type BrowserSpeechRecognitionConstructor = new () => BrowserSpeechRecognition
 
-async function readImageDimensions(file: File): Promise<{ width: number | null, height: number | null }> {
+async function readImageDimensions(
+  file: File,
+): Promise<{ width: number | null; height: number | null }> {
   return new Promise((resolve) => {
     const imageUrl = URL.createObjectURL(file)
     const image = new Image()
@@ -151,7 +153,8 @@ export function CreateEntryModal({ journalId, action, cleanupAction }: CreateEnt
       webkitSpeechRecognition?: BrowserSpeechRecognitionConstructor
     }
 
-    const SpeechRecognitionApi = speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition
+    const SpeechRecognitionApi =
+      speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition
 
     if (!SpeechRecognitionApi) {
       setIsSpeechRecognitionSupported(false)
@@ -394,7 +397,9 @@ export function CreateEntryModal({ journalId, action, cleanupAction }: CreateEnt
       }
 
       if (file.size > ENTRY_IMAGE_MAX_FILE_BYTES) {
-        setUploadError(`Each image must be ${formatFileSize(ENTRY_IMAGE_MAX_FILE_BYTES)} or smaller.`)
+        setUploadError(
+          `Each image must be ${formatFileSize(ENTRY_IMAGE_MAX_FILE_BYTES)} or smaller.`,
+        )
         continue
       }
 
@@ -503,8 +508,10 @@ export function CreateEntryModal({ journalId, action, cleanupAction }: CreateEnt
       <DialogContent className="flex max-h-[calc(100dvh-2rem)] flex-col overflow-hidden p-0 sm:max-w-lg">
         <DialogHeader>
           <div className="px-6 pt-6">
-          <DialogTitle>Create an entry</DialogTitle>
-          <DialogDescription>Fill in the details below to add an entry to this journal.</DialogDescription>
+            <DialogTitle>Create an entry</DialogTitle>
+            <DialogDescription>
+              Fill in the details below to add an entry to this journal.
+            </DialogDescription>
           </div>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
@@ -550,9 +557,15 @@ export function CreateEntryModal({ journalId, action, cleanupAction }: CreateEnt
                       startVoiceInput()
                     }}
                   >
-                    {isListening ? <MicOff className="size-4" aria-hidden /> : <Mic className="size-4" aria-hidden />}
+                    {isListening ? (
+                      <MicOff className="size-4" aria-hidden />
+                    ) : (
+                      <Mic className="size-4" aria-hidden />
+                    )}
                   </Button>
-                  {isListening ? <p className="text-muted-foreground text-xs">Listening for your voice...</p> : null}
+                  {isListening ? (
+                    <p className="text-muted-foreground text-xs">Listening for your voice...</p>
+                  ) : null}
                 </div>
               ) : null}
               {speechError ? <p className="text-destructive text-sm">{speechError}</p> : null}
@@ -621,7 +634,8 @@ export function CreateEntryModal({ journalId, action, cleanupAction }: CreateEnt
                 </div>
               ) : null}
               <p className="text-muted-foreground text-xs">
-                Up to {ENTRY_IMAGE_MAX_FILES} images, {formatFileSize(ENTRY_IMAGE_MAX_FILE_BYTES)} each.
+                Up to {ENTRY_IMAGE_MAX_FILES} images, {formatFileSize(ENTRY_IMAGE_MAX_FILE_BYTES)}{' '}
+                each.
               </p>
               {selectedImages.length > 0 ? (
                 <div className="grid grid-cols-2 gap-2">

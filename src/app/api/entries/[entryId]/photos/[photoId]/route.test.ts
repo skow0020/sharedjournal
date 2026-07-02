@@ -58,7 +58,11 @@ describe('entry photo proxy route', () => {
       storageKey: 'journals/j1/entries/e1/p1.jpg',
       mimeType: 'image/jpeg',
     })
-    getBlobMock.mockResolvedValue({ statusCode: 200, stream: null, blob: { contentType: 'image/jpeg' } })
+    getBlobMock.mockResolvedValue({
+      statusCode: 200,
+      stream: null,
+      blob: { contentType: 'image/jpeg' },
+    })
 
     const response = await GET(new Request('http://localhost'), { params: makeParams() })
 
