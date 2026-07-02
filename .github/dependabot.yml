@@ -5,64 +5,64 @@
 
 version: 2
 updates:
-  - package-ecosystem: "npm"
-    directory: "/" # Location of package manifests
+  - package-ecosystem: 'npm'
+    directory: '/' # Location of package manifests
     schedule:
-      interval: "weekly"
+      interval: 'weekly'
     ignore:
-      - dependency-name: "eslint"
+      - dependency-name: 'eslint'
         versions:
-          - ">=10"
+          - '>=10'
     open-pull-requests-limit: 10
     groups:
       react-stack:
         patterns:
-          - "react"
-          - "react-dom"
-          - "@types/react"
-          - "@types/react-dom"
+          - 'react'
+          - 'react-dom'
+          - '@types/react'
+          - '@types/react-dom'
       next-stack:
         patterns:
-          - "next"
-          - "eslint-config-next"
+          - 'next'
+          - 'eslint-config-next'
       auth-stack:
         patterns:
-          - "@clerk/nextjs"
+          - '@clerk/nextjs'
       database-stack:
         patterns:
-          - "@neondatabase/serverless"
-          - "drizzle-orm"
-          - "drizzle-kit"
+          - '@neondatabase/serverless'
+          - 'drizzle-orm'
+          - 'drizzle-kit'
       ui-stack:
         patterns:
-          - "@radix-ui/*"
-          - "class-variance-authority"
-          - "clsx"
-          - "lucide-react"
-          - "next-themes"
-          - "tailwind-merge"
-          - "tailwindcss"
-          - "@tailwindcss/postcss"
-          - "tw-animate-css"
+          - '@radix-ui/*'
+          - 'class-variance-authority'
+          - 'clsx'
+          - 'lucide-react'
+          - 'next-themes'
+          - 'tailwind-merge'
+          - 'tailwindcss'
+          - '@tailwindcss/postcss'
+          - 'tw-animate-css'
       testing-stack:
         patterns:
-          - "@testing-library/*"
+          - '@testing-library/*'
       vitest-stack:
         patterns:
-          - "vitest"
-          - "@vitest/coverage-v8"
+          - 'vitest'
+          - '@vitest/coverage-v8'
       playwright-stack:
         patterns:
-          - "@playwright/test"
+          - '@playwright/test'
       tooling-stack:
         patterns:
-          - "@types/node"
-          - "esbuild"
-          - "tsx"
-          - "typescript"
-          - "p-limit"
+          - '@types/node'
+          - 'esbuild'
+          - 'tsx'
+          - 'typescript'
+          - 'p-limit'
       vercel-stack:
         patterns:
-          - "@vercel/analytics"
-          - "@vercel/blob"
-          - "@vercel/speed-insights"
+          - '@vercel/analytics'
+          - '@vercel/blob'
+          - '@vercel/speed-insights'

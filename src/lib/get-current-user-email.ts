@@ -10,8 +10,8 @@ export async function getCurrentUserEmail(): Promise<string | null> {
 
   const primaryEmailId = clerkUser.primaryEmailAddressId
   const primaryEmail =
-    clerkUser.emailAddresses.find((address) => address.id === primaryEmailId)
-    ?? clerkUser.emailAddresses[0]
+    clerkUser.emailAddresses.find((address) => address.id === primaryEmailId) ??
+    clerkUser.emailAddresses[0]
 
   if (!primaryEmail?.emailAddress) {
     return null

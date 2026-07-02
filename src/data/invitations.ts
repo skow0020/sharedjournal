@@ -196,10 +196,7 @@ export async function createJournalInvitation({
       expiresAt: journalInvitations.expiresAt,
     })
 
-  await db
-    .update(journals)
-    .set({ updatedAt: new Date() })
-    .where(eq(journals.id, journalId))
+  await db.update(journals).set({ updatedAt: new Date() }).where(eq(journals.id, journalId))
 
   return {
     ok: true,
@@ -245,10 +242,7 @@ export async function getInvitationByToken(token: string): Promise<InvitationLoo
       .update(journalInvitations)
       .set({ status: 'expired' })
       .where(
-        and(
-          eq(journalInvitations.id, invitation.id),
-          eq(journalInvitations.status, 'pending'),
-        ),
+        and(eq(journalInvitations.id, invitation.id), eq(journalInvitations.status, 'pending')),
       )
 
     return {
@@ -451,10 +445,7 @@ export async function revokeJournalInvitationByOwner({
     .returning({ id: journalInvitations.id })
 
   if (updatedInvitation) {
-    await db
-      .update(journals)
-      .set({ updatedAt: new Date() })
-      .where(eq(journals.id, journalId))
+    await db.update(journals).set({ updatedAt: new Date() }).where(eq(journals.id, journalId))
 
     return { ok: true }
   }
@@ -463,10 +454,7 @@ export async function revokeJournalInvitationByOwner({
     .select({ id: journalInvitations.id, status: journalInvitations.status })
     .from(journalInvitations)
     .where(
-      and(
-        eq(journalInvitations.id, invitationId),
-        eq(journalInvitations.journalId, journalId),
-      ),
+      and(eq(journalInvitations.id, invitationId), eq(journalInvitations.journalId, journalId)),
     )
     .limit(1)
 
@@ -526,12 +514,7 @@ export async function getPendingInvitationsForEmail(email: string): Promise<Pend
     await db
       .update(journalInvitations)
       .set({ status: 'expired' })
-      .where(
-        and(
-          eq(journalInvitations.id, invitationId),
-          eq(journalInvitations.status, 'pending'),
-        ),
-      )
+      .where(and(eq(journalInvitations.id, invitationId), eq(journalInvitations.status, 'pending')))
   }
 
   return activeInvitations
@@ -589,10 +572,7 @@ export async function getPendingInvitationsForOwnedJournal({
       })
       .from(journalInvitations)
       .where(
-        and(
-          eq(journalInvitations.journalId, journalId),
-          eq(journalInvitations.status, 'pending'),
-        ),
+        and(eq(journalInvitations.journalId, journalId), eq(journalInvitations.status, 'pending')),
       )
       .orderBy(desc(journalInvitations.createdAt))
   } catch {
@@ -606,10 +586,7 @@ export async function getPendingInvitationsForOwnedJournal({
       })
       .from(journalInvitations)
       .where(
-        and(
-          eq(journalInvitations.journalId, journalId),
-          eq(journalInvitations.status, 'pending'),
-        ),
+        and(eq(journalInvitations.journalId, journalId), eq(journalInvitations.status, 'pending')),
       )
       .orderBy(desc(journalInvitations.createdAt))
 

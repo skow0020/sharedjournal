@@ -11,13 +11,23 @@ vi.mock('@/lib/get-current-app-user', () => ({
 }))
 
 vi.mock('@clerk/nextjs', () => ({
-  SignInButton: ({ children, forceRedirectUrl }: { children: ReactNode, forceRedirectUrl?: string }) => (
-    <div data-testid="sign-in-button" data-force-redirect-url={forceRedirectUrl}>{children}</div>
+  SignInButton: ({
+    children,
+    forceRedirectUrl,
+  }: {
+    children: ReactNode
+    forceRedirectUrl?: string
+  }) => (
+    <div data-testid="sign-in-button" data-force-redirect-url={forceRedirectUrl}>
+      {children}
+    </div>
   ),
 }))
 
 vi.mock('@/app/support/support-button', () => ({
-  SupportButton: ({ amountCents }: { amountCents: number }) => <div>Coffee option {amountCents}</div>,
+  SupportButton: ({ amountCents }: { amountCents: number }) => (
+    <div>Coffee option {amountCents}</div>
+  ),
 }))
 
 vi.mock('@/app/support/actions', () => ({
@@ -34,7 +44,10 @@ describe('SupportPage', () => {
     render(page)
 
     expect(screen.getByText('Sign in to continue')).toBeInTheDocument()
-    expect(screen.getByTestId('sign-in-button')).toHaveAttribute('data-force-redirect-url', '/buy-me-coffee')
+    expect(screen.getByTestId('sign-in-button')).toHaveAttribute(
+      'data-force-redirect-url',
+      '/buy-me-coffee',
+    )
     expect(screen.getByRole('button', { name: 'Sign in to buy me coffee' })).toBeInTheDocument()
   })
 

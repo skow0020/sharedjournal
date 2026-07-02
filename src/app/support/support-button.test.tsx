@@ -14,13 +14,17 @@ describe('SupportButton', () => {
       checkoutUrl: 'https://checkout.stripe.com/c/pay/cs_test_123',
     }))
 
-    render(<SupportButton amountCents={1000} action={action} redirectToCheckout={redirectToCheckout} />)
+    render(
+      <SupportButton amountCents={1000} action={action} redirectToCheckout={redirectToCheckout} />,
+    )
 
     await user.click(screen.getByRole('button', { name: 'Buy me coffee - $10.00' }))
 
     expect(action).toHaveBeenCalledWith({ amountCents: 1000 })
     await waitFor(() => {
-      expect(redirectToCheckout).toHaveBeenCalledWith('https://checkout.stripe.com/c/pay/cs_test_123')
+      expect(redirectToCheckout).toHaveBeenCalledWith(
+        'https://checkout.stripe.com/c/pay/cs_test_123',
+      )
     })
   })
 
@@ -36,7 +40,9 @@ describe('SupportButton', () => {
 
     await user.click(screen.getByRole('button', { name: 'Buy me coffee - $5.00' }))
 
-    expect(screen.getByText('Unable to start checkout right now. Please try again.')).toBeInTheDocument()
+    expect(
+      screen.getByText('Unable to start checkout right now. Please try again.'),
+    ).toBeInTheDocument()
   })
 
   it('shows error and resets pending state when action rejects', async () => {
@@ -50,7 +56,9 @@ describe('SupportButton', () => {
 
     await user.click(screen.getByRole('button', { name: 'Buy me coffee - $5.00' }))
 
-    expect(await screen.findByText('Unable to start checkout right now. Please try again.')).toBeInTheDocument()
+    expect(
+      await screen.findByText('Unable to start checkout right now. Please try again.'),
+    ).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Buy me coffee - $5.00' })).toBeEnabled()
   })
 })

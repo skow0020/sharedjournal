@@ -28,9 +28,7 @@ function getExportLinkSigningSecret(): string {
 }
 
 function signPayload(payloadPart: string): string {
-  return createHmac('sha256', getExportLinkSigningSecret())
-    .update(payloadPart)
-    .digest('base64url')
+  return createHmac('sha256', getExportLinkSigningSecret()).update(payloadPart).digest('base64url')
 }
 
 function encodePayload(payload: ExportDownloadTokenPayload): string {
@@ -39,13 +37,15 @@ function encodePayload(payload: ExportDownloadTokenPayload): string {
 
 function decodePayload(payloadPart: string): ExportDownloadTokenPayload | null {
   try {
-    const parsed = JSON.parse(Buffer.from(payloadPart, 'base64url').toString('utf8')) as Partial<ExportDownloadTokenPayload>
+    const parsed = JSON.parse(
+      Buffer.from(payloadPart, 'base64url').toString('utf8'),
+    ) as Partial<ExportDownloadTokenPayload>
 
     if (
-      typeof parsed.userId !== 'string'
-      || typeof parsed.storageKey !== 'string'
-      || typeof parsed.fileName !== 'string'
-      || typeof parsed.exp !== 'number'
+      typeof parsed.userId !== 'string' ||
+      typeof parsed.storageKey !== 'string' ||
+      typeof parsed.fileName !== 'string' ||
+      typeof parsed.exp !== 'number'
     ) {
       return null
     }
@@ -82,8 +82,8 @@ export function verifyExportDownloadToken(token: string): VerifyExportDownloadTo
     const expectedBuffer = Buffer.from(expectedSignature)
 
     if (
-      incomingBuffer.length !== expectedBuffer.length
-      || !timingSafeEqual(incomingBuffer, expectedBuffer)
+      incomingBuffer.length !== expectedBuffer.length ||
+      !timingSafeEqual(incomingBuffer, expectedBuffer)
     ) {
       return { ok: false, reason: 'invalid' }
     }

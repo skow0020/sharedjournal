@@ -38,7 +38,10 @@ describe('PendingInvitationRow', () => {
   })
 
   it('renders invitation details and action buttons', () => {
-    const acceptAction = vi.fn(async () => ({ error: null, redirectTo: '/dashboard/journals/journal-1' }))
+    const acceptAction = vi.fn(async () => ({
+      error: null,
+      redirectTo: '/dashboard/journals/journal-1',
+    }))
     const declineAction = vi.fn(async () => ({ error: null, success: true }))
 
     render(
@@ -58,7 +61,10 @@ describe('PendingInvitationRow', () => {
 
   it('accepts an invitation and navigates to returned route', async () => {
     const user = userEvent.setup()
-    const acceptAction = vi.fn(async () => ({ error: null, redirectTo: '/dashboard/journals/journal-1' }))
+    const acceptAction = vi.fn(async () => ({
+      error: null,
+      redirectTo: '/dashboard/journals/journal-1',
+    }))
     const declineAction = vi.fn(async () => ({ error: null, success: true }))
 
     render(
@@ -81,7 +87,10 @@ describe('PendingInvitationRow', () => {
 
   it('declines an invitation and refreshes the page', async () => {
     const user = userEvent.setup()
-    const acceptAction = vi.fn(async () => ({ error: null, redirectTo: '/dashboard/journals/journal-1' }))
+    const acceptAction = vi.fn(async () => ({
+      error: null,
+      redirectTo: '/dashboard/journals/journal-1',
+    }))
     const declineAction = vi.fn(async () => ({ error: null, success: true }))
 
     render(
@@ -104,7 +113,10 @@ describe('PendingInvitationRow', () => {
 
   it('shows accept error and does not navigate', async () => {
     const user = userEvent.setup()
-    const acceptAction = vi.fn(async () => ({ error: 'Invite is no longer valid.', redirectTo: null }))
+    const acceptAction = vi.fn(async () => ({
+      error: 'Invite is no longer valid.',
+      redirectTo: null,
+    }))
     const declineAction = vi.fn(async () => ({ error: null, success: true }))
 
     render(
@@ -145,13 +157,21 @@ describe('PendingInvitationRow', () => {
     })
 
     expect(pushMock).toHaveBeenCalledWith('/invitations/invite-token')
-    expect(screen.queryByText('You must be signed in with the invited email to accept this invitation.')).not.toBeInTheDocument()
+    expect(
+      screen.queryByText('You must be signed in with the invited email to accept this invitation.'),
+    ).not.toBeInTheDocument()
   })
 
   it('shows decline error and does not refresh', async () => {
     const user = userEvent.setup()
-    const acceptAction = vi.fn(async () => ({ error: null, redirectTo: '/dashboard/journals/journal-1' }))
-    const declineAction = vi.fn(async () => ({ error: 'Invite is no longer valid.', success: false }))
+    const acceptAction = vi.fn(async () => ({
+      error: null,
+      redirectTo: '/dashboard/journals/journal-1',
+    }))
+    const declineAction = vi.fn(async () => ({
+      error: 'Invite is no longer valid.',
+      success: false,
+    }))
 
     render(
       <PendingInvitationRow
@@ -170,10 +190,10 @@ describe('PendingInvitationRow', () => {
 
   it('shows Accepting... while accept action is in flight', async () => {
     const user = userEvent.setup()
-    let resolveAccept: ((value: { error: null, redirectTo: string }) => void) | null = null
+    let resolveAccept: ((value: { error: null; redirectTo: string }) => void) | null = null
     const acceptAction = vi.fn(
       () =>
-        new Promise<{ error: null, redirectTo: string }>((resolve) => {
+        new Promise<{ error: null; redirectTo: string }>((resolve) => {
           resolveAccept = resolve
         }),
     )
@@ -203,11 +223,14 @@ describe('PendingInvitationRow', () => {
 
   it('shows Declining... while decline action is in flight', async () => {
     const user = userEvent.setup()
-    let resolveDecline: ((value: { error: null, success: true }) => void) | null = null
-    const acceptAction = vi.fn(async () => ({ error: null, redirectTo: '/dashboard/journals/journal-1' }))
+    let resolveDecline: ((value: { error: null; success: true }) => void) | null = null
+    const acceptAction = vi.fn(async () => ({
+      error: null,
+      redirectTo: '/dashboard/journals/journal-1',
+    }))
     const declineAction = vi.fn(
       () =>
-        new Promise<{ error: null, success: true }>((resolve) => {
+        new Promise<{ error: null; success: true }>((resolve) => {
           resolveDecline = resolve
         }),
     )

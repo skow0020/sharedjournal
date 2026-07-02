@@ -96,9 +96,7 @@ async function sendWithResend({
   }
 }
 
-export async function sendInviteEmail(
-  input: SendInviteEmailInput,
-): Promise<SendInviteEmailResult> {
+export async function sendInviteEmail(input: SendInviteEmailInput): Promise<SendInviteEmailResult> {
   const provider = getInviteEmailProvider()
 
   if (provider === 'resend') {

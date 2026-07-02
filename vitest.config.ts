@@ -25,7 +25,7 @@ export default defineConfig({
         'src/proxy.ts',
         'src/db/seed.ts',
         'src/db/schema.ts',
-        'src/data/**'
+        'src/data/**',
       ],
       reporter: ['text', 'html'],
       thresholds: {

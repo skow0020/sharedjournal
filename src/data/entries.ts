@@ -4,7 +4,10 @@ import { and, asc, desc, eq, inArray, or, sql } from 'drizzle-orm'
 import { db } from '@/db'
 import { entries, entryPhotos, journalMembers, journals, users } from '@/db/schema'
 import { decryptEntryContent, encryptEntryContent } from '@/lib/entry-content-crypto'
-import { buildFinalEntryImageStorageKey, isTempEntryImageStorageKeyForJournal } from '@/lib/entry-image-storage'
+import {
+  buildFinalEntryImageStorageKey,
+  isTempEntryImageStorageKeyForJournal,
+} from '@/lib/entry-image-storage'
 
 export type JournalEntry = {
   id: string
@@ -59,7 +62,10 @@ type CreateEntryForJournalInput = {
  * @param userId - The user's ID (for access control)
  * @param date - The date to filter entries by (format: YYYY-MM-DD)
  */
-export async function getJournalEntriesByDate(userId: string, date: string): Promise<JournalEntry[]> {
+export async function getJournalEntriesByDate(
+  userId: string,
+  date: string,
+): Promise<JournalEntry[]> {
   const entryRows = await db
     .select({
       id: entries.id,
@@ -73,28 +79,23 @@ export async function getJournalEntriesByDate(userId: string, date: string): Pro
     .innerJoin(journalMembers, eq(journalMembers.journalId, entries.journalId))
     .innerJoin(journals, eq(journals.id, entries.journalId))
     .innerJoin(users, eq(users.id, entries.authorUserId))
-    .where(
-      and(
-        eq(journalMembers.userId, userId),
-        eq(entries.entryDate, date),
-      ),
-    )
+    .where(and(eq(journalMembers.userId, userId), eq(entries.entryDate, date)))
     .orderBy(desc(entries.createdAt))
 
-     return entryRows.map((entry) => {
-     let decryptedContent: string
-     try {
-       decryptedContent = decryptEntryContent(entry.content)
-     } catch {
-       // If decryption fails for this entry, return a safe fallback
-       // so a single bad row does not break the entire listing.
-       decryptedContent = ''
-     }
-     return {
-       ...entry,
-       content: decryptedContent,
-     }
-   })
+  return entryRows.map((entry) => {
+    let decryptedContent: string
+    try {
+      decryptedContent = decryptEntryContent(entry.content)
+    } catch {
+      // If decryption fails for this entry, return a safe fallback
+      // so a single bad row does not break the entire listing.
+      decryptedContent = ''
+    }
+    return {
+      ...entry,
+      content: decryptedContent,
+    }
+  })
 }
 
 /**
@@ -120,12 +121,7 @@ export async function getJournalEntriesForJournal(
     .from(entries)
     .innerJoin(journalMembers, eq(journalMembers.journalId, entries.journalId))
     .innerJoin(users, eq(users.id, entries.authorUserId))
-    .where(
-      and(
-        eq(journalMembers.userId, userId),
-        eq(entries.journalId, journalId),
-      ),
-    )
+    .where(and(eq(journalMembers.userId, userId), eq(entries.journalId, journalId)))
     .orderBy(desc(entries.entryDate), desc(entries.createdAt))
 
   if (typeof input.limit === 'number') {
@@ -160,20 +156,20 @@ export async function getJournalEntriesForJournal(
     photosByEntry.set(photo.entryId, current)
   }
 
-     const decryptedEntries: JournalEntryForJournal[] = []
-   for (const entry of entryRows) {
-     try {
-       decryptedEntries.push({
-         ...entry,
-         content: decryptEntryContent(entry.content),
-         photos: photosByEntry.get(entry.id) ?? [],
-       })
-     } catch (error) {
-       // Skip entries whose content cannot be decrypted to keep the list view resilient.
-       console.error('Failed to decrypt journal entry content', { entryId: entry.id, error })
-     }
-   }
-   return decryptedEntries
+  const decryptedEntries: JournalEntryForJournal[] = []
+  for (const entry of entryRows) {
+    try {
+      decryptedEntries.push({
+        ...entry,
+        content: decryptEntryContent(entry.content),
+        photos: photosByEntry.get(entry.id) ?? [],
+      })
+    } catch (error) {
+      // Skip entries whose content cannot be decrypted to keep the list view resilient.
+      console.error('Failed to decrypt journal entry content', { entryId: entry.id, error })
+    }
+  }
+  return decryptedEntries
 }
 
 export async function getJournalEntryCountForJournal(
@@ -186,12 +182,7 @@ export async function getJournalEntryCountForJournal(
     })
     .from(entries)
     .innerJoin(journalMembers, eq(journalMembers.journalId, entries.journalId))
-    .where(
-      and(
-        eq(journalMembers.userId, userId),
-        eq(entries.journalId, journalId),
-      ),
-    )
+    .where(and(eq(journalMembers.userId, userId), eq(entries.journalId, journalId)))
 
   return result?.count ?? 0
 }
@@ -217,12 +208,7 @@ export async function getAllPhotosForJournal(
     .from(entryPhotos)
     .innerJoin(entries, eq(entries.id, entryPhotos.entryId))
     .innerJoin(journalMembers, eq(journalMembers.journalId, entries.journalId))
-    .where(
-      and(
-        eq(entries.journalId, journalId),
-        eq(journalMembers.userId, userId),
-      ),
-    )
+    .where(and(eq(entries.journalId, journalId), eq(journalMembers.userId, userId)))
     .orderBy(desc(entries.entryDate), desc(entries.createdAt), asc(entryPhotos.position))
 }
 
@@ -239,19 +225,13 @@ export async function deleteEntryForJournal(input: {
     .innerJoin(journals, eq(journals.id, entries.journalId))
     .innerJoin(
       journalMembers,
-      and(
-        eq(journalMembers.journalId, entries.journalId),
-        eq(journalMembers.userId, input.userId),
-      ),
+      and(eq(journalMembers.journalId, entries.journalId), eq(journalMembers.userId, input.userId)),
     )
     .where(
       and(
         eq(entries.id, input.entryId),
         eq(entries.journalId, input.journalId),
-        or(
-          eq(entries.authorUserId, input.userId),
-          eq(journals.ownerUserId, input.userId),
-        ),
+        or(eq(entries.authorUserId, input.userId), eq(journals.ownerUserId, input.userId)),
       ),
     )
     .limit(1)
@@ -267,22 +247,14 @@ export async function deleteEntryForJournal(input: {
 
   const [deletedEntry] = await db
     .delete(entries)
-    .where(
-      and(
-        eq(entries.id, input.entryId),
-        eq(entries.journalId, input.journalId),
-      ),
-    )
+    .where(and(eq(entries.id, input.entryId), eq(entries.journalId, input.journalId)))
     .returning({ id: entries.id })
 
   if (!deletedEntry) {
     return false
   }
 
-  await db
-    .update(journals)
-    .set({ updatedAt: new Date() })
-    .where(eq(journals.id, input.journalId))
+  await db.update(journals).set({ updatedAt: new Date() }).where(eq(journals.id, input.journalId))
 
   const storageKeys = photoRows.map((photo) => photo.storageKey)
 
@@ -331,10 +303,7 @@ export async function createEntryForJournal({
     })
     .returning({ id: entries.id })
 
-  await db
-    .update(journals)
-    .set({ updatedAt: new Date() })
-    .where(eq(journals.id, journalId))
+  await db.update(journals).set({ updatedAt: new Date() }).where(eq(journals.id, journalId))
 
   return createdEntry
 }
@@ -353,7 +322,9 @@ export async function createEntryWithUploadedImagesForJournal(input: {
   const [membership] = await db
     .select({ id: journalMembers.id })
     .from(journalMembers)
-    .where(and(eq(journalMembers.userId, input.userId), eq(journalMembers.journalId, input.journalId)))
+    .where(
+      and(eq(journalMembers.userId, input.userId), eq(journalMembers.journalId, input.journalId)),
+    )
     .limit(1)
 
   if (!membership) {
@@ -423,10 +394,7 @@ export async function createEntryWithUploadedImagesForJournal(input: {
     await del(tempStorageKeys)
   }
 
-  await db
-    .update(journals)
-    .set({ updatedAt: new Date() })
-    .where(eq(journals.id, input.journalId))
+  await db.update(journals).set({ updatedAt: new Date() }).where(eq(journals.id, input.journalId))
 
   return createdEntry
 }

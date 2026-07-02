@@ -142,7 +142,8 @@ describe('createSupportCheckoutAction', () => {
       expect.objectContaining({
         mode: 'payment',
         customer_email: 'user@example.com',
-        success_url: 'https://sharedjournal.test/buy-me-coffee/success?session_id={CHECKOUT_SESSION_ID}',
+        success_url:
+          'https://sharedjournal.test/buy-me-coffee/success?session_id={CHECKOUT_SESSION_ID}',
         cancel_url: 'https://sharedjournal.test/buy-me-coffee',
       }),
     )
@@ -179,7 +180,8 @@ describe('createSupportCheckoutAction', () => {
 
     expect(stripeCheckoutCreateMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        success_url: 'https://sharedjournal.app/buy-me-coffee/success?session_id={CHECKOUT_SESSION_ID}',
+        success_url:
+          'https://sharedjournal.app/buy-me-coffee/success?session_id={CHECKOUT_SESSION_ID}',
         cancel_url: 'https://sharedjournal.app/buy-me-coffee',
       }),
     )

@@ -9,12 +9,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { PageFlairBackdrop } from '@/components/page-flair-shell'
 import { LandingHeroCta } from '@/components/landing-hero-cta'
 
@@ -44,7 +39,8 @@ export default async function Home() {
             Private and collaborative journaling
           </div>
           <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
-            Write together.<br className="hidden sm:block" /> Stay connected.
+            Write together.
+            <br className="hidden sm:block" /> Stay connected.
           </h1>
           <p className="mx-auto max-w-xl text-base leading-7 text-muted-foreground sm:text-lg">
             SharedJournal is a web app for couples, families, and small groups who want to write,
@@ -58,21 +54,41 @@ export default async function Home() {
       <section className="bg-[#f8fffd] dark:bg-zinc-900 px-6 py-16 sm:py-20">
         <div className="mx-auto max-w-4xl space-y-10">
           <div className="text-center space-y-2">
-            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl text-foreground">How it works</h2>
+            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl text-foreground">
+              How it works
+            </h2>
             <p className="text-muted-foreground">Everything in one journal workflow</p>
           </div>
           <ol className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { step: '1', title: 'Create a journal', body: 'Start a personal or shared journal for any topic — travel, family milestones, a project, or everyday life.' },
-              { step: '2', title: 'Write entries', body: 'Add written entries whenever you like. Attach photos to capture moments alongside your words.' },
-              { step: '3', title: 'Invite trusted people', body: 'Send an invitation link to people you trust. Only invited members can read or write in your shared journal.' },
-              { step: '4', title: 'Write together', body: 'Everyone in the journal contributes to a shared timeline. See new entries as they appear.' },
+              {
+                step: '1',
+                title: 'Create a journal',
+                body: 'Start a personal or shared journal for any topic — travel, family milestones, a project, or everyday life.',
+              },
+              {
+                step: '2',
+                title: 'Write entries',
+                body: 'Add written entries whenever you like. Attach photos to capture moments alongside your words.',
+              },
+              {
+                step: '3',
+                title: 'Invite trusted people',
+                body: 'Send an invitation link to people you trust. Only invited members can read or write in your shared journal.',
+              },
+              {
+                step: '4',
+                title: 'Write together',
+                body: 'Everyone in the journal contributes to a shared timeline. See new entries as they appear.',
+              },
             ].map(({ step, title, body }) => (
               <li key={step} className="flex flex-col gap-3">
                 <span className="flex h-9 w-9 items-center justify-center rounded-full border border-[#74d9c5] bg-[#e9f8f4] text-sm font-semibold text-[#174f48]">
                   {step}
                 </span>
-                <p className="text-sm font-semibold text-[#174f48] dark:text-emerald-400">{title}</p>
+                <p className="text-sm font-semibold text-[#174f48] dark:text-emerald-400">
+                  {title}
+                </p>
                 <p className="text-sm leading-6 text-muted-foreground">{body}</p>
               </li>
             ))}
@@ -84,31 +100,47 @@ export default async function Home() {
       <section className="px-6 py-16 sm:py-20">
         <div className="mx-auto max-w-4xl space-y-10">
           <div className="text-center space-y-2">
-            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl text-foreground">Built for ongoing stories</h2>
-            <p className="text-muted-foreground">Not one-off notes — a lasting record of shared life.</p>
+            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl text-foreground">
+              Built for ongoing stories
+            </h2>
+            <p className="text-muted-foreground">
+              Not one-off notes — a lasting record of shared life.
+            </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-3">
             <Card className="border-[#d9efe9] bg-[#f8fffd] dark:bg-teal-950 dark:border-teal-800">
               <CardHeader>
                 <CardTitle className="text-base">Personal journals</CardTitle>
-                <CardDescription>Keep private writing spaces organized by topic and date.</CardDescription>
+                <CardDescription>
+                  Keep private writing spaces organized by topic and date.
+                </CardDescription>
               </CardHeader>
             </Card>
             <Card className="border-[#ffd9cf] bg-[#fff8f5] dark:bg-orange-950 dark:border-orange-800">
               <CardHeader>
                 <CardTitle className="text-base">Shared entries</CardTitle>
-                <CardDescription>Collaborate with invited members in a single timeline.</CardDescription>
+                <CardDescription>
+                  Collaborate with invited members in a single timeline.
+                </CardDescription>
               </CardHeader>
             </Card>
             <Card className="border-[#d4e6ff] bg-[#f8fbff] dark:bg-blue-950 dark:border-blue-800">
               <CardHeader>
                 <CardTitle className="text-base">Photo support</CardTitle>
-                <CardDescription>Add multiple images to entries and review them in-place.</CardDescription>
+                <CardDescription>
+                  Add multiple images to entries and review them in-place.
+                </CardDescription>
               </CardHeader>
             </Card>
           </div>
           <div className="flex flex-wrap justify-center gap-2">
-            {['Owner controls', 'Role-based access', 'Invite links', 'Private image serving', 'Clean activity history'].map((tag) => (
+            {[
+              'Owner controls',
+              'Role-based access',
+              'Invite links',
+              'Private image serving',
+              'Clean activity history',
+            ].map((tag) => (
               <span
                 key={tag}
                 className="rounded-full border border-[#ffd4c8] bg-[#fff6f3] px-3 py-1 text-sm text-[#7b3f2d]"
@@ -124,21 +156,40 @@ export default async function Home() {
       <section className="bg-[#f4fffc] dark:bg-zinc-900 px-6 py-16 sm:py-20">
         <div className="mx-auto max-w-3xl space-y-8 text-center">
           <div className="space-y-2">
-            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl text-foreground">Your journals stay yours</h2>
+            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl text-foreground">
+              Your journals stay yours
+            </h2>
             <p className="text-muted-foreground">
-              Journals hold personal memories. We built SharedJournal with access control at the core,
-              not as an afterthought.
+              Journals hold personal memories. We built SharedJournal with access control at the
+              core, not as an afterthought.
             </p>
           </div>
           <ul className="grid gap-4 text-left sm:grid-cols-2">
             {[
-              { title: 'Invitation-only access', body: 'No one can join a shared journal without an explicit invitation from the owner.' },
-              { title: 'Role-based permissions', body: 'Owners and collaborators have distinct capabilities. You stay in control of your space.' },
-              { title: 'Private image serving', body: 'Photos attached to entries are served privately and are not publicly accessible.' },
-              { title: 'Clean activity history', body: 'Every change is tracked so you always know what happened and when.' },
+              {
+                title: 'Invitation-only access',
+                body: 'No one can join a shared journal without an explicit invitation from the owner.',
+              },
+              {
+                title: 'Role-based permissions',
+                body: 'Owners and collaborators have distinct capabilities. You stay in control of your space.',
+              },
+              {
+                title: 'Private image serving',
+                body: 'Photos attached to entries are served privately and are not publicly accessible.',
+              },
+              {
+                title: 'Clean activity history',
+                body: 'Every change is tracked so you always know what happened and when.',
+              },
             ].map(({ title, body }) => (
-              <li key={title} className="rounded-xl border border-[#d9efe9] bg-white/90 dark:bg-zinc-800 dark:border-zinc-700 px-4 py-4">
-                <p className="text-sm font-semibold text-[#174f48] dark:text-emerald-400">{title}</p>
+              <li
+                key={title}
+                className="rounded-xl border border-[#d9efe9] bg-white/90 dark:bg-zinc-800 dark:border-zinc-700 px-4 py-4"
+              >
+                <p className="text-sm font-semibold text-[#174f48] dark:text-emerald-400">
+                  {title}
+                </p>
                 <p className="mt-1 text-sm leading-6 text-muted-foreground">{body}</p>
               </li>
             ))}
@@ -177,7 +228,9 @@ export default async function Home() {
             ].map(({ q, a }) => (
               <AccordionItem key={q} value={q}>
                 <AccordionTrigger className="text-left text-sm font-medium">{q}</AccordionTrigger>
-                <AccordionContent className="text-sm leading-6 text-muted-foreground">{a}</AccordionContent>
+                <AccordionContent className="text-sm leading-6 text-muted-foreground">
+                  {a}
+                </AccordionContent>
               </AccordionItem>
             ))}
           </Accordion>
@@ -205,13 +258,22 @@ export default async function Home() {
               <CoffeeIcon className="h-3.5 w-3.5 shrink-0 text-[#8b5e3c]" aria-hidden="true" />
               <span>Buy me coffee</span>
             </Link>
-            <Link href="/legal" className="inline-flex items-center underline-offset-4 hover:underline">
+            <Link
+              href="/legal"
+              className="inline-flex items-center underline-offset-4 hover:underline"
+            >
               Legal
             </Link>
-            <Link href="/privacy" className="inline-flex items-center underline-offset-4 hover:underline">
+            <Link
+              href="/privacy"
+              className="inline-flex items-center underline-offset-4 hover:underline"
+            >
               Privacy Policy
             </Link>
-            <Link href="/terms" className="inline-flex items-center underline-offset-4 hover:underline">
+            <Link
+              href="/terms"
+              className="inline-flex items-center underline-offset-4 hover:underline"
+            >
               Terms of Service
             </Link>
           </nav>

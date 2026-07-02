@@ -150,13 +150,21 @@ const deleteEntrySchema = z.object({
 const inviteUserSchema = z.object({
   journalId: z.string().trim().min(1, 'Journal is required.'),
   journalTitle: z.string().trim().min(1, 'Journal title is required.'),
-  email: z.string().trim().email('Please provide a valid email address.').transform((value) => value.toLowerCase()),
+  email: z
+    .string()
+    .trim()
+    .email('Please provide a valid email address.')
+    .transform((value) => value.toLowerCase()),
 })
 
 const addCommentSchema = z.object({
   journalId: z.string().uuid('Invalid journal id.'),
   entryId: z.string().uuid('Invalid entry id.'),
-  content: z.string().trim().min(1, 'Reflection is required.').max(2000, 'Reflection must be 2000 characters or less.'),
+  content: z
+    .string()
+    .trim()
+    .min(1, 'Reflection is required.')
+    .max(2000, 'Reflection must be 2000 characters or less.'),
 })
 
 const updateJournalDetailsSchema = z.object({
@@ -174,8 +182,10 @@ const cancelPendingInvitationSchema = z.object({
   invitationId: z.string().trim().min(1, 'Invitation is required.'),
 })
 
-const MODERATION_BLOCKED_ENTRY_ERROR = 'Your entry could not be saved because it violates our content guidelines.'
-const MODERATION_BLOCKED_COMMENT_ERROR = 'Your reflection could not be posted because it violates our content guidelines.'
+const MODERATION_BLOCKED_ENTRY_ERROR =
+  'Your entry could not be saved because it violates our content guidelines.'
+const MODERATION_BLOCKED_COMMENT_ERROR =
+  'Your reflection could not be posted because it violates our content guidelines.'
 const MODERATION_RETRY_ERROR = 'We could not process your request right now. Please try again.'
 
 function normalizeBaseUrl(value: string): string {
@@ -212,12 +222,14 @@ async function getAppBaseUrl(): Promise<string> {
     return normalizeBaseUrl(requestOrigin)
   }
 
-  const requestHost = getFirstHeaderValue(requestHeaders.get('x-forwarded-host'))
-    ?? getFirstHeaderValue(requestHeaders.get('host'))
+  const requestHost =
+    getFirstHeaderValue(requestHeaders.get('x-forwarded-host')) ??
+    getFirstHeaderValue(requestHeaders.get('host'))
 
   if (requestHost) {
-    const requestProtocol = getFirstHeaderValue(requestHeaders.get('x-forwarded-proto'))
-      ?? (requestHost.includes('localhost') ? 'http' : 'https')
+    const requestProtocol =
+      getFirstHeaderValue(requestHeaders.get('x-forwarded-proto')) ??
+      (requestHost.includes('localhost') ? 'http' : 'https')
 
     return `${requestProtocol}://${requestHost}`
   }
@@ -243,17 +255,17 @@ async function getRequestCorrelationId(): Promise<string | undefined> {
       return undefined
     }
 
-    return getFirstHeaderValue(requestHeaders.get('x-request-id'))
-      ?? getFirstHeaderValue(requestHeaders.get('x-vercel-id'))
-      ?? undefined
+    return (
+      getFirstHeaderValue(requestHeaders.get('x-request-id')) ??
+      getFirstHeaderValue(requestHeaders.get('x-vercel-id')) ??
+      undefined
+    )
   } catch {
     return undefined
   }
 }
 
-export async function createEntryAction(
-  input: CreateEntryInput,
-): Promise<CreateEntryState> {
+export async function createEntryAction(input: CreateEntryInput): Promise<CreateEntryState> {
   const currentUser = await getCurrentAppUser()
 
   if (!currentUser) {
@@ -282,7 +294,8 @@ export async function createEntryAction(
   }
 
   const hasInvalidStorageKey = parsedInput.data.uploadedImages.some(
-    (image) => !isTempEntryImageStorageKeyForJournal(image.tempStorageKey, parsedInput.data.journalId),
+    (image) =>
+      !isTempEntryImageStorageKeyForJournal(image.tempStorageKey, parsedInput.data.journalId),
   )
 
   if (hasInvalidStorageKey) {
@@ -301,9 +314,10 @@ export async function createEntryAction(
 
   if (moderationResult.decision !== 'allow') {
     return {
-      error: moderationResult.reasonCode === 'provider_error_fail_closed'
-        ? MODERATION_RETRY_ERROR
-        : MODERATION_BLOCKED_ENTRY_ERROR,
+      error:
+        moderationResult.reasonCode === 'provider_error_fail_closed'
+          ? MODERATION_RETRY_ERROR
+          : MODERATION_BLOCKED_ENTRY_ERROR,
       redirectTo: null,
     }
   }
@@ -380,9 +394,7 @@ export async function cleanupEntryImageUploadsAction(
   }
 }
 
-export async function deleteEntryAction(
-  input: DeleteEntryInput,
-): Promise<DeleteEntryState> {
+export async function deleteEntryAction(input: DeleteEntryInput): Promise<DeleteEntryState> {
   const currentUser = await getCurrentAppUser()
 
   if (!currentUser) {
@@ -422,9 +434,7 @@ export async function deleteEntryAction(
   }
 }
 
-export async function createInviteAction(
-  input: InviteUserInput,
-): Promise<InviteActionState> {
+export async function createInviteAction(input: InviteUserInput): Promise<InviteActionState> {
   const currentUser = await getCurrentAppUser()
 
   if (!currentUser) {
@@ -487,9 +497,7 @@ export async function createInviteAction(
   }
 }
 
-export async function addCommentAction(
-  input: AddCommentInput,
-): Promise<AddCommentState> {
+export async function addCommentAction(input: AddCommentInput): Promise<AddCommentState> {
   const currentUser = await getCurrentAppUser()
 
   if (!currentUser) {
@@ -547,9 +555,10 @@ export async function addCommentAction(
 
   if (moderationResult.decision !== 'allow') {
     return {
-      error: moderationResult.reasonCode === 'provider_error_fail_closed'
-        ? MODERATION_RETRY_ERROR
-        : MODERATION_BLOCKED_COMMENT_ERROR,
+      error:
+        moderationResult.reasonCode === 'provider_error_fail_closed'
+          ? MODERATION_RETRY_ERROR
+          : MODERATION_BLOCKED_COMMENT_ERROR,
       success: false,
     }
   }

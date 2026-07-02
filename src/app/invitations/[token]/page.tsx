@@ -1,10 +1,7 @@
 import { SignInButton } from '@clerk/nextjs'
 import type { ReactNode } from 'react'
 
-import {
-  acceptInvitationAction,
-  declineInvitationAction,
-} from '@/app/invitations/[token]/actions'
+import { acceptInvitationAction, declineInvitationAction } from '@/app/invitations/[token]/actions'
 import { InvitationResponseActions } from '@/app/invitations/[token]/invitation-response-actions'
 import { PageFlairShell } from '@/components/page-flair-shell'
 import { Button } from '@/components/ui/button'
@@ -19,13 +16,7 @@ type InvitationPageProps = {
   }>
 }
 
-function InvitationStateCard({
-  title,
-  description,
-}: {
-  title: string
-  description: ReactNode
-}) {
+function InvitationStateCard({ title, description }: { title: string; description: ReactNode }) {
   return (
     <PageFlairShell contentClassName="max-w-2xl">
       <Card>
@@ -55,11 +46,13 @@ export default async function InvitationPage({ params }: InvitationPageProps) {
     return (
       <InvitationStateCard
         title="Invitation expired"
-        description={(
+        description={
           <>
-            This invite to <span className="font-medium">{invitationLookup.invitation.journalTitle}</span> has expired.
+            This invite to{' '}
+            <span className="font-medium">{invitationLookup.invitation.journalTitle}</span> has
+            expired.
           </>
-        )}
+        }
       />
     )
   }
@@ -68,11 +61,13 @@ export default async function InvitationPage({ params }: InvitationPageProps) {
     return (
       <InvitationStateCard
         title="Invitation unavailable"
-        description={(
+        description={
           <>
-            This invitation for <span className="font-medium">{invitationLookup.invitation.journalTitle}</span> is no longer pending.
+            This invitation for{' '}
+            <span className="font-medium">{invitationLookup.invitation.journalTitle}</span> is no
+            longer pending.
           </>
-        )}
+        }
       />
     )
   }
@@ -81,8 +76,7 @@ export default async function InvitationPage({ params }: InvitationPageProps) {
   const currentUserEmail = await getCurrentUserEmail()
   const requiresSignIn = !appUser || !currentUserEmail
   const emailMatchesInvite =
-    !!currentUserEmail
-    && currentUserEmail === invitationLookup.invitation.inviteeEmail
+    !!currentUserEmail && currentUserEmail === invitationLookup.invitation.inviteeEmail
 
   return (
     <PageFlairShell contentClassName="max-w-2xl">
@@ -90,14 +84,16 @@ export default async function InvitationPage({ params }: InvitationPageProps) {
         <CardHeader>
           <CardTitle>Journal invitation</CardTitle>
           <CardDescription>
-            You were invited to join <span className="font-medium">{invitationLookup.invitation.journalTitle}</span> as an{' '}
+            You were invited to join{' '}
+            <span className="font-medium">{invitationLookup.invitation.journalTitle}</span> as an{' '}
             <span className="font-medium">{invitationLookup.invitation.role}</span>.
           </CardDescription>
         </CardHeader>
 
         <div className="space-y-4 px-6 pb-6">
           <p className="text-muted-foreground text-sm">
-            Invited email: <span className="font-medium">{invitationLookup.invitation.inviteeEmail}</span>
+            Invited email:{' '}
+            <span className="font-medium">{invitationLookup.invitation.inviteeEmail}</span>
           </p>
 
           {requiresSignIn ? (
@@ -112,8 +108,9 @@ export default async function InvitationPage({ params }: InvitationPageProps) {
             />
           ) : (
             <p className="text-destructive text-sm">
-              You are signed in as <span className="font-medium">{currentUserEmail}</span>. Sign in with{' '}
-              <span className="font-medium">{invitationLookup.invitation.inviteeEmail}</span> to accept this invite.
+              You are signed in as <span className="font-medium">{currentUserEmail}</span>. Sign in
+              with <span className="font-medium">{invitationLookup.invitation.inviteeEmail}</span>{' '}
+              to accept this invite.
             </p>
           )}
         </div>

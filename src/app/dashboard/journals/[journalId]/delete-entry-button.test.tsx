@@ -24,16 +24,12 @@ describe('DeleteEntryButton', () => {
     const user = userEvent.setup()
     const action = vi.fn(async () => ({ error: null, success: true }))
 
-    render(
-      <DeleteEntryButton
-        journalId="journal-1"
-        entryId="entry-1"
-        action={action}
-      />,
-    )
+    render(<DeleteEntryButton journalId="journal-1" entryId="entry-1" action={action} />)
 
     await user.click(screen.getByRole('button', { name: 'Delete entry' }))
-    await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete entry' }))
+    await user.click(
+      within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete entry' }),
+    )
 
     await waitFor(() => {
       expect(action).toHaveBeenCalledWith({ journalId: 'journal-1', entryId: 'entry-1' })
@@ -46,16 +42,12 @@ describe('DeleteEntryButton', () => {
     const user = userEvent.setup()
     const action = vi.fn(async () => ({ error: 'Could not delete entry.', success: false }))
 
-    render(
-      <DeleteEntryButton
-        journalId="journal-1"
-        entryId="entry-1"
-        action={action}
-      />,
-    )
+    render(<DeleteEntryButton journalId="journal-1" entryId="entry-1" action={action} />)
 
     await user.click(screen.getByRole('button', { name: 'Delete entry' }))
-    await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete entry' }))
+    await user.click(
+      within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete entry' }),
+    )
 
     expect(await screen.findByText('Could not delete entry.')).toBeInTheDocument()
     expect(refreshMock).not.toHaveBeenCalled()

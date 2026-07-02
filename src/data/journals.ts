@@ -165,12 +165,7 @@ export async function getCollaboratorsForJournals(
     })
     .from(journalMembers)
     .innerJoin(users, eq(users.id, journalMembers.userId))
-    .where(
-      and(
-        inArray(journalMembers.journalId, journalIds),
-        ne(journalMembers.role, 'owner'),
-      ),
-    )
+    .where(and(inArray(journalMembers.journalId, journalIds), ne(journalMembers.role, 'owner')))
 
   const collaboratorsByJournal = new Map<string, JournalCollaborator[]>()
 

@@ -51,9 +51,4 @@ function DropdownMenuItem({
   )
 }
 
-export {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-}
+export { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger }

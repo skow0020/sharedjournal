@@ -16,6 +16,14 @@ You can start editing the page by modifying `src/app/page.tsx`. The page auto-up
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Code Quality
+
+- Run lint checks: `npm run lint`
+- Format all files: `npm run format`
+- Check formatting in CI or pre-commit: `npm run format:check`
+
+ESLint is used for code-quality and correctness checks, while Prettier handles code formatting.
+
 ## Setup
 
 ### Environment Variables
@@ -109,7 +117,9 @@ Configure these events for your webhook endpoint:
 #### Local development setup
 
 1. Ensure your Stripe test key is configured:
-  - `STRIPE_SECRET_KEY=sk_test_...`
+
+- `STRIPE_SECRET_KEY=sk_test_...`
+
 2. Start the app:
 
 ```bash
@@ -123,7 +133,8 @@ stripe listen --events checkout.session.completed,checkout.session.async_payment
 ```
 
 4. Copy the webhook signing secret printed by Stripe CLI (`whsec_...`) and set:
-  - `STRIPE_WEBHOOK_SECRET=whsec_...`
+
+- `STRIPE_WEBHOOK_SECRET=whsec_...`
 
 Notes:
 
@@ -135,7 +146,9 @@ Notes:
 For deployed environments (Vercel preview or production):
 
 1. Create a Stripe webhook endpoint in Dashboard for each environment URL:
-  - `https://<your-domain>/api/webhooks/stripe`
+
+- `https://<your-domain>/api/webhooks/stripe`
+
 2. Subscribe it to the required events listed above.
 3. Use that endpoint's signing secret as `STRIPE_WEBHOOK_SECRET` in that environment.
 
@@ -327,7 +340,6 @@ Or use the default Claude model:
 ollama launch claude
 ```
 
-
 ### Installing Neon MCP Server
 
 The Neon Model Context Protocol (MCP) server allows you to interact with your Neon PostgreSQL databases using natural language through AI assistants like Claude Code.
@@ -341,6 +353,7 @@ npx neonctl@latest init
 ```
 
 This will:
+
 - Authenticate via OAuth
 - Create a Neon API key automatically
 - Configure your MCP client (Claude Code, VS Code, Cursor)
@@ -348,24 +361,27 @@ This will:
 #### Manual Setup with Ollama
 
 1. **Configure Claude Code MCP servers**:
+
    ```bash
    ollama launch claude --config
    ```
+
    This will open an interactive configuration menu.
 
 2. **Add Neon MCP to your MCP configuration**:
-   
+
    After configuring Ollama, you'll need to add Neon to your MCP servers configuration file. The easiest way is using the remote hosted server:
-   
+
    ```bash
    npx add-mcp https://mcp.neon.tech/mcp
    ```
 
 3. **Alternative: Manual MCP Configuration**:
-   
+
    Create or edit your MCP configuration file (location varies by tool):
-   
+
    **Remote MCP Server (OAuth - No API Key Needed)**:
+
    ```json
    {
      "mcpServers": {
@@ -380,6 +396,7 @@ This will:
 #### Using Neon MCP
 
 Once configured, you can use natural language commands like:
+
 - "Create a new Postgres database called 'my-database'"
 - "Show me all my Neon projects"
 - "Run a migration on my project to add a created_at column"
@@ -387,10 +404,12 @@ Once configured, you can use natural language commands like:
 ### Documentation
 
 For more information, visit:
+
 - [Neon MCP Server Guide](https://neon.tech/docs/ai/neon-mcp-server)
 - [Neon MCP GitHub](https://github.com/neondatabase/mcp-server-neon)
 - [Ollama Documentation](https://docs.ollama.com)
 - [Model Context Protocol](https://modelcontextprotocol.io)
 
 ### Note:
+
 Created with the help of this udemy course: [Course](https://sdg.udemy.com/course/learn-claude-code/learn/lecture/54834735#overview)

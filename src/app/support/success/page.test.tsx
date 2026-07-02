@@ -1,13 +1,14 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
-const { getCurrentAppUserMock, getSupportPaymentForUserByCheckoutSessionMock, redirectMock } = vi.hoisted(() => ({
-  getCurrentAppUserMock: vi.fn(),
-  getSupportPaymentForUserByCheckoutSessionMock: vi.fn(),
-  redirectMock: vi.fn(() => {
-    throw new Error('NEXT_REDIRECT')
-  }),
-}))
+const { getCurrentAppUserMock, getSupportPaymentForUserByCheckoutSessionMock, redirectMock } =
+  vi.hoisted(() => ({
+    getCurrentAppUserMock: vi.fn(),
+    getSupportPaymentForUserByCheckoutSessionMock: vi.fn(),
+    redirectMock: vi.fn(() => {
+      throw new Error('NEXT_REDIRECT')
+    }),
+  }))
 
 vi.mock('next/navigation', () => ({
   redirect: redirectMock,

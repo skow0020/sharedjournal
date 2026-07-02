@@ -2,13 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { format, parseISO } from 'date-fns'
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { PageFlairShell } from '@/components/page-flair-shell'
 import { SUPPORT_EMAIL, SUPPORT_EMAIL_HREF } from '@/lib/support-contact'
 
@@ -38,7 +32,9 @@ export default function PrivacyPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">
-          <p>Account information from sign-in providers, including email and basic profile details.</p>
+          <p>
+            Account information from sign-in providers, including email and basic profile details.
+          </p>
           <p>Journal content you create, including text, photos, and invitations you send.</p>
           <p>Basic usage telemetry used to improve app reliability and performance.</p>
         </CardContent>
@@ -62,15 +58,22 @@ export default function PrivacyPage() {
         <CardHeader>
           <CardTitle>Sharing and retention</CardTitle>
           <CardDescription>
-            We do not sell personal data. Data is shared only with service providers needed to run the app.
+            We do not sell personal data. Data is shared only with service providers needed to run
+            the app.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">
-          <p>Service providers include authentication, hosting, analytics, and database infrastructure.</p>
+          <p>
+            Service providers include authentication, hosting, analytics, and database
+            infrastructure.
+          </p>
           <p>Journal content remains private to journal members invited by the journal owner.</p>
           <p>
             You can request account-related support at{' '}
-            <a href={SUPPORT_EMAIL_HREF} className="underline underline-offset-4 hover:no-underline">
+            <a
+              href={SUPPORT_EMAIL_HREF}
+              className="underline underline-offset-4 hover:no-underline"
+            >
               {SUPPORT_EMAIL}
             </a>
             .
@@ -81,9 +84,7 @@ export default function PrivacyPage() {
       <Card>
         <CardHeader>
           <CardTitle>Payment processing</CardTitle>
-          <CardDescription>
-            Support payments are processed by Stripe.
-          </CardDescription>
+          <CardDescription>Support payments are processed by Stripe.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">
           <p>
@@ -102,7 +103,11 @@ export default function PrivacyPage() {
         This is a general policy summary and is not legal advice. For questions, contact support.
       </p>
       <p className="text-muted-foreground text-xs">
-        Return to <Link href="/" className="underline underline-offset-4 hover:no-underline">home</Link>.
+        Return to{' '}
+        <Link href="/" className="underline underline-offset-4 hover:no-underline">
+          home
+        </Link>
+        .
       </p>
     </PageFlairShell>
   )

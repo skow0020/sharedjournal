@@ -2,19 +2,15 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-const {
-  pushMock,
-  refreshMock,
-  uploadMock,
-  createObjectUrlMock,
-  revokeObjectUrlMock,
-} = vi.hoisted(() => ({
-  pushMock: vi.fn(),
-  refreshMock: vi.fn(),
-  uploadMock: vi.fn(),
-  createObjectUrlMock: vi.fn(),
-  revokeObjectUrlMock: vi.fn(),
-}))
+const { pushMock, refreshMock, uploadMock, createObjectUrlMock, revokeObjectUrlMock } = vi.hoisted(
+  () => ({
+    pushMock: vi.fn(),
+    refreshMock: vi.fn(),
+    uploadMock: vi.fn(),
+    createObjectUrlMock: vi.fn(),
+    revokeObjectUrlMock: vi.fn(),
+  }),
+)
 
 vi.mock('@vercel/blob/client', () => ({
   upload: uploadMock,
@@ -44,7 +40,11 @@ class MockSpeechRecognition {
   continuous = false
   onstart: ((event: Event) => void) | null = null
   onend: ((event: Event) => void) | null = null
-  onresult: ((event: Event & { resultIndex?: number, results?: ArrayLike<MockRecognitionResult> }) => void) | null = null
+  onresult:
+    | ((
+        event: Event & { resultIndex?: number; results?: ArrayLike<MockRecognitionResult> },
+      ) => void)
+    | null = null
   onerror: ((event: Event & { error?: string }) => void) | null = null
 
   constructor() {
@@ -68,7 +68,7 @@ class MockSpeechRecognition {
           isFinal: true,
         },
       ] satisfies ArrayLike<MockRecognitionResult>,
-    }) as Event & { resultIndex?: number, results?: ArrayLike<MockRecognitionResult> }
+    }) as Event & { resultIndex?: number; results?: ArrayLike<MockRecognitionResult> }
 
     this.onresult?.(resultEvent)
   }
@@ -322,7 +322,9 @@ describe('CreateEntryModal', () => {
 
     await user.click(screen.getByRole('button', { name: 'Create entry' }))
 
-    expect(screen.getByText('Remove failed uploads before creating this entry.')).toBeInTheDocument()
+    expect(
+      screen.getByText('Remove failed uploads before creating this entry.'),
+    ).toBeInTheDocument()
     expect(action).not.toHaveBeenCalled()
   }, 15000)
 
@@ -382,13 +384,18 @@ describe('CreateEntryModal', () => {
 
     await user.click(screen.getByRole('button', { name: 'Add entry' }))
 
-    const files = Array.from({ length: ENTRY_IMAGE_MAX_FILES + 1 }, (_, index) =>
-      new File([`f${index}`], `img-${index}.jpg`, { type: 'image/jpeg' }),
+    const files = Array.from(
+      { length: ENTRY_IMAGE_MAX_FILES + 1 },
+      (_, index) => new File([`f${index}`], `img-${index}.jpg`, { type: 'image/jpeg' }),
     )
 
     await user.upload(getFileInput(), files)
 
-    expect(screen.getByText(new RegExp(`Only ${ENTRY_IMAGE_MAX_FILES} images can be attached to an entry\\.`))).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        new RegExp(`Only ${ENTRY_IMAGE_MAX_FILES} images can be attached to an entry\\.`),
+      ),
+    ).toBeInTheDocument()
   }, 20000)
 
   it('shows cleanup error and keeps modal open when cancel cleanup fails', async () => {
@@ -634,8 +641,9 @@ describe('CreateEntryModal', () => {
 
     await user.click(screen.getByRole('button', { name: 'Add entry' }))
 
-    const files = Array.from({ length: ENTRY_IMAGE_MAX_FILES }, (_, index) =>
-      new File([`f${index}`], `img-${index}.jpg`, { type: 'image/jpeg' }),
+    const files = Array.from(
+      { length: ENTRY_IMAGE_MAX_FILES },
+      (_, index) => new File([`f${index}`], `img-${index}.jpg`, { type: 'image/jpeg' }),
     )
 
     for (const [index, file] of files.entries()) {

@@ -4,10 +4,7 @@ import type { ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 
-import {
-  type DeleteJournalInput,
-  type DeleteJournalState,
-} from '@/app/dashboard/actions'
+import { type DeleteJournalInput, type DeleteJournalState } from '@/app/dashboard/actions'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -86,12 +83,15 @@ export function DeleteJournalButton({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       {trigger ? (
-        <DialogTrigger asChild>
-          {trigger}
-        </DialogTrigger>
+        <DialogTrigger asChild>{trigger}</DialogTrigger>
       ) : controlledOpen !== undefined ? null : (
         <DialogTrigger asChild>
-          <Button type="button" size="sm" variant="outline" className="text-destructive hover:text-destructive">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="text-destructive hover:text-destructive"
+          >
             Delete journal
           </Button>
         </DialogTrigger>
@@ -100,7 +100,8 @@ export function DeleteJournalButton({
         <DialogHeader>
           <DialogTitle>Delete journal</DialogTitle>
           <DialogDescription>
-            This will permanently remove this journal and all of its entries. This action cannot be undone.
+            This will permanently remove this journal and all of its entries. This action cannot be
+            undone.
           </DialogDescription>
         </DialogHeader>
         {state.error ? <p className="text-destructive text-sm">{state.error}</p> : null}

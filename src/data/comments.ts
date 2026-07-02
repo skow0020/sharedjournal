@@ -55,7 +55,9 @@ export async function canUserCommentOnEntry(input: {
   return Boolean(accessibleEntry)
 }
 
-export async function createEntryComment(input: CreateEntryCommentInput): Promise<CreatedEntryComment | null> {
+export async function createEntryComment(
+  input: CreateEntryCommentInput,
+): Promise<CreatedEntryComment | null> {
   const parsedInput = CreateEntryCommentSchema.parse(input)
 
   const [accessibleEntry] = await db
@@ -75,11 +77,14 @@ export async function createEntryComment(input: CreateEntryCommentInput): Promis
     return null
   }
 
-  const [comment] = await db.insert(entryComments).values({
-    entryId: parsedInput.entryId,
-    authorUserId: parsedInput.authorUserId,
-    content: encryptEntryContent(parsedInput.content),
-  }).returning()
+  const [comment] = await db
+    .insert(entryComments)
+    .values({
+      entryId: parsedInput.entryId,
+      authorUserId: parsedInput.authorUserId,
+      content: encryptEntryContent(parsedInput.content),
+    })
+    .returning()
 
   if (!comment) {
     return null

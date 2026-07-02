@@ -25,9 +25,9 @@
 
 - For authenticated Server Components that need a database user, call `getCurrentAppUser` from `src/lib/get-current-app-user.ts`.
 - `getCurrentAppUser` is the single entry point for:
-	- reading auth state from Clerk
-	- creating the user in Neon on first login
-	- syncing profile fields (display name, avatar URL) on subsequent requests
+  - reading auth state from Clerk
+  - creating the user in Neon on first login
+  - syncing profile fields (display name, avatar URL) on subsequent requests
 - Do **NOT** duplicate `auth()` + `currentUser()` + user upsert logic inside pages.
 - After resolving `appUser`, pass `appUser.id` into `/data` helper functions for all user-scoped queries.
 - If `getCurrentAppUser` returns `null`, render an unauthenticated state (or redirect) instead of querying user-scoped data.

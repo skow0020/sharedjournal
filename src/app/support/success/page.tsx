@@ -2,13 +2,7 @@ import { format } from 'date-fns'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { PageFlairShell } from '@/components/page-flair-shell'
 import { getSupportPaymentForUserByCheckoutSession } from '@/data/support-payments'
 import { getCurrentAppUser } from '@/lib/get-current-app-user'
@@ -97,7 +91,9 @@ export default async function SupportSuccessPage({ searchParams }: SupportSucces
       <Card>
         <CardHeader>
           <CardTitle>Thanks for the coffee!</CardTitle>
-          <CardDescription>Your contribution helps us keep building for shared stories.</CardDescription>
+          <CardDescription>
+            Your contribution helps us keep building for shared stories.
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">
           <p>Status: {statusText}</p>
@@ -111,7 +107,10 @@ export default async function SupportSuccessPage({ searchParams }: SupportSucces
 
       <p className="text-muted-foreground text-xs">
         Need help? Email{' '}
-        <a href="mailto:skow0020@gmail.com" className="underline underline-offset-4 hover:no-underline">
+        <a
+          href="mailto:skow0020@gmail.com"
+          className="underline underline-offset-4 hover:no-underline"
+        >
           skow0020@gmail.com
         </a>
         .

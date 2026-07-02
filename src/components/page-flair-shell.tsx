@@ -35,9 +35,7 @@ export function PageFlairShell({ children, contentClassName, mainClassName }: Pa
     <main className={cn('relative overflow-hidden', mainClassName)}>
       <PageFlairBackdrop />
 
-      <div className={cn('relative mx-auto w-full px-6 py-10', contentClassName)}>
-        {children}
-      </div>
+      <div className={cn('relative mx-auto w-full px-6 py-10', contentClassName)}>{children}</div>
     </main>
   )
 }

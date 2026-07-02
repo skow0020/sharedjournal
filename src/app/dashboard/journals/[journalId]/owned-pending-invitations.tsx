@@ -1,27 +1,18 @@
 'use client'
-
-import { useEffect, useState, useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-
 import {
   type CancelPendingInvitationInput,
   type CancelPendingInvitationState,
 } from '@/app/dashboard/journals/[journalId]/actions'
 import type { PendingJournalInvitation } from '@/data/invitations'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 type OwnedPendingInvitationsProps = {
   invitations: PendingJournalInvitation[]
   journalId: string
-  cancelAction: (
-    input: CancelPendingInvitationInput,
-  ) => Promise<CancelPendingInvitationState>
+  cancelAction: (input: CancelPendingInvitationInput) => Promise<CancelPendingInvitationState>
 }
 
 export function OwnedPendingInvitations({
@@ -35,23 +26,17 @@ export function OwnedPendingInvitations({
   const [activeInvitationId, setActiveInvitationId] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
 
-  useEffect(() => {
-    setVisibleInvitations(invitations)
-  }, [invitations])
-
   function handleCancel(invitationId: string) {
     setActiveInvitationId(invitationId)
     setErrorByInvitationId((currentErrors) => ({
       ...currentErrors,
       [invitationId]: null,
     }))
-
     startTransition(async () => {
       const result = await cancelAction({
         journalId,
         invitationId,
       })
-
       if (result.error) {
         setErrorByInvitationId((currentErrors) => ({
           ...currentErrors,
@@ -60,7 +45,6 @@ export function OwnedPendingInvitations({
         setActiveInvitationId(null)
         return
       }
-
       setVisibleInvitations((currentInvitations) =>
         currentInvitations.filter((invitation) => invitation.id !== invitationId),
       )
@@ -87,7 +71,8 @@ export function OwnedPendingInvitations({
               <div className="min-w-0 space-y-2">
                 <CardTitle className="text-base break-all">{invitation.inviteeEmail}</CardTitle>
                 <CardDescription>
-                  {invitation.role} · {invitation.emailDelivered ? 'email delivered' : 'manual share needed'}
+                  {invitation.role} ·{' '}
+                  {invitation.emailDelivered ? 'email delivered' : 'manual share needed'}
                 </CardDescription>
               </div>
               <Button

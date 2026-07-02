@@ -101,12 +101,16 @@ export function InviteUserModal({ journalId, journalTitle, action }: InviteUserM
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline">Invite</Button>
+        <Button size="sm" variant="outline">
+          Invite
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Invite a user</DialogTitle>
-          <DialogDescription>Enter an email address to invite someone to this journal.</DialogDescription>
+          <DialogDescription>
+            Enter an email address to invite someone to this journal.
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -126,14 +130,21 @@ export function InviteUserModal({ journalId, journalTitle, action }: InviteUserM
           {state.error ? <p className="text-destructive text-sm">{state.error}</p> : null}
           {state.successMessage ? <p className="text-sm">{state.successMessage}</p> : null}
           {state.inviteLink ? (
-            <p className="text-muted-foreground text-sm break-all">Invite link: {state.inviteLink}</p>
+            <p className="text-muted-foreground text-sm break-all">
+              Invite link: {state.inviteLink}
+            </p>
           ) : null}
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => handleOpenChange(false)} disabled={pending}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => handleOpenChange(false)}
+              disabled={pending}
+            >
               {sent ? 'Close' : 'Cancel'}
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={pending || sent}
               className={sent ? 'bg-green-600 hover:bg-green-700' : ''}
             >

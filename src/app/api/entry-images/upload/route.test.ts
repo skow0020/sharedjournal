@@ -1,6 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const { handleUploadMock, getCurrentAppUserMock, getUserJournalByIdMock, isTempStorageKeyForJournalMock } = vi.hoisted(() => ({
+const {
+  handleUploadMock,
+  getCurrentAppUserMock,
+  getUserJournalByIdMock,
+  isTempStorageKeyForJournalMock,
+} = vi.hoisted(() => ({
   handleUploadMock: vi.fn(),
   getCurrentAppUserMock: vi.fn(),
   getUserJournalByIdMock: vi.fn(),
@@ -20,7 +25,9 @@ vi.mock('@/data/journals', () => ({
 }))
 
 vi.mock('@/lib/entry-image-storage', async () => {
-  const actual = await vi.importActual<typeof import('@/lib/entry-image-storage')>('@/lib/entry-image-storage')
+  const actual = await vi.importActual<typeof import('@/lib/entry-image-storage')>(
+    '@/lib/entry-image-storage',
+  )
 
   return {
     ...actual,

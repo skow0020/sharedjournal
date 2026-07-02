@@ -5,13 +5,7 @@ import { ImagesIcon } from 'lucide-react'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   createLaunchDarklyContext,
   getLaunchDarklyVariation,
@@ -44,9 +38,7 @@ import {
 import { buildEntryPhotoProxyUrl } from '@/lib/entry-image-storage'
 import { EntryPhotoGallery } from '@/app/dashboard/journals/[journalId]/entry-photo-gallery'
 import { JournalSlideshow } from '@/app/dashboard/journals/[journalId]/journal-slideshow'
-import {
-  getPendingInvitationsForOwnedJournal,
-} from '@/data/invitations'
+import { getPendingInvitationsForOwnedJournal } from '@/data/invitations'
 import { getCollaboratorsForJournal, getUserJournalById } from '@/data/journals'
 import { PageFlairBackdrop } from '@/components/page-flair-shell'
 import { getCurrentAppUser } from '@/lib/get-current-app-user'
@@ -62,7 +54,10 @@ type JournalDetailsPageProps = {
 
 const ENTRIES_PER_PAGE = 10
 
-export default async function JournalDetailsPage({ params, searchParams }: JournalDetailsPageProps) {
+export default async function JournalDetailsPage({
+  params,
+  searchParams,
+}: JournalDetailsPageProps) {
   const { journalId } = await params
 
   // Ignore extension-like path probes (e.g. browser installHook.js.map requests)
@@ -86,9 +81,8 @@ export default async function JournalDetailsPage({ params, searchParams }: Journ
   const journalTitle = journal.title
   const resolvedSearchParams = searchParams ? await searchParams : undefined
   const parsedEntriesPage = Number.parseInt(resolvedSearchParams?.entriesPage ?? '1', 10)
-  const currentEntriesPage = Number.isNaN(parsedEntriesPage) || parsedEntriesPage < 1
-    ? 1
-    : parsedEntriesPage
+  const currentEntriesPage =
+    Number.isNaN(parsedEntriesPage) || parsedEntriesPage < 1 ? 1 : parsedEntriesPage
 
   // Check if comments feature is enabled via LaunchDarkly
   const ldContext = createLaunchDarklyContext({
@@ -114,7 +108,8 @@ export default async function JournalDetailsPage({ params, searchParams }: Journ
     : {}
 
   // Determine if user can comment (editor or owner, and feature enabled)
-  const canComment = isCommentsFeatureEnabled && (journal.role === 'editor' || journal.role === 'owner')
+  const canComment =
+    isCommentsFeatureEnabled && (journal.role === 'editor' || journal.role === 'owner')
   const collaborators = await getCollaboratorsForJournal(appUser.id, journalId)
   const pendingInvitations = journal.isOwner
     ? await getPendingInvitationsForOwnedJournal({
@@ -142,9 +137,7 @@ export default async function JournalDetailsPage({ params, searchParams }: Journ
             </Link>
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0 flex-1">
-                <JournalTitleEditor
-                  title={journal.title}
-                />
+                <JournalTitleEditor title={journal.title} />
               </div>
             </div>
             {journal.description ? (
@@ -221,7 +214,8 @@ export default async function JournalDetailsPage({ params, searchParams }: Journ
                       <div className="min-w-0 space-y-1">
                         <CardTitle>{entry.title || 'Untitled entry'}</CardTitle>
                         <CardDescription>
-                          {format(parseISO(entry.entryDate), 'MMMM d, yyyy')} · {entry.authorName || 'Unknown author'}
+                          {format(parseISO(entry.entryDate), 'MMMM d, yyyy')} ·{' '}
+                          {entry.authorName || 'Unknown author'}
                         </CardDescription>
                       </div>
                       {journal.isOwner || entry.authorUserId === appUser.id ? (
@@ -263,7 +257,6 @@ export default async function JournalDetailsPage({ params, searchParams }: Journ
           </>
         )}
       </section>
-
     </main>
   )
 }
