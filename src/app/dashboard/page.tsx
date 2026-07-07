@@ -5,17 +5,21 @@ import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/ca
 import {
   acceptDashboardInvitationAction,
   createJournalAction,
+  dismissFeatureRequestSurveyAction,
   declineDashboardInvitationAction,
   deleteJournalAction,
   generateOwnerExportAction,
+  submitFeatureRequestSurveyAction,
 } from '@/app/dashboard/actions'
 import { CreateJournalModal } from '@/app/dashboard/create-journal-modal'
 import { ExportJournalsButton } from '@/app/dashboard/export-journals-button'
+import { FeatureRequestModal } from '@/app/dashboard/feature-request-modal'
 import { JournalCard } from '@/app/dashboard/journal-card'
 import { PendingInvitationRow } from '@/app/dashboard/pending-invitation-row'
 import { Button } from '@/components/ui/button'
 import { PageFlairBackdrop } from '@/components/page-flair-shell'
 import { getPendingInvitationsForEmail } from '@/data/invitations'
+import { getFeatureRequestSurveyResponseForUser } from '@/data/feature-requests'
 import {
   getCollaboratorsForJournals,
   getRecentPhotosForJournals,
@@ -70,6 +74,10 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const pendingInvitations = currentUserEmail
     ? await getPendingInvitationsForEmail(currentUserEmail)
     : []
+  const featureRequestSurveyResponse = await getFeatureRequestSurveyResponseForUser({
+    userId: appUser.id,
+  })
+  const shouldShowFeatureRequestPrompt = featureRequestSurveyResponse === null
   const collaboratorsByJournal = await getCollaboratorsForJournals(
     userJournals.map((journal) => journal.id),
   )
@@ -88,6 +96,12 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         <div className="flex items-start justify-between gap-4">
           <h1 className="text-3xl font-semibold tracking-tight">Your Journals</h1>
           <div className="flex items-center gap-2">
+            {shouldShowFeatureRequestPrompt ? (
+              <FeatureRequestModal
+                submitAction={submitFeatureRequestSurveyAction}
+                dismissAction={dismissFeatureRequestSurveyAction}
+              />
+            ) : null}
             {isOwnerJournalExportEnabled ? (
               <ExportJournalsButton action={generateOwnerExportAction} />
             ) : null}
