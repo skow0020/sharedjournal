@@ -225,7 +225,7 @@ export const featureRequestSurveys = pgTable(
   ],
 )
 
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ one, many }) => ({
   ownedJournals: many(journals),
   journalMemberships: many(journalMembers),
   writtenEntries: many(entries),
@@ -238,7 +238,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   invitationsAccepted: many(journalInvitations, {
     relationName: 'journalInvitationsAccepted',
   }),
-  featureRequestSurveys: many(featureRequestSurveys),
+  featureRequestSurvey: one(featureRequestSurveys),
 }))
 
 export const journalsRelations = relations(journals, ({ one, many }) => ({
