@@ -50,7 +50,7 @@ describe('FeatureRequestModal', () => {
     render(<FeatureRequestModal submitAction={submitAction} dismissAction={dismissAction} />)
 
     await user.click(screen.getByRole('button', { name: 'Share feedback' }))
-    await user.click(screen.getByRole('button', { name: 'Skip for now' }))
+    await user.click(screen.getByRole('button', { name: 'No thanks' }))
 
     await waitFor(() => {
       expect(dismissAction).toHaveBeenCalledWith({})
@@ -88,7 +88,7 @@ describe('FeatureRequestModal', () => {
     render(<FeatureRequestModal submitAction={submitAction} dismissAction={dismissAction} />)
 
     await user.click(screen.getByRole('button', { name: 'Share feedback' }))
-    await user.click(screen.getByRole('button', { name: 'Skip for now' }))
+    await user.click(screen.getByRole('button', { name: 'No thanks' }))
 
     await waitFor(() => {
       expect(screen.getByText('Unable to dismiss feature feedback.')).toBeInTheDocument()
