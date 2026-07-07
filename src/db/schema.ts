@@ -30,6 +30,11 @@ export const supportPaymentStatusEnum = pgEnum('support_payment_status', [
   'cancelled',
 ])
 
+export const featureRequestSurveyStatusEnum = pgEnum('feature_request_survey_status', [
+  'submitted',
+  'dismissed',
+])
+
 export const users = pgTable(
   'users',
   {
@@ -199,7 +204,28 @@ export const supportPayments = pgTable(
   ],
 )
 
-export const usersRelations = relations(users, ({ many }) => ({
+export const featureRequestSurveys = pgTable(
+  'feature_request_surveys',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    requestText: text('request_text'),
+    status: featureRequestSurveyStatusEnum('status').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdateFn(() => new Date()),
+  },
+  (table) => [
+    uniqueIndex('feature_request_surveys_user_uidx').on(table.userId),
+    index('feature_request_surveys_status_idx').on(table.status),
+  ],
+)
+
+export const usersRelations = relations(users, ({ one, many }) => ({
   ownedJournals: many(journals),
   journalMemberships: many(journalMembers),
   writtenEntries: many(entries),
@@ -212,6 +238,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   invitationsAccepted: many(journalInvitations, {
     relationName: 'journalInvitationsAccepted',
   }),
+  featureRequestSurvey: one(featureRequestSurveys),
 }))
 
 export const journalsRelations = relations(journals, ({ one, many }) => ({
@@ -294,6 +321,13 @@ export const supportPaymentsRelations = relations(supportPayments, ({ one }) => 
   }),
 }))
 
+export const featureRequestSurveysRelations = relations(featureRequestSurveys, ({ one }) => ({
+  user: one(users, {
+    fields: [featureRequestSurveys.userId],
+    references: [users.id],
+  }),
+}))
+
 export type User = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert
 
@@ -314,3 +348,6 @@ export type NewEntryPhoto = typeof entryPhotos.$inferInsert
 
 export type SupportPayment = typeof supportPayments.$inferSelect
 export type NewSupportPayment = typeof supportPayments.$inferInsert
+
+export type FeatureRequestSurvey = typeof featureRequestSurveys.$inferSelect
+export type NewFeatureRequestSurvey = typeof featureRequestSurveys.$inferInsert

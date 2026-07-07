@@ -6,6 +6,7 @@ const {
   getCurrentAppUserMock,
   getCurrentUserEmailMock,
   getPendingInvitationsForEmailMock,
+  getFeatureRequestSurveyResponseForUserMock,
   getCollaboratorsForJournalsMock,
   getRecentPhotosForJournalsMock,
   getUserJournalCountMock,
@@ -17,6 +18,7 @@ const {
   getCurrentAppUserMock: vi.fn(),
   getCurrentUserEmailMock: vi.fn(),
   getPendingInvitationsForEmailMock: vi.fn(),
+  getFeatureRequestSurveyResponseForUserMock: vi.fn(),
   getCollaboratorsForJournalsMock: vi.fn(),
   getRecentPhotosForJournalsMock: vi.fn(),
   getUserJournalCountMock: vi.fn(),
@@ -47,6 +49,12 @@ vi.mock('@/app/dashboard/export-journals-button', () => ({
   ),
 }))
 
+vi.mock('@/app/dashboard/feature-request-modal', () => ({
+  FeatureRequestModal: ({ children }: { children?: ReactNode }) => (
+    <div data-testid="feature-request-modal">{children ?? 'Feature request modal'}</div>
+  ),
+}))
+
 vi.mock('@/app/dashboard/delete-journal-button', () => ({
   DeleteJournalButton: ({ journalId }: { journalId: string }) => (
     <div data-testid={`delete-journal-${journalId}`}>Delete</div>
@@ -68,6 +76,10 @@ vi.mock('@/lib/launchdarkly/server-client', () => ({
 
 vi.mock('@/data/invitations', () => ({
   getPendingInvitationsForEmail: getPendingInvitationsForEmailMock,
+}))
+
+vi.mock('@/data/feature-requests', () => ({
+  getFeatureRequestSurveyResponseForUser: getFeatureRequestSurveyResponseForUserMock,
 }))
 
 vi.mock('@/data/journals', () => ({
@@ -111,6 +123,7 @@ describe('DashboardPage', () => {
     getRecentPhotosForJournalsMock.mockResolvedValue(new Map())
     getLaunchDarklyVariationMock.mockResolvedValue(true)
     getPendingInvitationsForEmailMock.mockResolvedValue([])
+    getFeatureRequestSurveyResponseForUserMock.mockResolvedValue(null)
   })
 
   it('redirects to sign-in when no app user exists', async () => {
@@ -128,8 +141,21 @@ describe('DashboardPage', () => {
     expect(screen.getByRole('heading', { name: 'Your Journals' })).toBeInTheDocument()
     expect(screen.getByText('No journals found')).toBeInTheDocument()
     expect(screen.getByText('You are not a member of any journals yet.')).toBeInTheDocument()
+    expect(screen.getByTestId('feature-request-modal')).toBeInTheDocument()
     expect(screen.getByTestId('create-journal-modal')).toBeInTheDocument()
     expect(screen.getByTestId('export-journals-button')).toBeInTheDocument()
+  })
+
+  it('hides feature request modal when the user already responded', async () => {
+    getFeatureRequestSurveyResponseForUserMock.mockResolvedValue({
+      id: 'feature-request-1',
+      status: 'dismissed',
+      requestText: null,
+    })
+
+    await renderDashboardPage()
+
+    expect(screen.queryByTestId('feature-request-modal')).not.toBeInTheDocument()
   })
 
   it('hides export button when owner journal export flag is disabled', async () => {

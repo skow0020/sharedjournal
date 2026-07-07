@@ -3,6 +3,7 @@
 import { z } from 'zod'
 
 import { buildOwnerJournalsExportPayload } from '@/data/exports'
+import { upsertFeatureRequestSurveyResponse } from '@/data/feature-requests'
 import { createJournalForOwner, deleteJournalOwnedByUser } from '@/data/journals'
 import { createExportDownloadToken } from '@/lib/export-link-token'
 import { getCurrentAppUser } from '@/lib/get-current-app-user'
@@ -51,6 +52,22 @@ export type GenerateOwnerExportState = {
   expiresAt: string | null
 }
 
+export type SubmitFeatureRequestSurveyInput = {
+  requestText: string
+}
+
+export type SubmitFeatureRequestSurveyState = {
+  error: string | null
+  success: boolean
+}
+
+export type DismissFeatureRequestSurveyInput = Record<string, never>
+
+export type DismissFeatureRequestSurveyState = {
+  error: string | null
+  success: boolean
+}
+
 const createJournalSchema = z.object({
   title: z
     .string()
@@ -69,6 +86,15 @@ const dashboardInvitationActionSchema = z.object({
 })
 
 const generateOwnerExportSchema = z.object({}).strict()
+
+const submitFeatureRequestSurveySchema = z.object({
+  requestText: z
+    .string()
+    .trim()
+    .max(2000, 'Feature request must be 2000 characters or less.'),
+})
+
+const dismissFeatureRequestSurveySchema = z.object({}).strict()
 
 export async function createJournalAction(input: CreateJournalInput): Promise<CreateJournalState> {
   const currentUser = await getCurrentAppUser()
@@ -289,5 +315,71 @@ export async function generateOwnerExportAction(
       downloadUrl: null,
       expiresAt: null,
     }
+  }
+}
+
+export async function submitFeatureRequestSurveyAction(
+  input: SubmitFeatureRequestSurveyInput,
+): Promise<SubmitFeatureRequestSurveyState> {
+  const currentUser = await getCurrentAppUser()
+
+  if (!currentUser) {
+    return {
+      error: 'You must be signed in to submit feature feedback.',
+      success: false,
+    }
+  }
+
+  const parsedInput = submitFeatureRequestSurveySchema.safeParse(input)
+
+  if (!parsedInput.success) {
+    return {
+      error: parsedInput.error.issues[0]?.message ?? 'Unable to submit feature feedback.',
+      success: false,
+    }
+  }
+
+  await upsertFeatureRequestSurveyResponse({
+    userId: currentUser.id,
+    requestText: parsedInput.data.requestText || null,
+    status: 'submitted',
+  })
+
+  return {
+    error: null,
+    success: true,
+  }
+}
+
+export async function dismissFeatureRequestSurveyAction(
+  input: DismissFeatureRequestSurveyInput,
+): Promise<DismissFeatureRequestSurveyState> {
+  const currentUser = await getCurrentAppUser()
+
+  if (!currentUser) {
+    return {
+      error: 'You must be signed in to dismiss feature feedback.',
+      success: false,
+    }
+  }
+
+  const parsedInput = dismissFeatureRequestSurveySchema.safeParse(input)
+
+  if (!parsedInput.success) {
+    return {
+      error: parsedInput.error.issues[0]?.message ?? 'Unable to dismiss feature feedback.',
+      success: false,
+    }
+  }
+
+  await upsertFeatureRequestSurveyResponse({
+    userId: currentUser.id,
+    requestText: null,
+    status: 'dismissed',
+  })
+
+  return {
+    error: null,
+    success: true,
   }
 }

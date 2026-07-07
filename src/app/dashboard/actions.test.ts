@@ -10,6 +10,7 @@ const {
   getCurrentUserEmailMock,
   acceptJournalInvitationMock,
   declineJournalInvitationMock,
+  upsertFeatureRequestSurveyResponseMock,
 } = vi.hoisted(() => ({
   createJournalForOwnerMock: vi.fn(),
   deleteJournalOwnedByUserMock: vi.fn(),
@@ -20,6 +21,7 @@ const {
   getCurrentUserEmailMock: vi.fn(),
   acceptJournalInvitationMock: vi.fn(),
   declineJournalInvitationMock: vi.fn(),
+  upsertFeatureRequestSurveyResponseMock: vi.fn(),
 }))
 
 vi.mock('@/data/journals', () => ({
@@ -52,12 +54,18 @@ vi.mock('@/data/invitations', () => ({
   declineJournalInvitation: declineJournalInvitationMock,
 }))
 
+vi.mock('@/data/feature-requests', () => ({
+  upsertFeatureRequestSurveyResponse: upsertFeatureRequestSurveyResponseMock,
+}))
+
 import {
   acceptDashboardInvitationAction,
   createJournalAction,
   declineDashboardInvitationAction,
   deleteJournalAction,
+  dismissFeatureRequestSurveyAction,
   generateOwnerExportAction,
+  submitFeatureRequestSurveyAction,
 } from '@/app/dashboard/actions'
 
 describe('createJournalAction', () => {
@@ -422,6 +430,123 @@ describe('generateOwnerExportAction', () => {
       error: null,
       downloadUrl: '/api/exports/download?token=signed-token',
       expiresAt: expect.any(String),
+    })
+  })
+})
+
+describe('submitFeatureRequestSurveyAction', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns auth error when no app user exists', async () => {
+    getCurrentAppUserMock.mockResolvedValue(null)
+
+    const result = await submitFeatureRequestSurveyAction({
+      requestText: 'Add weekly summaries',
+    })
+
+    expect(result).toEqual({
+      error: 'You must be signed in to submit feature feedback.',
+      success: false,
+    })
+    expect(upsertFeatureRequestSurveyResponseMock).not.toHaveBeenCalled()
+  })
+
+  it('validates max request length before persisting', async () => {
+    getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
+
+    const result = await submitFeatureRequestSurveyAction({
+      requestText: 'x'.repeat(2001),
+    })
+
+    expect(result).toEqual({
+      error: 'Feature request must be 2000 characters or less.',
+      success: false,
+    })
+    expect(upsertFeatureRequestSurveyResponseMock).not.toHaveBeenCalled()
+  })
+
+  it('trims and persists submitted feature request text', async () => {
+    getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
+    upsertFeatureRequestSurveyResponseMock.mockResolvedValue({ id: 'feature-request-1' })
+
+    const result = await submitFeatureRequestSurveyAction({
+      requestText: '  Add a monthly digest email.  ',
+    })
+
+    expect(upsertFeatureRequestSurveyResponseMock).toHaveBeenCalledWith({
+      userId: 'user-1',
+      requestText: 'Add a monthly digest email.',
+      status: 'submitted',
+    })
+    expect(result).toEqual({
+      error: null,
+      success: true,
+    })
+  })
+
+  it('stores null request text when submitted empty', async () => {
+    getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
+    upsertFeatureRequestSurveyResponseMock.mockResolvedValue({ id: 'feature-request-1' })
+
+    await submitFeatureRequestSurveyAction({
+      requestText: '   ',
+    })
+
+    expect(upsertFeatureRequestSurveyResponseMock).toHaveBeenCalledWith({
+      userId: 'user-1',
+      requestText: null,
+      status: 'submitted',
+    })
+  })
+})
+
+describe('dismissFeatureRequestSurveyAction', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns auth error when no app user exists', async () => {
+    getCurrentAppUserMock.mockResolvedValue(null)
+
+    const result = await dismissFeatureRequestSurveyAction({})
+
+    expect(result).toEqual({
+      error: 'You must be signed in to dismiss feature feedback.',
+      success: false,
+    })
+    expect(upsertFeatureRequestSurveyResponseMock).not.toHaveBeenCalled()
+  })
+
+  it('returns an error when dismiss input is invalid', async () => {
+    getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
+
+    const result = await dismissFeatureRequestSurveyAction({
+      extra: 'unexpected',
+    } as never)
+
+    expect(result).toEqual({
+      error: 'Unrecognized key: "extra"',
+      success: false,
+    })
+    expect(upsertFeatureRequestSurveyResponseMock).not.toHaveBeenCalled()
+  })
+
+  it('stores dismissed status for authenticated users', async () => {
+    getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
+    upsertFeatureRequestSurveyResponseMock.mockResolvedValue({ id: 'feature-request-1' })
+
+    const result = await dismissFeatureRequestSurveyAction({})
+
+    expect(upsertFeatureRequestSurveyResponseMock).toHaveBeenCalledWith({
+      userId: 'user-1',
+      requestText: null,
+      status: 'dismissed',
+    })
+    expect(result).toEqual({
+      error: null,
+      success: true,
     })
   })
 })
