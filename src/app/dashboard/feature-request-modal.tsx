@@ -104,7 +104,7 @@ export function FeatureRequestModal({ submitAction, dismissAction }: FeatureRequ
           {error ? <p className="text-destructive text-sm">{error}</p> : null}
           <DialogFooter>
             <Button type="button" variant="outline" onClick={handleDismiss} disabled={pending}>
-              Skip for now
+              No thanks
             </Button>
             <Button type="submit" disabled={pending}>
               {pending ? 'Saving...' : 'Submit'}
