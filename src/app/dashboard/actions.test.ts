@@ -519,6 +519,20 @@ describe('dismissFeatureRequestSurveyAction', () => {
     expect(upsertFeatureRequestSurveyResponseMock).not.toHaveBeenCalled()
   })
 
+  it('returns an error when dismiss input is invalid', async () => {
+    getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
+
+    const result = await dismissFeatureRequestSurveyAction({
+      extra: 'unexpected',
+    } as never)
+
+    expect(result).toEqual({
+      error: 'Unrecognized key: "extra"',
+      success: false,
+    })
+    expect(upsertFeatureRequestSurveyResponseMock).not.toHaveBeenCalled()
+  })
+
   it('stores dismissed status for authenticated users', async () => {
     getCurrentAppUserMock.mockResolvedValue({ id: 'user-1' })
     upsertFeatureRequestSurveyResponseMock.mockResolvedValue({ id: 'feature-request-1' })

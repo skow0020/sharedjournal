@@ -77,6 +77,26 @@ describe('FeatureRequestModal', () => {
     })
   })
 
+  it('renders returned error when dismiss fails', async () => {
+    const user = userEvent.setup()
+    const submitAction = vi.fn(async () => ({ error: null, success: true }))
+    const dismissAction = vi.fn(async () => ({
+      error: 'Unable to dismiss feature feedback.',
+      success: false,
+    }))
+
+    render(<FeatureRequestModal submitAction={submitAction} dismissAction={dismissAction} />)
+
+    await user.click(screen.getByRole('button', { name: 'Share feedback' }))
+    await user.click(screen.getByRole('button', { name: 'Skip for now' }))
+
+    await waitFor(() => {
+      expect(screen.getByText('Unable to dismiss feature feedback.')).toBeInTheDocument()
+    })
+
+    expect(screen.getByRole('dialog', { name: 'Help shape SharedJournal' })).toBeInTheDocument()
+  })
+
   describe('accessibility', () => {
     it('has no violations when modal is open', async () => {
       const user = userEvent.setup()
