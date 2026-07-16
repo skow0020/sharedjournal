@@ -9,10 +9,6 @@ updates:
     directory: '/' # Location of package manifests
     schedule:
       interval: 'weekly'
-    ignore:
-      - dependency-name: 'eslint'
-        versions:
-          - '>=10'
     open-pull-requests-limit: 10
     groups:
       react-stack:
