@@ -1,6 +1,9 @@
 {
   "name": "sharedjournal",
   "version": "0.1.0",
+  "engines": {
+    "node": ">=26.0.0"
+  },
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -70,5 +73,11 @@
     "typescript": "6.0.3",
     "vitest": "4.1.10",
     "vitest-axe": "^0.1.0"
+  },
+  "allowScripts": {
+    "esbuild@0.18.20": true,
+    "esbuild@0.25.12": true,
+    "esbuild@0.28.1": true,
+    "unrs-resolver@1.12.2": true
   }
 }
