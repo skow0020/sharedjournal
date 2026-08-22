@@ -1,7 +1,7 @@
 import Stripe from 'stripe'
 
 let stripeClient: Stripe | null = null
-const STRIPE_API_VERSION = '2026-06-24.dahlia'
+const STRIPE_API_VERSION = '2026-07-29.dahlia'
 
 function getStripeSecretKey(): string {
   const secretKey = process.env.STRIPE_SECRET_KEY
