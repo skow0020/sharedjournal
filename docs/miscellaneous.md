@@ -1,5 +1,5 @@
 - Don't use magic numbers or strings. Use a const or even better, an enum when appropriate.
 - Reduce code indentation. Avoid Arrow Anti-Pattern. Leverage early return and continue.
-- Use enums instead of boolean for function parameters. .
+- Use enums instead of booleans for function parameters. .
 - Respect layering. Don't punch holes through the layers.
 - Let the reader of the code breathe. Add empty lines between logical blocks of code. 
