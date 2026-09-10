@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { auth } from '@clerk/nextjs/server'
 import { CoffeeIcon } from 'lucide-react'
 import Link from 'next/link'
@@ -12,6 +13,19 @@ import {
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { PageFlairBackdrop } from '@/components/page-flair-shell'
 import { LandingHeroCta } from '@/components/landing-hero-cta'
+
+export const metadata: Metadata = {
+  title: 'SharedJournal | Private Journaling for Couples & Families',
+  description:
+    'SharedJournal is a private, secure journaling app for couples, families, and small groups. Write together, share memories, and stay connected. Invitation-only access with role-based permissions.',
+  openGraph: {
+    title: 'SharedJournal | Private Journaling for Couples & Families',
+    description:
+      'Write and share memories privately with the people you trust. Secure, invitation-only journaling platform.',
+    type: 'website',
+    url: 'https://sharedjournal.com',
+  },
+}
 
 /*
  * Note: Native mobile apps (Android / iOS) are not yet available.
@@ -227,7 +241,9 @@ export default async function Home() {
               },
             ].map(({ q, a }) => (
               <AccordionItem key={q} value={q}>
-                <AccordionTrigger className="text-left text-sm font-medium">{q}</AccordionTrigger>
+                <AccordionTrigger className="text-left text-sm font-medium">
+                  <h3 className="text-sm font-medium">{q}</h3>
+                </AccordionTrigger>
                 <AccordionContent className="text-sm leading-6 text-muted-foreground">
                   {a}
                 </AccordionContent>
@@ -279,6 +295,74 @@ export default async function Home() {
           </nav>
         </div>
       </section>
+
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Organization',
+            name: 'SharedJournal',
+            url: 'https://sharedjournal.com',
+            description:
+              'A private, secure journaling platform for couples, families, and small groups',
+            logo: 'https://sharedjournal.com/icon.svg',
+            sameAs: [],
+          }),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: [
+              {
+                '@type': 'Question',
+                name: 'Is SharedJournal free to use?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'You can sign up and start journaling for free. Create an account and explore the app at no cost.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'Who can see my journals?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Only you — and anyone you explicitly invite. Personal journals are private to you. Shared journals are visible only to the members you invite.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'How do I invite someone to a shared journal?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'From your journal settings, generate an invite link and send it to the person you want to include. They will be prompted to create an account if they do not have one.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'Can I remove someone from a shared journal?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Yes. As the journal owner you can remove any collaborator at any time from the journal settings.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'Is there a mobile app?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'SharedJournal is a web app that works well on mobile browsers. Native iOS and Android apps are not yet available.',
+                },
+              },
+            ],
+          }),
+        }}
+      />
     </main>
   )
 }
