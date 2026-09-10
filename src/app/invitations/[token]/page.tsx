@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { SignInButton } from '@clerk/nextjs'
 import type { ReactNode } from 'react'
 
@@ -9,6 +10,10 @@ import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/ca
 import { getInvitationByToken } from '@/data/invitations'
 import { getCurrentAppUser } from '@/lib/get-current-app-user'
 import { getCurrentUserEmail } from '@/lib/get-current-user-email'
+
+export const metadata: Metadata = {
+  robots: 'noindex, nofollow',
+}
 
 type InvitationPageProps = {
   params: Promise<{

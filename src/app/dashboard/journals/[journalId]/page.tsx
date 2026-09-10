@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { getCommentsForEntries } from '@/data/comments'
 import { EntryComments } from './entry-comments'
 import { format, parseISO } from 'date-fns'
@@ -42,6 +43,10 @@ import { getPendingInvitationsForOwnedJournal } from '@/data/invitations'
 import { getCollaboratorsForJournal, getUserJournalById } from '@/data/journals'
 import { PageFlairBackdrop } from '@/components/page-flair-shell'
 import { getCurrentAppUser } from '@/lib/get-current-app-user'
+
+export const metadata: Metadata = {
+  robots: 'noindex, nofollow',
+}
 
 type JournalDetailsPageProps = {
   params: Promise<{
