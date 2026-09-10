@@ -27,6 +27,33 @@ export const metadata: Metadata = {
   },
 }
 
+const FAQ_ITEMS = [
+  {
+    q: 'Is SharedJournal free to use?',
+    a: 'You can sign up and start journaling for free. Create an account and explore the app at no cost.',
+  },
+  {
+    q: 'Who can see my journals?',
+    a: 'Only you — and anyone you explicitly invite. Personal journals are private to you. Shared journals are visible only to the members you invite.',
+  },
+  {
+    q: 'How do I invite someone to a shared journal?',
+    a: 'From your journal settings, generate an invite link and send it to the person you want to include. They will be prompted to create an account if they do not have one.',
+  },
+  {
+    q: 'Is my data encrypted?',
+    a: 'Yes. All data is encrypted in transit and at rest. We use industry-standard security practices to protect your personal journals and memories.',
+  },
+  {
+    q: 'Can I export my journal entries?',
+    a: 'Yes. You can export your journals and entries at any time. We support multiple formats to ensure you always have access to your data.',
+  },
+  {
+    q: 'Is there a mobile app?',
+    a: 'SharedJournal is a web app that works well on mobile browsers. Native iOS and Android apps are not yet available.',
+  },
+]
+
 /*
  * Note: Native mobile apps (Android / iOS) are not yet available.
  * The Google Play and App Store download buttons have been removed
@@ -218,32 +245,7 @@ export default async function Home() {
             <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Common questions</h2>
           </div>
           <Accordion type="single" collapsible className="w-full">
-            {[
-              {
-                q: 'Is SharedJournal free to use?',
-                a: 'You can sign up and start journaling for free. Create an account and explore the app at no cost.',
-              },
-              {
-                q: 'Who can see my journals?',
-                a: 'Only you — and anyone you explicitly invite. Personal journals are private to you. Shared journals are visible only to the members you invite.',
-              },
-              {
-                q: 'How do I invite someone to a shared journal?',
-                a: 'From your journal settings, generate an invite link and send it to the person you want to include. They will be prompted to create an account if they do not have one.',
-              },
-              {
-                q: 'Is my data encrypted?',
-                a: 'Yes. All data is encrypted in transit and at rest. We use industry-standard security practices to protect your personal journals and memories.',
-              },
-              {
-                q: 'Can I export my journal entries?',
-                a: 'Yes. You can export your journals and entries at any time. We support multiple formats to ensure you always have access to your data.',
-              },
-              {
-                q: 'Is there a mobile app?',
-                a: 'SharedJournal is a web app that works well on mobile browsers. Native iOS and Android apps are not yet available.',
-              },
-            ].map(({ q, a }) => (
+            {FAQ_ITEMS.map(({ q, a }) => (
               <AccordionItem key={q} value={q}>
                 <AccordionTrigger className="text-left text-sm font-medium">{q}</AccordionTrigger>
                 <AccordionContent className="text-sm leading-6 text-muted-foreground">
@@ -320,48 +322,14 @@ export default async function Home() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'FAQPage',
-            mainEntity: [
-              {
-                '@type': 'Question',
-                name: 'Is SharedJournal free to use?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'You can sign up and start journaling for free. Create an account and explore the app at no cost.',
-                },
+            mainEntity: FAQ_ITEMS.map(({ q, a }) => ({
+              '@type': 'Question',
+              name: q,
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: a,
               },
-              {
-                '@type': 'Question',
-                name: 'Who can see my journals?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'Only you — and anyone you explicitly invite. Personal journals are private to you. Shared journals are visible only to the members you invite.',
-                },
-              },
-              {
-                '@type': 'Question',
-                name: 'How do I invite someone to a shared journal?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'From your journal settings, generate an invite link and send it to the person you want to include. They will be prompted to create an account if they do not have one.',
-                },
-              },
-              {
-                '@type': 'Question',
-                name: 'Can I remove someone from a shared journal?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'Yes. As the journal owner you can remove any collaborator at any time from the journal settings.',
-                },
-              },
-              {
-                '@type': 'Question',
-                name: 'Is there a mobile app?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'SharedJournal is a web app that works well on mobile browsers. Native iOS and Android apps are not yet available.',
-                },
-              },
-            ],
+            })),
           }),
         }}
       />
