@@ -245,9 +245,7 @@ export default async function Home() {
               },
             ].map(({ q, a }) => (
               <AccordionItem key={q} value={q}>
-                <AccordionTrigger className="text-left text-sm font-medium">
-                  <h3 className="text-sm font-medium">{q}</h3>
-                </AccordionTrigger>
+                <AccordionTrigger className="text-left text-sm font-medium">{q}</AccordionTrigger>
                 <AccordionContent className="text-sm leading-6 text-muted-foreground">
                   {a}
                 </AccordionContent>
