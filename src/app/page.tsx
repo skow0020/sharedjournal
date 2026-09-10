@@ -232,8 +232,12 @@ export default async function Home() {
                 a: 'From your journal settings, generate an invite link and send it to the person you want to include. They will be prompted to create an account if they do not have one.',
               },
               {
-                q: 'Can I remove someone from a shared journal?',
-                a: 'Yes. As the journal owner you can remove any collaborator at any time from the journal settings.',
+                q: 'Is my data encrypted?',
+                a: 'Yes. All data is encrypted in transit and at rest. We use industry-standard security practices to protect your personal journals and memories.',
+              },
+              {
+                q: 'Can I export my journal entries?',
+                a: 'Yes. You can export your journals and entries at any time. We support multiple formats to ensure you always have access to your data.',
               },
               {
                 q: 'Is there a mobile app?',
