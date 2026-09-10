@@ -25,7 +25,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       url: 'https://sharedjournal.com/buy-me-coffee',
       changeFrequency: 'monthly',
-      priority: 0.3,
+      priority: 0.7,
     },
   ]
 }

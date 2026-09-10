@@ -49,6 +49,10 @@ const FAQ_ITEMS = [
     a: 'Yes. You can export your journals and entries at any time. We support multiple formats to ensure you always have access to your data.',
   },
   {
+    q: 'How can I support SharedJournal?',
+    a: 'SharedJournal is built with care and runs on a small budget. You can support ongoing development and maintenance by buying me a coffee. Every contribution helps keep the app running and enables new features.',
+  },
+  {
     q: 'Is there a mobile app?',
     a: 'SharedJournal is a web app that works well on mobile browsers. Native iOS and Android apps are not yet available.',
   },
