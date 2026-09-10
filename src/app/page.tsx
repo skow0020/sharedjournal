@@ -88,8 +88,8 @@ export default async function Home() {
             <br className="hidden sm:block" /> Stay connected.
           </h1>
           <p className="mx-auto max-w-xl text-base leading-7 text-muted-foreground sm:text-lg">
-            SharedJournal is a web app for couples, families, and small groups who want to write,
-            share memories, and stay in each other&apos;s lives — privately, on their own terms.
+            SharedJournal is a web app for individuals, couples, families, and small groups who want
+            to write, share memories, and stay connected — privately, on their own terms.
           </p>
           <LandingHeroCta />
         </div>
@@ -102,7 +102,7 @@ export default async function Home() {
             <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl text-foreground">
               How it works
             </h2>
-            <p className="text-muted-foreground">Everything in one journal workflow</p>
+            <p className="text-muted-foreground">Personal or shared journaling in one workflow</p>
           </div>
           <ol className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {[
