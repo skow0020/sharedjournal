@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { auth } from '@clerk/nextjs/server'
 import { CoffeeIcon } from 'lucide-react'
 import Link from 'next/link'
@@ -12,6 +13,50 @@ import {
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { PageFlairBackdrop } from '@/components/page-flair-shell'
 import { LandingHeroCta } from '@/components/landing-hero-cta'
+
+export const metadata: Metadata = {
+  title: 'SharedJournal | Private Journaling for Couples & Families',
+  description:
+    'SharedJournal is a private, secure journaling app for couples, families, and small groups. Write together, share memories, and stay connected. Invitation-only access with role-based permissions.',
+  openGraph: {
+    title: 'SharedJournal | Private Journaling for Couples & Families',
+    description:
+      'Write and share memories privately with the people you trust. Secure, invitation-only journaling platform.',
+    type: 'website',
+    url: 'https://sharedjournal.com',
+  },
+}
+
+const FAQ_ITEMS = [
+  {
+    q: 'Is SharedJournal free to use?',
+    a: 'You can sign up and start journaling for free. Create an account and explore the app at no cost.',
+  },
+  {
+    q: 'Who can see my journals?',
+    a: 'Only you — and anyone you explicitly invite. Personal journals are private to you. Shared journals are visible only to the members you invite.',
+  },
+  {
+    q: 'How do I invite someone to a shared journal?',
+    a: 'From your journal settings, generate an invite link and send it to the person you want to include. They will be prompted to create an account if they do not have one.',
+  },
+  {
+    q: 'Is my data encrypted?',
+    a: 'Yes. All data is encrypted in transit and at rest. We use industry-standard security practices to protect your personal journals and memories.',
+  },
+  {
+    q: 'Can I export my journal entries?',
+    a: 'Yes. You can export your journals and entries at any time. We support multiple formats to ensure you always have access to your data.',
+  },
+  {
+    q: 'How can I support SharedJournal?',
+    a: 'SharedJournal is built with care and runs on a small budget. You can support ongoing development and maintenance by buying me a coffee. Every contribution helps keep the app running and enables new features.',
+  },
+  {
+    q: 'Is there a mobile app?',
+    a: 'SharedJournal is a web app that works well on mobile browsers. Native iOS and Android apps are not yet available.',
+  },
+]
 
 /*
  * Note: Native mobile apps (Android / iOS) are not yet available.
@@ -43,8 +88,8 @@ export default async function Home() {
             <br className="hidden sm:block" /> Stay connected.
           </h1>
           <p className="mx-auto max-w-xl text-base leading-7 text-muted-foreground sm:text-lg">
-            SharedJournal is a web app for couples, families, and small groups who want to write,
-            share memories, and stay in each other&apos;s lives — privately, on their own terms.
+            SharedJournal is a web app for individuals, couples, families, and small groups who want
+            to write, share memories, and stay connected — privately, on their own terms.
           </p>
           <LandingHeroCta />
         </div>
@@ -57,7 +102,7 @@ export default async function Home() {
             <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl text-foreground">
               How it works
             </h2>
-            <p className="text-muted-foreground">Everything in one journal workflow</p>
+            <p className="text-muted-foreground">Personal or shared journaling in one workflow</p>
           </div>
           <ol className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {[
@@ -204,28 +249,7 @@ export default async function Home() {
             <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Common questions</h2>
           </div>
           <Accordion type="single" collapsible className="w-full">
-            {[
-              {
-                q: 'Is SharedJournal free to use?',
-                a: 'You can sign up and start journaling for free. Create an account and explore the app at no cost.',
-              },
-              {
-                q: 'Who can see my journals?',
-                a: 'Only you — and anyone you explicitly invite. Personal journals are private to you. Shared journals are visible only to the members you invite.',
-              },
-              {
-                q: 'How do I invite someone to a shared journal?',
-                a: 'From your journal settings, generate an invite link and send it to the person you want to include. They will be prompted to create an account if they do not have one.',
-              },
-              {
-                q: 'Can I remove someone from a shared journal?',
-                a: 'Yes. As the journal owner you can remove any collaborator at any time from the journal settings.',
-              },
-              {
-                q: 'Is there a mobile app?',
-                a: 'SharedJournal is a web app that works well on mobile browsers. Native iOS and Android apps are not yet available.',
-              },
-            ].map(({ q, a }) => (
+            {FAQ_ITEMS.map(({ q, a }) => (
               <AccordionItem key={q} value={q}>
                 <AccordionTrigger className="text-left text-sm font-medium">{q}</AccordionTrigger>
                 <AccordionContent className="text-sm leading-6 text-muted-foreground">
@@ -279,6 +303,40 @@ export default async function Home() {
           </nav>
         </div>
       </section>
+
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Organization',
+            name: 'SharedJournal',
+            url: 'https://sharedjournal.com',
+            description:
+              'A private, secure journaling platform for couples, families, and small groups',
+            logo: 'https://sharedjournal.com/icon.svg',
+            sameAs: [],
+          }),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: FAQ_ITEMS.map(({ q, a }) => ({
+              '@type': 'Question',
+              name: q,
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: a,
+              },
+            })),
+          }),
+        }}
+      />
     </main>
   )
 }

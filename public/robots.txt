@@ -1,0 +1,46 @@
+# Allow all crawlers, with restrictions on private/authenticated routes
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /invitations/
+Disallow: /api/
+
+# Explicitly allow AI crawlers for public content only
+User-agent: GPTBot
+Allow: /
+Disallow: /dashboard
+Disallow: /invitations/
+Disallow: /api/
+
+User-agent: CCBot
+Allow: /
+Disallow: /dashboard
+Disallow: /invitations/
+Disallow: /api/
+
+User-agent: anthropic-ai
+Allow: /
+Disallow: /dashboard
+Disallow: /invitations/
+Disallow: /api/
+
+User-agent: Claude-Web
+Allow: /
+Disallow: /dashboard
+Disallow: /invitations/
+Disallow: /api/
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /dashboard
+Disallow: /invitations/
+Disallow: /api/
+
+User-agent: google-extended
+Allow: /
+Disallow: /dashboard
+Disallow: /invitations/
+Disallow: /api/
+
+# Sitemap location
+Sitemap: https://sharedjournal.com/sitemap.xml

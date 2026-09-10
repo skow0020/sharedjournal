@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
@@ -28,6 +29,10 @@ import {
 } from '@/data/journals'
 import { getCurrentAppUser } from '@/lib/get-current-app-user'
 import { getCurrentUserEmail } from '@/lib/get-current-user-email'
+
+export const metadata: Metadata = {
+  robots: 'noindex, nofollow',
+}
 import {
   createLaunchDarklyContext,
   getLaunchDarklyVariation,
