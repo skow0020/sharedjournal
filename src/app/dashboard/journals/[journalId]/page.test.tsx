@@ -73,6 +73,12 @@ vi.mock('@/app/dashboard/journals/[journalId]/journal-entries-infinite-loader', 
   ),
 }))
 
+vi.mock('@/app/dashboard/journals/[journalId]/journal-entries-date-filter', () => ({
+  JournalEntriesDateFilter: ({ value }: { value: string }) => (
+    <div data-testid="journal-entries-date-filter">Date filter: {value || 'none'}</div>
+  ),
+}))
+
 vi.mock('@/app/dashboard/delete-journal-button', () => ({
   DeleteJournalButton: () => <div data-testid="delete-journal-button">Delete journal</div>,
 }))
@@ -134,7 +140,7 @@ import JournalDetailsPage from '@/app/dashboard/journals/[journalId]/page'
 
 async function renderJournalDetailsPage(
   journalId = 'journal-1',
-  searchParams?: { entriesPage?: string },
+  searchParams?: { entriesPage?: string; entryDate?: string },
 ) {
   const page = await JournalDetailsPage({
     params: Promise.resolve({ journalId }),
@@ -353,6 +359,7 @@ describe('JournalDetailsPage', () => {
 
     expect(getJournalEntriesForJournalMock).toHaveBeenCalledWith('user-1', 'journal-1', {
       limit: 20,
+      entryDate: undefined,
     })
     expect(screen.getByTestId('journal-entries-infinite-loader')).toHaveTextContent(
       'Page 2 loader true',
@@ -364,5 +371,42 @@ describe('JournalDetailsPage', () => {
 
     expect(getCommentsForEntriesMock).toHaveBeenCalledWith(['entry-1'])
     expect(getCommentsForEntriesMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('renders the date filter with the value from the entryDate search param', async () => {
+    await renderJournalDetailsPage('journal-1', { entryDate: '2026-03-10' })
+
+    expect(getJournalEntriesForJournalMock).toHaveBeenCalledWith('user-1', 'journal-1', {
+      limit: 10,
+      entryDate: '2026-03-10',
+    })
+    expect(getJournalEntryCountForJournalMock).toHaveBeenCalledWith('user-1', 'journal-1', {
+      entryDate: '2026-03-10',
+    })
+    expect(screen.getByTestId('journal-entries-date-filter')).toHaveTextContent(
+      'Date filter: 2026-03-10',
+    )
+  })
+
+  it('ignores a malformed entryDate search param', async () => {
+    await renderJournalDetailsPage('journal-1', { entryDate: 'not-a-date' })
+
+    expect(getJournalEntriesForJournalMock).toHaveBeenCalledWith('user-1', 'journal-1', {
+      limit: 10,
+      entryDate: undefined,
+    })
+    expect(screen.getByTestId('journal-entries-date-filter')).toHaveTextContent(
+      'Date filter: none',
+    )
+  })
+
+  it('shows a filtered empty state when no entries match the selected date', async () => {
+    getJournalEntryCountForJournalMock.mockResolvedValue(0)
+    getJournalEntriesForJournalMock.mockResolvedValue([])
+
+    await renderJournalDetailsPage('journal-1', { entryDate: '2026-03-11' })
+
+    expect(screen.getByText('No entries found')).toBeInTheDocument()
+    expect(screen.getByText('No entries match the selected date.')).toBeInTheDocument()
   })
 })

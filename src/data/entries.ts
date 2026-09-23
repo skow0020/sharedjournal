@@ -106,8 +106,15 @@ export async function getJournalEntriesForJournal(
   journalId: string,
   input: {
     limit?: number
+    entryDate?: string
   } = {},
 ): Promise<JournalEntryForJournal[]> {
+  const conditions = [eq(journalMembers.userId, userId), eq(entries.journalId, journalId)]
+
+  if (input.entryDate) {
+    conditions.push(eq(entries.entryDate, input.entryDate))
+  }
+
   const query = db
     .select({
       id: entries.id,
@@ -121,7 +128,7 @@ export async function getJournalEntriesForJournal(
     .from(entries)
     .innerJoin(journalMembers, eq(journalMembers.journalId, entries.journalId))
     .innerJoin(users, eq(users.id, entries.authorUserId))
-    .where(and(eq(journalMembers.userId, userId), eq(entries.journalId, journalId)))
+    .where(and(...conditions))
     .orderBy(desc(entries.entryDate), desc(entries.createdAt))
 
   if (typeof input.limit === 'number') {
@@ -175,14 +182,23 @@ export async function getJournalEntriesForJournal(
 export async function getJournalEntryCountForJournal(
   userId: string,
   journalId: string,
+  input: {
+    entryDate?: string
+  } = {},
 ): Promise<number> {
+  const conditions = [eq(journalMembers.userId, userId), eq(entries.journalId, journalId)]
+
+  if (input.entryDate) {
+    conditions.push(eq(entries.entryDate, input.entryDate))
+  }
+
   const [result] = await db
     .select({
       count: sql<number>`count(${entries.id})`.mapWith(Number),
     })
     .from(entries)
     .innerJoin(journalMembers, eq(journalMembers.journalId, entries.journalId))
-    .where(and(eq(journalMembers.userId, userId), eq(entries.journalId, journalId)))
+    .where(and(...conditions))
 
   return result?.count ?? 0
 }
