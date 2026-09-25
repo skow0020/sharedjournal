@@ -407,6 +407,6 @@ describe('JournalDetailsPage', () => {
     await renderJournalDetailsPage('journal-1', { entryDate: '2026-03-11' })
 
     expect(screen.getByText('No entries found')).toBeInTheDocument()
-    expect(screen.getByText('No entries match the selected date.')).toBeInTheDocument()
+    expect(screen.getByText('No entries on or before the selected date.')).toBeInTheDocument()
   })
 })

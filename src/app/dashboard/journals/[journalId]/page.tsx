@@ -219,7 +219,7 @@ export default async function JournalDetailsPage({
               <CardTitle>{entryDateFilter ? 'No entries found' : 'No entries yet'}</CardTitle>
               <CardDescription>
                 {entryDateFilter
-                  ? 'No entries match the selected date.'
+                  ? 'No entries on or before the selected date.'
                   : 'This journal does not have any entries yet.'}
               </CardDescription>
             </CardHeader>

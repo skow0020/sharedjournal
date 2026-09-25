@@ -196,7 +196,7 @@ describe('getJournalEntriesForJournal', () => {
     expect(result).toHaveLength(2)
   })
 
-  it('filters entries by entryDate when provided', async () => {
+  it('filters entries to the selected date and all entries before it', async () => {
     const result = await getJournalEntriesForJournal(ownerId, journalId, {
       entryDate: '2026-03-01',
     })
@@ -205,7 +205,23 @@ describe('getJournalEntriesForJournal', () => {
     expect(result[0].title).toBe('First Entry')
   })
 
-  it('returns an empty array when no entries match the entryDate filter', async () => {
+  it('includes entries on and before the selected date in descending order', async () => {
+    await createEntry(journalId, ownerId, {
+      title: 'Third Entry',
+      content: 'Another one.',
+      entryDate: '2026-03-03',
+    })
+
+    const result = await getJournalEntriesForJournal(ownerId, journalId, {
+      entryDate: '2026-03-02',
+    })
+
+    expect(result).toHaveLength(2)
+    expect(result[0].title).toBe('Second Entry')
+    expect(result[1].title).toBe('First Entry')
+  })
+
+  it('returns an empty array when no entries fall on or before the entryDate filter', async () => {
     const result = await getJournalEntriesForJournal(ownerId, journalId, {
       entryDate: '2026-01-01',
     })
@@ -262,12 +278,12 @@ describe('getJournalEntryCountForJournal', () => {
     expect(count).toBe(list.length)
   })
 
-  it('filters the count by entryDate when provided', async () => {
+  it('filters the count to entries on or before the entryDate', async () => {
     const count = await getJournalEntryCountForJournal(ownerId, journalId, {
       entryDate: '2026-03-02',
     })
 
-    expect(count).toBe(1)
+    expect(count).toBe(2)
   })
 })
 

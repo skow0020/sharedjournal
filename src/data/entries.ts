@@ -1,5 +1,5 @@
 import { copy, del } from '@vercel/blob'
-import { and, asc, desc, eq, inArray, or, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray, lte, or, sql } from 'drizzle-orm'
 
 import { db } from '@/db'
 import { entries, entryPhotos, journalMembers, journals, users } from '@/db/schema'
@@ -100,6 +100,9 @@ export async function getJournalEntriesByDate(
 
 /**
  * Get entries for a specific journal, only if the user is a member of that journal.
+ *
+ * When `entryDate` is provided, entries on that date and all earlier entries are
+ * returned (in descending order), so the filter behaves like "on or before this date".
  */
 export async function getJournalEntriesForJournal(
   userId: string,
@@ -112,7 +115,7 @@ export async function getJournalEntriesForJournal(
   const conditions = [eq(journalMembers.userId, userId), eq(entries.journalId, journalId)]
 
   if (input.entryDate) {
-    conditions.push(eq(entries.entryDate, input.entryDate))
+    conditions.push(lte(entries.entryDate, input.entryDate))
   }
 
   const query = db
@@ -189,7 +192,7 @@ export async function getJournalEntryCountForJournal(
   const conditions = [eq(journalMembers.userId, userId), eq(entries.journalId, journalId)]
 
   if (input.entryDate) {
-    conditions.push(eq(entries.entryDate, input.entryDate))
+    conditions.push(lte(entries.entryDate, input.entryDate))
   }
 
   const [result] = await db
