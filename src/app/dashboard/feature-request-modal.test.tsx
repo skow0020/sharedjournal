@@ -19,7 +19,7 @@ describe('FeatureRequestModal', () => {
     expect(screen.getByLabelText('Feature request (optional)')).toBeInTheDocument()
   })
 
-  it('submits entered feedback and hides trigger after success', async () => {
+  it('submits entered feedback and keeps trigger visible after success', async () => {
     const user = userEvent.setup()
     const submitAction = vi.fn(async () => ({ error: null, success: true }))
     const dismissAction = vi.fn(async () => ({ error: null, success: true }))
@@ -39,7 +39,7 @@ describe('FeatureRequestModal', () => {
       })
     })
 
-    expect(screen.queryByRole('button', { name: 'Share feedback' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Share feedback' })).toBeInTheDocument()
   })
 
   it('dismisses survey and hides trigger after skip', async () => {
@@ -57,6 +57,26 @@ describe('FeatureRequestModal', () => {
     })
 
     expect(screen.queryByRole('button', { name: 'Share feedback' })).not.toBeInTheDocument()
+  })
+
+  it('closes modal without dismissing when Later is clicked', async () => {
+    const user = userEvent.setup()
+    const submitAction = vi.fn(async () => ({ error: null, success: true }))
+    const dismissAction = vi.fn(async () => ({ error: null, success: true }))
+
+    render(<FeatureRequestModal submitAction={submitAction} dismissAction={dismissAction} />)
+
+    await user.click(screen.getByRole('button', { name: 'Share feedback' }))
+    await user.click(screen.getByRole('button', { name: 'Later' }))
+
+    await waitFor(() => {
+      expect(
+        screen.queryByRole('dialog', { name: 'Help shape SharedJournal' }),
+      ).not.toBeInTheDocument()
+    })
+
+    expect(dismissAction).not.toHaveBeenCalled()
+    expect(screen.getByRole('button', { name: 'Share feedback' })).toBeInTheDocument()
   })
 
   it('renders returned error when submit fails', async () => {
