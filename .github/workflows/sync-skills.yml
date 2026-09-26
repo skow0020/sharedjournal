@@ -1,0 +1,69 @@
+name: Sync SKILL docs to agents folder
+
+on:
+  push:
+    paths:
+      - '.github/skills/**'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  sync-skills:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Sync skills
+        run: |
+          set -euo pipefail
+          mkdir -p .agents/skills
+          changed=0
+          for src in .github/skills/*.md; do
+            [ -f "$src" ] || continue
+            base=$(basename "$src" .md)
+            target_dir=".agents/skills/$base"
+            mkdir -p "$target_dir"
+            target_file="$target_dir/SKILL.md"
+
+            # Build frontmatter
+            cat > "$target_file" <<'EOF'
+---
+name: "${BASE_NAME}"
+description: "Synced from .github/skills/${SRC_NAME}.md"
+applyTo:
+  - ${BASE_NAME_LOWER}
+version: "1.0"
+---
+EOF
+
+            # Replace placeholders and append original content
+            SRC_NAME=$(basename "$src")
+            BASE_NAME="$base"
+            BASE_NAME_LOWER=$(echo "$base" | tr '[:upper:]' '[:lower:]')
+            # Use a temp file to perform substitution
+            tmpfile=$(mktemp)
+            sed "s|\${SRC_NAME}|$SRC_NAME|g; s|\${BASE_NAME}|$BASE_NAME|g; s|\${BASE_NAME_LOWER}|$BASE_NAME_LOWER|g" "$target_file" > "$tmpfile"
+            mv "$tmpfile" "$target_file"
+            # Append the original markdown content
+            echo >> "$target_file"
+            cat "$src" >> "$target_file"
+
+            git add "$target_file"
+            changed=1
+          done
+
+          if [ "$changed" -eq 1 ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            if git diff --staged --quiet; then
+              echo "No changes to commit"
+            else
+              git commit -m "chore: sync skills from .github/skills to .agents/skills [skip ci]" || true
+              git push
+            fi 
+          else
+            echo "No skill files found to sync"
+          fi
