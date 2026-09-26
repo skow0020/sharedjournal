@@ -28,25 +28,19 @@ jobs:
             mkdir -p "$target_dir"
             target_file="$target_dir/SKILL.md"
 
-            # Build frontmatter
-            cat > "$target_file" <<'EOF'
----
-name: "${BASE_NAME}"
-description: "Synced from .github/skills/${SRC_NAME}.md"
-applyTo:
-  - ${BASE_NAME_LOWER}
-version: "1.0"
----
-EOF
-
-            # Replace placeholders and append original content
+            # Build frontmatter safely using printf (avoid heredoc issues)
             SRC_NAME=$(basename "$src")
             BASE_NAME="$base"
             BASE_NAME_LOWER=$(echo "$base" | tr '[:upper:]' '[:lower:]')
-            # Use a temp file to perform substitution
-            tmpfile=$(mktemp)
-            sed "s|\${SRC_NAME}|$SRC_NAME|g; s|\${BASE_NAME}|$BASE_NAME|g; s|\${BASE_NAME_LOWER}|$BASE_NAME_LOWER|g" "$target_file" > "$tmpfile"
-            mv "$tmpfile" "$target_file"
+
+            printf '%s\n' "---" \
+              "name: \"$BASE_NAME\"" \
+              "description: \"Synced from .github/skills/$SRC_NAME\"" \
+              "applyTo:" \
+              "  - $BASE_NAME_LOWER" \
+              "version: \"1.0\"" \
+              "---" > "$target_file"
+
             # Append the original markdown content
             echo >> "$target_file"
             cat "$src" >> "$target_file"
