@@ -49,8 +49,8 @@ export function FeatureRequestModal({ submitAction, dismissAction }: FeatureRequ
       }
 
       setError(null)
+      setRequestText('')
       setOpen(false)
-      setHidden(true)
     })
   }
 
@@ -67,6 +67,10 @@ export function FeatureRequestModal({ submitAction, dismissAction }: FeatureRequ
       setOpen(false)
       setHidden(true)
     })
+  }
+
+  function handleLater() {
+    setOpen(false)
   }
 
   if (hidden) {
@@ -105,6 +109,9 @@ export function FeatureRequestModal({ submitAction, dismissAction }: FeatureRequ
           <DialogFooter>
             <Button type="button" variant="outline" onClick={handleDismiss} disabled={pending}>
               No thanks
+            </Button>
+            <Button type="button" variant="outline" onClick={handleLater} disabled={pending}>
+              Later
             </Button>
             <Button type="submit" disabled={pending}>
               {pending ? 'Saving...' : 'Submit'}
