@@ -25,7 +25,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               href={SUPPORT_EMAIL_HREF}
               className="text-muted-foreground underline-offset-4 hover:underline"
             >
-              Support
+              Contact
             </a>
             <Link
               href="/buy-me-coffee"
