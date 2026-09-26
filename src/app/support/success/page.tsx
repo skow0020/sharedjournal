@@ -108,10 +108,10 @@ export default async function SupportSuccessPage({ searchParams }: SupportSucces
       <p className="text-muted-foreground text-xs">
         Need help? Email{' '}
         <a
-          href="mailto:skow0020@gmail.com"
+          href="mailto:sharedjournal.support@gmail.com"
           className="underline underline-offset-4 hover:no-underline"
         >
-          skow0020@gmail.com
+          sharedjournal.support@gmail.com
         </a>
         .
       </p>
