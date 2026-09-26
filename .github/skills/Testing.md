@@ -16,3 +16,4 @@ Checklist for PRs
 Best Practices
 - Keep tests deterministic; avoid reliance on network or external services where possible.
 - Use fixtures and test helpers from `test/` and `e2e/` for consistent setups.
+- Be smart
