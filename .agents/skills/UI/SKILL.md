@@ -1,11 +1,8 @@
-
 ---
 name: "UI"
-description: "shadcn/ui + Tailwind conventions for SharedJournal"
+description: "Synced from .github/skills/UI.md"
 applyTo:
   - ui
-  - frontend
-  - components
 version: "1.0"
 ---
 

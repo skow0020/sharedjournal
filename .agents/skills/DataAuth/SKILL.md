@@ -1,11 +1,8 @@
-
 ---
-name: "Data + Auth"
-description: "Drizzle, Neon, Clerk patterns"
+name: "DataAuth"
+description: "Synced from .github/skills/DataAuth.md"
 applyTo:
-  - data
-  - auth
-  - backend
+  - dataauth
 version: "1.0"
 ---
 

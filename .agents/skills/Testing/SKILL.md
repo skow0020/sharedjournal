@@ -1,11 +1,8 @@
-
 ---
 name: "Testing"
-description: "vitest, Playwright, and coverage expectations"
+description: "Synced from .github/skills/Testing.md"
 applyTo:
-  - test
-  - e2e
-  - ci
+  - testing
 version: "1.0"
 ---
 
@@ -23,3 +20,8 @@ Checklist for PRs
 - Unit tests added/updated (yes/no)
 - Integration tests added/updated (yes/no)
 - Local `npm run test:coverage` passes (yes/no)
+
+Best Practices
+- Keep tests deterministic; avoid reliance on network or external services where possible.
+- Use fixtures and test helpers from `test/` and `e2e/` for consistent setups.
+- Be smart
