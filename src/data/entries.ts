@@ -1,5 +1,5 @@
 import { copy, del } from '@vercel/blob'
-import { and, asc, desc, eq, inArray, or, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray, lte, or, sql } from 'drizzle-orm'
 
 import { db } from '@/db'
 import { entries, entryPhotos, journalMembers, journals, users } from '@/db/schema'
@@ -100,14 +100,24 @@ export async function getJournalEntriesByDate(
 
 /**
  * Get entries for a specific journal, only if the user is a member of that journal.
+ *
+ * When `entryDate` is provided, entries on that date and all earlier entries are
+ * returned (in descending order), so the filter behaves like "on or before this date".
  */
 export async function getJournalEntriesForJournal(
   userId: string,
   journalId: string,
   input: {
     limit?: number
+    entryDate?: string
   } = {},
 ): Promise<JournalEntryForJournal[]> {
+  const conditions = [eq(journalMembers.userId, userId), eq(entries.journalId, journalId)]
+
+  if (input.entryDate) {
+    conditions.push(lte(entries.entryDate, input.entryDate))
+  }
+
   const query = db
     .select({
       id: entries.id,
@@ -121,7 +131,7 @@ export async function getJournalEntriesForJournal(
     .from(entries)
     .innerJoin(journalMembers, eq(journalMembers.journalId, entries.journalId))
     .innerJoin(users, eq(users.id, entries.authorUserId))
-    .where(and(eq(journalMembers.userId, userId), eq(entries.journalId, journalId)))
+    .where(and(...conditions))
     .orderBy(desc(entries.entryDate), desc(entries.createdAt))
 
   if (typeof input.limit === 'number') {
@@ -175,14 +185,23 @@ export async function getJournalEntriesForJournal(
 export async function getJournalEntryCountForJournal(
   userId: string,
   journalId: string,
+  input: {
+    entryDate?: string
+  } = {},
 ): Promise<number> {
+  const conditions = [eq(journalMembers.userId, userId), eq(entries.journalId, journalId)]
+
+  if (input.entryDate) {
+    conditions.push(lte(entries.entryDate, input.entryDate))
+  }
+
   const [result] = await db
     .select({
       count: sql<number>`count(${entries.id})`.mapWith(Number),
     })
     .from(entries)
     .innerJoin(journalMembers, eq(journalMembers.journalId, entries.journalId))
-    .where(and(eq(journalMembers.userId, userId), eq(entries.journalId, journalId)))
+    .where(and(...conditions))
 
   return result?.count ?? 0
 }

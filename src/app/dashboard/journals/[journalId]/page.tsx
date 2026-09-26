@@ -27,6 +27,7 @@ import { deleteJournalAction } from '@/app/dashboard/actions'
 import { CreateEntryModal } from '@/app/dashboard/journals/[journalId]/create-entry-modal'
 import { DeleteEntryButton } from '@/app/dashboard/journals/[journalId]/delete-entry-button'
 import { InviteUserModal } from '@/app/dashboard/journals/[journalId]/invite-user-modal'
+import { JournalEntriesDateFilter } from '@/app/dashboard/journals/[journalId]/journal-entries-date-filter'
 import { JournalEntriesInfiniteLoader } from '@/app/dashboard/journals/[journalId]/journal-entries-infinite-loader'
 import { OwnerActionsMenu } from '@/app/dashboard/journals/[journalId]/owner-actions-menu'
 import { JournalTitleEditor } from '@/app/dashboard/journals/[journalId]/journal-title-editor'
@@ -54,10 +55,12 @@ type JournalDetailsPageProps = {
   }>
   searchParams?: Promise<{
     entriesPage?: string
+    entryDate?: string
   }>
 }
 
 const ENTRIES_PER_PAGE = 10
+const ENTRY_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/
 
 export default async function JournalDetailsPage({
   params,
@@ -88,6 +91,10 @@ export default async function JournalDetailsPage({
   const parsedEntriesPage = Number.parseInt(resolvedSearchParams?.entriesPage ?? '1', 10)
   const currentEntriesPage =
     Number.isNaN(parsedEntriesPage) || parsedEntriesPage < 1 ? 1 : parsedEntriesPage
+  const entryDateFilter =
+    resolvedSearchParams?.entryDate && ENTRY_DATE_PATTERN.test(resolvedSearchParams.entryDate)
+      ? resolvedSearchParams.entryDate
+      : undefined
 
   // Check if comments feature is enabled via LaunchDarkly
   const ldContext = createLaunchDarklyContext({
@@ -100,9 +107,10 @@ export default async function JournalDetailsPage({
   })
 
   const [totalEntryCount, entries, allPhotos] = await Promise.all([
-    getJournalEntryCountForJournal(appUser.id, journalId),
+    getJournalEntryCountForJournal(appUser.id, journalId, { entryDate: entryDateFilter }),
     getJournalEntriesForJournal(appUser.id, journalId, {
       limit: currentEntriesPage * ENTRIES_PER_PAGE,
+      entryDate: entryDateFilter,
     }),
     getAllPhotosForJournal(appUser.id, journalId),
   ])
@@ -201,12 +209,19 @@ export default async function JournalDetailsPage({
       ) : null}
 
       <section className="space-y-3 border-t pt-2">
-        <h2 className="text-xl font-semibold tracking-tight">Journal entries</h2>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="text-xl font-semibold tracking-tight">Journal entries</h2>
+          <JournalEntriesDateFilter value={entryDateFilter ?? ''} />
+        </div>
         {entries.length === 0 ? (
           <Card>
             <CardHeader>
-              <CardTitle>No entries yet</CardTitle>
-              <CardDescription>This journal does not have any entries yet.</CardDescription>
+              <CardTitle>{entryDateFilter ? 'No entries found' : 'No entries yet'}</CardTitle>
+              <CardDescription>
+                {entryDateFilter
+                  ? 'No entries on or before the selected date.'
+                  : 'This journal does not have any entries yet.'}
+              </CardDescription>
             </CardHeader>
           </Card>
         ) : (
