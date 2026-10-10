@@ -59,8 +59,10 @@ updates:
           - '@types/node'
           - 'esbuild'
           - 'tsx'
-          - 'typescript'
           - 'p-limit'
+      typescript-stack:
+        patterns:
+          - 'typescript'
       vercel-stack:
         patterns:
           - '@vercel/analytics'
