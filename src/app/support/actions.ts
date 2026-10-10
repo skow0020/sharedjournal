@@ -84,7 +84,7 @@ export async function createSupportCheckoutAction(
       customer_email: currentUserEmail,
       success_url: `${baseUrl}/buy-me-coffee/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/buy-me-coffee`,
-      payment_method_types: ['card'],
+      allowed_payment_method_types: ['card'],
       line_items: [
         {
           quantity: 1,
