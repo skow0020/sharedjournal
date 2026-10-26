@@ -383,3 +383,50 @@ export async function dismissFeatureRequestSurveyAction(
     success: true,
   }
 }
+
+export type DismissSupportModalInput = {
+  nextShowAfterDays?: number
+}
+
+export type DismissSupportModalState = {
+  error: string | null
+  success: boolean
+}
+
+export async function dismissSupportModalAction(
+  input: DismissSupportModalInput,
+): Promise<DismissSupportModalState> {
+  const { upsertSupportModalDismissal } = await import('@/data/support-modal-dismissals')
+
+  const currentUser = await getCurrentAppUser()
+
+  if (!currentUser) {
+    return {
+      error: 'User not authenticated.',
+      success: false,
+    }
+  }
+
+  const parsedInput = z
+    .object({
+      nextShowAfterDays: z.number().int().positive().optional(),
+    })
+    .safeParse(input)
+
+  if (!parsedInput.success) {
+    return {
+      error: parsedInput.error.issues[0]?.message ?? 'Invalid input.',
+      success: false,
+    }
+  }
+
+  await upsertSupportModalDismissal({
+    userId: currentUser.id,
+    nextShowAfterDays: parsedInput.data.nextShowAfterDays,
+  })
+
+  return {
+    error: null,
+    success: true,
+  }
+}

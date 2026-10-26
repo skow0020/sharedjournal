@@ -225,6 +225,22 @@ export const featureRequestSurveys = pgTable(
   ],
 )
 
+export const supportModalDismissals = pgTable(
+  'support_modal_dismissals',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    dismissedAt: timestamp('dismissed_at', { withTimezone: true }).defaultNow().notNull(),
+    nextShowAfter: timestamp('next_show_after', { withTimezone: true }).notNull(),
+  },
+  (table) => [
+    uniqueIndex('support_modal_dismissals_user_uidx').on(table.userId),
+    index('support_modal_dismissals_next_show_idx').on(table.nextShowAfter),
+  ],
+)
+
 export const usersRelations = relations(users, ({ one, many }) => ({
   ownedJournals: many(journals),
   journalMemberships: many(journalMembers),
@@ -239,6 +255,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
     relationName: 'journalInvitationsAccepted',
   }),
   featureRequestSurvey: one(featureRequestSurveys),
+  supportModalDismissal: one(supportModalDismissals),
 }))
 
 export const journalsRelations = relations(journals, ({ one, many }) => ({
@@ -328,6 +345,13 @@ export const featureRequestSurveysRelations = relations(featureRequestSurveys, (
   }),
 }))
 
+export const supportModalDismissalsRelations = relations(supportModalDismissals, ({ one }) => ({
+  user: one(users, {
+    fields: [supportModalDismissals.userId],
+    references: [users.id],
+  }),
+}))
+
 export type User = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert
 
@@ -351,3 +375,6 @@ export type NewSupportPayment = typeof supportPayments.$inferInsert
 
 export type FeatureRequestSurvey = typeof featureRequestSurveys.$inferSelect
 export type NewFeatureRequestSurvey = typeof featureRequestSurveys.$inferInsert
+
+export type SupportModalDismissal = typeof supportModalDismissals.$inferSelect
+export type NewSupportModalDismissal = typeof supportModalDismissals.$inferInsert
