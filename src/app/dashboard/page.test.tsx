@@ -7,6 +7,7 @@ const {
   getCurrentUserEmailMock,
   getPendingInvitationsForEmailMock,
   getFeatureRequestSurveyResponseForUserMock,
+  getSupportModalDismissalForUserMock,
   getCollaboratorsForJournalsMock,
   getRecentPhotosForJournalsMock,
   getUserJournalCountMock,
@@ -19,6 +20,7 @@ const {
   getCurrentUserEmailMock: vi.fn(),
   getPendingInvitationsForEmailMock: vi.fn(),
   getFeatureRequestSurveyResponseForUserMock: vi.fn(),
+  getSupportModalDismissalForUserMock: vi.fn(),
   getCollaboratorsForJournalsMock: vi.fn(),
   getRecentPhotosForJournalsMock: vi.fn(),
   getUserJournalCountMock: vi.fn(),
@@ -55,6 +57,12 @@ vi.mock('@/app/dashboard/feature-request-modal', () => ({
   ),
 }))
 
+vi.mock('@/app/dashboard/support-modal', () => ({
+  SupportModal: ({ children }: { children?: ReactNode }) => (
+    <div data-testid="support-modal">{children ?? 'Support modal'}</div>
+  ),
+}))
+
 vi.mock('@/app/dashboard/delete-journal-button', () => ({
   DeleteJournalButton: ({ journalId }: { journalId: string }) => (
     <div data-testid={`delete-journal-${journalId}`}>Delete</div>
@@ -80,6 +88,10 @@ vi.mock('@/data/invitations', () => ({
 
 vi.mock('@/data/feature-requests', () => ({
   getFeatureRequestSurveyResponseForUser: getFeatureRequestSurveyResponseForUserMock,
+}))
+
+vi.mock('@/data/support-modal-dismissals', () => ({
+  getSupportModalDismissalForUser: getSupportModalDismissalForUserMock,
 }))
 
 vi.mock('@/data/journals', () => ({
@@ -124,6 +136,7 @@ describe('DashboardPage', () => {
     getLaunchDarklyVariationMock.mockResolvedValue(true)
     getPendingInvitationsForEmailMock.mockResolvedValue([])
     getFeatureRequestSurveyResponseForUserMock.mockResolvedValue(null)
+    getSupportModalDismissalForUserMock.mockResolvedValue(null)
   })
 
   it('redirects to sign-in when no app user exists', async () => {
