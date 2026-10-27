@@ -1,10 +1,10 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type APIRequestContext } from '@playwright/test'
 import { DashboardPage } from './pages/dashboard.page'
 import { SupportModal } from './components/support-modal'
 
 // Helper to set flag state with cleanup to avoid cross-test interference
 async function withSupportModalFlag(
-  request: any,
+  request: APIRequestContext,
   enabled: boolean,
   testFn: () => Promise<void>
 ) {
