@@ -41,6 +41,13 @@ export function SupportModal({ open, onDismiss }: SupportModalProps) {
     }
   }
 
+  async function handleBuyCoffee() {
+    // Persist dismissal with 180-day cooldown before navigating
+    // This prevents the modal from immediately reappearing after user completes purchase
+    await handleDismiss(180)
+    // Navigation happens via Link after modal closes
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={(newOpen) => {
       if (!newOpen) {
@@ -86,7 +93,7 @@ export function SupportModal({ open, onDismiss }: SupportModalProps) {
             asChild
             disabled={isPending}
             className="flex-1 gap-2 sm:flex-none"
-            onClick={() => setIsOpen(false)}
+            onClick={handleBuyCoffee}
           >
             <Link href="/buy-me-coffee">
               <CoffeeIcon className="h-4 w-4" aria-hidden="true" />
