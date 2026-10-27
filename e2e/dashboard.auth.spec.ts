@@ -3,13 +3,19 @@ import { DashboardPage } from './pages/dashboard.page'
 import { JournalDetailPage } from './pages/journal-detail.page'
 
 test.beforeEach(async ({ request }) => {
-  const resetResponse = await request.post('/api/test/launchdarkly/entry-comments', {
+  const entryCommentsResponse = await request.post('/api/test/launchdarkly/entry-comments', {
     data: {
       enabled: false,
     },
   })
+  expect(entryCommentsResponse.ok()).toBeTruthy()
 
-  expect(resetResponse.ok()).toBeTruthy()
+  const supportModalResponse = await request.post('/api/test/launchdarkly/support-modal', {
+    data: {
+      enabled: false,
+    },
+  })
+  expect(supportModalResponse.ok()).toBeTruthy()
 })
 
 test('can create a journal, add an entry, comment on it, and invite a collaborator', async ({
