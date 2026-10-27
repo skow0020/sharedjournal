@@ -366,4 +366,56 @@ describe('DashboardPage', () => {
     expect(screen.getByRole('button', { name: 'Previous' })).toBeDisabled()
     expect(screen.getByRole('link', { name: 'Next' })).toHaveAttribute('href', '/dashboard?page=2')
   })
+
+  it('shows support modal when flag is enabled and no dismissal exists', async () => {
+    getLaunchDarklyVariationMock.mockResolvedValue(true)
+    getSupportModalDismissalForUserMock.mockResolvedValue(null)
+
+    await renderDashboardPage()
+
+    expect(screen.getByTestId('support-modal')).toBeInTheDocument()
+  })
+
+  it('hides support modal when flag is disabled', async () => {
+    getLaunchDarklyVariationMock.mockResolvedValue(false)
+    getSupportModalDismissalForUserMock.mockResolvedValue(null)
+
+    await renderDashboardPage()
+
+    expect(screen.queryByTestId('support-modal')).not.toBeInTheDocument()
+  })
+
+  it('hides support modal when dismissal nextShowAfter is in the future', async () => {
+    const tomorrow = new Date()
+    tomorrow.setDate(tomorrow.getDate() + 1)
+
+    getLaunchDarklyVariationMock.mockResolvedValue(true)
+    getSupportModalDismissalForUserMock.mockResolvedValue({
+      id: 'dismissal-1',
+      userId: 'user-1',
+      dismissedAt: new Date(),
+      nextShowAfter: tomorrow,
+    })
+
+    await renderDashboardPage()
+
+    expect(screen.queryByTestId('support-modal')).not.toBeInTheDocument()
+  })
+
+  it('shows support modal when dismissal nextShowAfter is in the past', async () => {
+    const yesterday = new Date()
+    yesterday.setDate(yesterday.getDate() - 1)
+
+    getLaunchDarklyVariationMock.mockResolvedValue(true)
+    getSupportModalDismissalForUserMock.mockResolvedValue({
+      id: 'dismissal-1',
+      userId: 'user-1',
+      dismissedAt: new Date(yesterday),
+      nextShowAfter: yesterday,
+    })
+
+    await renderDashboardPage()
+
+    expect(screen.getByTestId('support-modal')).toBeInTheDocument()
+  })
 })
