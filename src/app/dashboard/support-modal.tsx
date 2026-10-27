@@ -31,8 +31,13 @@ export function SupportModal({ open, onDismiss }: SupportModalProps) {
       if (result.success) {
         setIsOpen(false)
       }
+    } catch (error) {
+      // Catch rejection errors so they don't become unhandled
+      console.error('Failed to dismiss support modal:', error)
     } finally {
       setIsPending(false)
+      // Close dialog locally even when persistence fails
+      setIsOpen(false)
     }
   }
 

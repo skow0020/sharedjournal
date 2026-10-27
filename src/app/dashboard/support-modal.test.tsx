@@ -66,8 +66,22 @@ describe('SupportModal', () => {
     await user.click(maybeLaterButton)
 
     expect(failingDismiss).toHaveBeenCalledWith({ nextShowAfterDays: 30 })
-    // Modal should still be open after failed dismissal
-    expect(screen.getByText('Support SharedJournal')).toBeInTheDocument()
+    // Modal should close locally even when server returns failure
+    expect(screen.queryByText('Support SharedJournal')).not.toBeInTheDocument()
+  })
+
+  it('should handle dismissed action rejection gracefully', async () => {
+    const user = userEvent.setup()
+    const rejectingDismiss = vi.fn().mockRejectedValue(new Error('Network error'))
+
+    render(<SupportModal open={true} onDismiss={rejectingDismiss} />)
+
+    const maybeLaterButton = screen.getByRole('button', { name: /maybe later/i })
+    await user.click(maybeLaterButton)
+
+    expect(rejectingDismiss).toHaveBeenCalledWith({ nextShowAfterDays: 30 })
+    // Modal should close locally even when request is rejected
+    expect(screen.queryByText('Support SharedJournal')).not.toBeInTheDocument()
   })
 
   it('should close modal when dismiss succeeds', async () => {
