@@ -11,16 +11,19 @@ import {
   deleteJournalAction,
   generateOwnerExportAction,
   submitFeatureRequestSurveyAction,
+  dismissSupportModalAction,
 } from '@/app/dashboard/actions'
 import { CreateJournalModal } from '@/app/dashboard/create-journal-modal'
 import { ExportJournalsButton } from '@/app/dashboard/export-journals-button'
 import { FeatureRequestModal } from '@/app/dashboard/feature-request-modal'
+import { SupportModal } from '@/app/dashboard/support-modal'
 import { JournalCard } from '@/app/dashboard/journal-card'
 import { PendingInvitationRow } from '@/app/dashboard/pending-invitation-row'
 import { Button } from '@/components/ui/button'
 import { PageFlairBackdrop } from '@/components/page-flair-shell'
 import { getPendingInvitationsForEmail } from '@/data/invitations'
 import { getFeatureRequestSurveyResponseForUser } from '@/data/feature-requests'
+import { getSupportModalDismissalForUser } from '@/data/support-modal-dismissals'
 import {
   getCollaboratorsForJournals,
   getRecentPhotosForJournals,
@@ -76,6 +79,11 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     context: ldContext,
     fallback: false,
   })
+  const isSupportModalEnabled = await getLaunchDarklyVariation({
+    flagKey: 'support-modal',
+    context: ldContext,
+    fallback: false,
+  })
   const pendingInvitations = currentUserEmail
     ? await getPendingInvitationsForEmail(currentUserEmail)
     : []
@@ -83,6 +91,12 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     userId: appUser.id,
   })
   const shouldShowFeatureRequestPrompt = featureRequestSurveyResponse === null
+  const supportModalDismissal = await getSupportModalDismissalForUser({
+    userId: appUser.id,
+  })
+  const now = new Date()
+  const shouldShowSupportModal =
+    isSupportModalEnabled && (!supportModalDismissal || supportModalDismissal.nextShowAfter < now)
   const collaboratorsByJournal = await getCollaboratorsForJournals(
     userJournals.map((journal) => journal.id),
   )
@@ -91,7 +105,11 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   )
 
   return (
-    <main className="relative mx-auto w-full max-w-5xl space-y-6 px-6 py-8">
+    <>
+      {shouldShowSupportModal ? (
+        <SupportModal open={shouldShowSupportModal} onDismiss={dismissSupportModalAction} />
+      ) : null}
+      <main className="relative mx-auto w-full max-w-5xl space-y-6 px-6 py-8">
       <PageFlairBackdrop
         className="fixed inset-0 -z-10 overflow-hidden"
         topOrbClassName="-top-32 right-0 h-96 w-96 bg-[#86e6d3]/24"
@@ -180,5 +198,6 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         </section>
       ) : null}
     </main>
+    </>
   )
 }

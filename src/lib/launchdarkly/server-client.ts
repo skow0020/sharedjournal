@@ -5,6 +5,8 @@ let launchDarklyInitialization: Promise<LDClient> | null = null
 const LAUNCHDARKLY_INITIALIZATION_TIMEOUT_SECONDS = 10
 const ENTRY_COMMENTS_FLAG_KEY = 'entry-comments'
 const ENTRY_COMMENTS_OVERRIDE_ENV_VAR = 'LAUNCHDARKLY_FLAG_ENTRY_COMMENTS'
+const SUPPORT_MODAL_FLAG_KEY = 'support-modal'
+const SUPPORT_MODAL_OVERRIDE_ENV_VAR = 'LAUNCHDARKLY_FLAG_SUPPORT_MODAL'
 
 function parseBooleanEnvValue(value: string | undefined): boolean | undefined {
   if (!value) {
@@ -25,11 +27,15 @@ function parseBooleanEnvValue(value: string | undefined): boolean | undefined {
 }
 
 function getFlagOverride(flagKey: string): boolean | undefined {
-  if (flagKey !== ENTRY_COMMENTS_FLAG_KEY) {
-    return undefined
+  if (flagKey === ENTRY_COMMENTS_FLAG_KEY) {
+    return parseBooleanEnvValue(process.env[ENTRY_COMMENTS_OVERRIDE_ENV_VAR])
   }
 
-  return parseBooleanEnvValue(process.env[ENTRY_COMMENTS_OVERRIDE_ENV_VAR])
+  if (flagKey === SUPPORT_MODAL_FLAG_KEY) {
+    return parseBooleanEnvValue(process.env[SUPPORT_MODAL_OVERRIDE_ENV_VAR])
+  }
+
+  return undefined
 }
 
 function getLaunchDarklySdkKey(): string {

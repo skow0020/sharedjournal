@@ -3,6 +3,15 @@ import { expect, test } from '@playwright/test'
 import { DashboardPage } from './pages/dashboard.page'
 import { JournalDetailPage } from './pages/journal-detail.page'
 
+test.beforeEach(async ({ request }) => {
+  const supportModalResponse = await request.post('/api/test/launchdarkly/support-modal', {
+    data: {
+      enabled: false,
+    },
+  })
+  expect(supportModalResponse.ok()).toBeTruthy()
+})
+
 test('can create a journal, send an invite, and cancel it', async ({ page }) => {
   const journalTitle = `E2E Invite Journal ${Date.now()}`
   const inviteeEmail = `invitee+${Date.now()}@example.com`
