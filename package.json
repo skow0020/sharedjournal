@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^7.9.22",
-    "@launchdarkly/node-server-sdk": "^9.14.4",
+    "@launchdarkly/node-server-sdk": "^9.16.0",
     "@neondatabase/serverless": "^1.2.0",
     "@types/pg": "^8.23.1",
     "@vercel/analytics": "^2.0.1",
@@ -38,17 +38,17 @@
     "dotenv": "^18.0.9",
     "drizzle-orm": "0.45.4",
     "jszip": "^3.10.2",
-    "lucide-react": "^1.61.0",
+    "lucide-react": "^1.65.0",
     "next": "16.4.3",
     "next-themes": "^0.4.6",
     "p-limit": "^7.3.3",
     "pg": "^8.23.1",
-    "radix-ui": "^1.7.0",
+    "radix-ui": "^1.8.1",
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "stripe": "^23.0.1",
     "tailwind-merge": "^3.7.0",
-    "zod": "^4.6.5"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@playwright/test": "1.64.1",
@@ -57,7 +57,7 @@
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.8",
-    "@types/node": "^26.6.5",
+    "@types/node": "^26.6.6",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@vitest/coverage-v8": "^5.0.5",
