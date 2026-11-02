@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^7.9.22",
-    "@launchdarkly/node-server-sdk": "^9.14.4",
+    "@launchdarkly/node-server-sdk": "^9.16.0",
     "@neondatabase/serverless": "^1.2.0",
     "@types/pg": "^8.23.1",
     "@vercel/analytics": "^2.0.1",
