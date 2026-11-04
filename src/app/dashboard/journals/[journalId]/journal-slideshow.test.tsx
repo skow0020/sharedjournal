@@ -30,6 +30,14 @@ describe('JournalSlideshow', () => {
     render(<JournalSlideshow photos={photos} trigger={<button>Open Slideshow</button>} />)
     await user.click(screen.getByRole('button', { name: 'Open Slideshow' }))
     expect(screen.getByRole('button', { name: 'Close slideshow' })).toBeVisible()
+    expect(screen.getByRole('button', { name: 'Pause slideshow' })).toBeVisible()
+  })
+
+  it('fits slideshow photos without cropping them', async () => {
+    const user = userEvent.setup()
+    render(<JournalSlideshow photos={photos} trigger={<button>Open Slideshow</button>} />)
+    await user.click(screen.getByRole('button', { name: 'Open Slideshow' }))
+    expect(screen.getByRole('img', { name: 'Photo 1 of 3' })).toHaveClass('object-contain')
   })
 
   it('shows photo counter after opening', async () => {
