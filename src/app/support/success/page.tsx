@@ -38,7 +38,7 @@ export default async function SupportSuccessPage({ searchParams }: SupportSucces
           <CardHeader>
             <CardTitle>Checkout session not found</CardTitle>
             <CardDescription>
-              We could not find your checkout session. Please try again from the Buy me coffee page.
+              We could not find your checkout session. Please try again from the support page.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -90,9 +90,9 @@ export default async function SupportSuccessPage({ searchParams }: SupportSucces
     <PageFlairShell contentClassName="max-w-2xl space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Thanks for the coffee!</CardTitle>
+          <CardTitle>Thank you for your support!</CardTitle>
           <CardDescription>
-            Your contribution helps us keep building for shared stories.
+            Your contribution helps keep SharedJournal growing and supports its ongoing development.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">

@@ -57,7 +57,7 @@ describe('SupportPage', () => {
     const page = await SupportPage()
     render(page)
 
-    expect(screen.getByRole('heading', { name: 'Buy me coffee' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Buy me coffee or beer' })).toBeInTheDocument()
     expect(screen.getByText('Coffee option 500')).toBeInTheDocument()
     expect(screen.getByText('Coffee option 1000')).toBeInTheDocument()
     expect(screen.getByText('Coffee option 2500')).toBeInTheDocument()
