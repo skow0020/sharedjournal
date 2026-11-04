@@ -29,7 +29,7 @@ describe('JournalSlideshow', () => {
     const user = userEvent.setup()
     render(<JournalSlideshow photos={photos} trigger={<button>Open Slideshow</button>} />)
     await user.click(screen.getByRole('button', { name: 'Open Slideshow' }))
-    expect(screen.getByLabelText('Close slideshow')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Close slideshow' })).toBeVisible()
   })
 
   it('shows photo counter after opening', async () => {
@@ -122,9 +122,11 @@ describe('JournalSlideshow', () => {
   it('closes the dialog when Close button is clicked', async () => {
     const user = userEvent.setup()
     render(<JournalSlideshow photos={photos} trigger={<button>Open Slideshow</button>} />)
-    await user.click(screen.getByRole('button', { name: 'Open Slideshow' }))
-    await user.click(screen.getByLabelText('Close slideshow'))
-    expect(screen.queryByLabelText('Close slideshow')).not.toBeInTheDocument()
+    const trigger = screen.getByRole('button', { name: 'Open Slideshow' })
+    await user.click(trigger)
+    await user.click(screen.getByRole('button', { name: 'Close slideshow' }))
+    expect(screen.queryByRole('button', { name: 'Close slideshow' })).not.toBeInTheDocument()
+    expect(trigger).toHaveFocus()
   })
 
   it('opens without error and shows no photo content when photos is empty', async () => {
