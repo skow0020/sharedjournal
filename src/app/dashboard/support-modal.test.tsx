@@ -9,9 +9,12 @@ describe('SupportModal', () => {
   it('should render modal when open is true', () => {
     render(<SupportModal open={true} onDismiss={mockOnDismiss} />)
 
-    expect(screen.getByText('Support SharedJournal')).toBeInTheDocument()
+    expect(screen.getByText('A little support goes a long way')).toBeInTheDocument()
     expect(
       screen.getByText('If you enjoy using SharedJournal, consider supporting its development.'),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(/This web app has been developed and maintained by one person/i),
     ).toBeInTheDocument()
   })
 
@@ -53,7 +56,7 @@ describe('SupportModal', () => {
     render(<SupportModal open={false} onDismiss={mockOnDismiss} />)
 
     // Modal title should not be in the document when open is false
-    expect(screen.queryByText('Support SharedJournal')).not.toBeInTheDocument()
+    expect(screen.queryByText('A little support goes a long way')).not.toBeInTheDocument()
   })
 
   it('should handle failed dismissal gracefully', async () => {
@@ -67,7 +70,7 @@ describe('SupportModal', () => {
 
     expect(failingDismiss).toHaveBeenCalledWith({ nextShowAfterDays: 30 })
     // Modal should close locally even when server returns failure
-    expect(screen.queryByText('Support SharedJournal')).not.toBeInTheDocument()
+    expect(screen.queryByText('A little support goes a long way')).not.toBeInTheDocument()
   })
 
   it('should handle dismissed action rejection gracefully', async () => {
@@ -81,7 +84,7 @@ describe('SupportModal', () => {
 
     expect(rejectingDismiss).toHaveBeenCalledWith({ nextShowAfterDays: 30 })
     // Modal should close locally even when request is rejected
-    expect(screen.queryByText('Support SharedJournal')).not.toBeInTheDocument()
+    expect(screen.queryByText('A little support goes a long way')).not.toBeInTheDocument()
   })
 
   it('should close modal when dismiss succeeds', async () => {
@@ -96,7 +99,7 @@ describe('SupportModal', () => {
 
     // Rerender to simulate component state update after successful dismiss
     rerender(<SupportModal open={false} onDismiss={mockOnDismiss} />)
-    expect(screen.queryByText('Support SharedJournal')).not.toBeInTheDocument()
+    expect(screen.queryByText('A little support goes a long way')).not.toBeInTheDocument()
   })
 
   it('should enable buy coffee button when not pending', () => {
@@ -110,7 +113,7 @@ describe('SupportModal', () => {
   it('should render with proper accessibility attributes', () => {
     render(<SupportModal open={true} onDismiss={mockOnDismiss} />)
 
-    const heading = screen.getByRole('heading', { name: /support SharedJournal/i })
+    const heading = screen.getByRole('heading', { name: /a little support goes a long way/i })
     expect(heading).toBeInTheDocument()
 
     const description = screen.getByText(

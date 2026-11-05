@@ -14,9 +14,9 @@ export default async function SupportPage() {
   return (
     <PageFlairShell mainClassName="min-h-[100svh]" contentClassName="max-w-3xl space-y-6">
       <section className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight">Buy me coffee</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">Buy me coffee or beer</h1>
         <p className="text-muted-foreground text-sm">
-          SharedJournal is free to use. If it has helped you, an optional one-time coffee
+          SharedJournal is free to use. If it has helped you, a
           contribution helps cover hosting, storage, and ongoing development.
         </p>
       </section>
@@ -39,9 +39,9 @@ export default async function SupportPage() {
       ) : (
         <Card>
           <CardHeader>
-            <CardTitle>Choose a coffee amount</CardTitle>
+            <CardTitle>Choose an amount</CardTitle>
             <CardDescription>
-              Coffee contributions are optional and are not tax-deductible charitable donations.
+              Contributions are optional and are not tax-deductible charitable donations.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-3">

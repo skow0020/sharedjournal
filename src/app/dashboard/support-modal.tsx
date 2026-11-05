@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { CoffeeIcon } from 'lucide-react'
+import { CoffeeIcon, HeartIcon } from 'lucide-react'
 
 import { type DismissSupportModalInput } from '@/app/dashboard/actions'
 import { Button } from '@/components/ui/button'
@@ -60,24 +60,21 @@ export function SupportModal({ open, onDismiss }: SupportModalProps) {
         <DialogHeader>
           <div className="flex items-center gap-2">
             <CoffeeIcon className="h-5 w-5 text-amber-600" aria-hidden="true" />
-            <DialogTitle>Support SharedJournal</DialogTitle>
+            <DialogTitle>A little support goes a long way</DialogTitle>
           </div>
-          <DialogDescription>
+            <DialogDescription>
             If you enjoy using SharedJournal, consider supporting its development.
-          </DialogDescription>
-        </DialogHeader>
+            </DialogDescription>
+          </DialogHeader>
 
-        <div className="space-y-4 py-4">
-          <p className="text-sm text-muted-foreground">
-            Your support helps keep this app free and enables new features and improvements.
-          </p>
-
-          <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-900 dark:bg-amber-950">
-            <p className="text-sm font-medium text-amber-900 dark:text-amber-100">
-              🎉 Your support is greatly appreciated!
-            </p>
+          <div className="space-y-4 py-4">
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950">
+              <p className="mb-2 flex items-center gap-2 text-sm font-medium text-amber-900 dark:text-amber-100">
+                <HeartIcon className="h-4 w-4" aria-hidden="true" />
+                This web app has been developed and maintained by one person so if you care about its survival, consider buying him a coffee or beer.
+              </p>
+            </div>
           </div>
-        </div>
 
         <DialogFooter className="flex gap-2 sm:flex-row">
           <Button

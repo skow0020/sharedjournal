@@ -8,7 +8,7 @@ export class SupportModal {
   }
 
   heading() {
-    return this.page.getByRole('heading', { name: /support SharedJournal/i })
+    return this.page.getByRole('heading', { name: 'A little support goes a long way' })
   }
 
   closeButton() {

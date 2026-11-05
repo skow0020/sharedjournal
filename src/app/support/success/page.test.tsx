@@ -71,7 +71,7 @@ describe('SupportSuccessPage', () => {
     })
     render(page)
 
-    expect(screen.getByText('Thanks for the coffee!')).toBeInTheDocument()
+    expect(screen.getByText('Thank you for your support!')).toBeInTheDocument()
     expect(screen.getByText('Status: Completed')).toBeInTheDocument()
     expect(screen.getByText('Amount: $10.00')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'sharedjournal.support@gmail.com' })).toHaveAttribute(
