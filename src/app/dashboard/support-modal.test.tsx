@@ -113,11 +113,11 @@ describe('SupportModal', () => {
   it('should render with proper accessibility attributes', () => {
     render(<SupportModal open={true} onDismiss={mockOnDismiss} />)
 
-    const heading = screen.getByRole('heading', { name: /a little support keeps stories growing/i })
+    const heading = screen.getByRole('heading', { name: /a little support goes a long way/i })
     expect(heading).toBeInTheDocument()
 
     const description = screen.getByText(
-      'Every shared journal is a little home for the moments you want to remember.',
+      'If you enjoy using SharedJournal, consider supporting its development.',
     )
     expect(description).toBeInTheDocument()
   })
