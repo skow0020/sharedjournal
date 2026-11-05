@@ -50,7 +50,7 @@ describe('getStripeServerClient', () => {
     expect(firstClient).toBe(secondClient)
     expect(StripeMock).toHaveBeenCalledTimes(1)
     expect(StripeMock).toHaveBeenCalledWith('sk_test_123', {
-      apiVersion: '2026-09-30.endive',
+      apiVersion: '2026-10-28.endive',
     })
   })
 })
