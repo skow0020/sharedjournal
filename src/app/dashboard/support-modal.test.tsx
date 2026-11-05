@@ -70,7 +70,7 @@ describe('SupportModal', () => {
 
     expect(failingDismiss).toHaveBeenCalledWith({ nextShowAfterDays: 30 })
     // Modal should close locally even when server returns failure
-    expect(screen.queryByText('A little support keeps stories growing')).not.toBeInTheDocument()
+    expect(screen.queryByText('A little support goes a long way')).not.toBeInTheDocument()
   })
 
   it('should handle dismissed action rejection gracefully', async () => {
@@ -84,7 +84,7 @@ describe('SupportModal', () => {
 
     expect(rejectingDismiss).toHaveBeenCalledWith({ nextShowAfterDays: 30 })
     // Modal should close locally even when request is rejected
-    expect(screen.queryByText('A little support keeps stories growing')).not.toBeInTheDocument()
+    expect(screen.queryByText('A little support goes a long way')).not.toBeInTheDocument()
   })
 
   it('should close modal when dismiss succeeds', async () => {
@@ -99,7 +99,7 @@ describe('SupportModal', () => {
 
     // Rerender to simulate component state update after successful dismiss
     rerender(<SupportModal open={false} onDismiss={mockOnDismiss} />)
-    expect(screen.queryByText('Support SharedJournal')).not.toBeInTheDocument()
+    expect(screen.queryByText('A little support goes a long way')).not.toBeInTheDocument()
   })
 
   it('should enable buy coffee button when not pending', () => {
