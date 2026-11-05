@@ -56,7 +56,7 @@ describe('SupportModal', () => {
     render(<SupportModal open={false} onDismiss={mockOnDismiss} />)
 
     // Modal title should not be in the document when open is false
-    expect(screen.queryByText('A little support keeps stories growing')).not.toBeInTheDocument()
+    expect(screen.queryByText('A little support goes a long way')).not.toBeInTheDocument()
   })
 
   it('should handle failed dismissal gracefully', async () => {
