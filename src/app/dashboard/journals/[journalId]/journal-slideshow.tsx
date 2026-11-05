@@ -96,7 +96,7 @@ export function JournalSlideshow({ photos, trigger }: JournalSlideshowProps) {
         <DialogTrigger asChild>{trigger}</DialogTrigger>
         <DialogContent
           withFlair={false}
-          className="max-w-none h-screen w-screen gap-0 rounded-none border-0 bg-black p-0"
+          className="top-0 left-0 h-dvh max-h-dvh w-dvw max-w-none translate-x-0 translate-y-0 flex flex-col gap-0 overflow-hidden rounded-none border-0 bg-black p-0"
         >
           <DialogTitle className="sr-only">
             Slideshow — photo {currentIndex + 1} of {total}
@@ -107,17 +107,17 @@ export function JournalSlideshow({ photos, trigger }: JournalSlideshowProps) {
           </DialogDescription>
 
           {currentPhoto ? (
-            <div className="relative flex h-full w-full items-center justify-center">
+            <div className="relative flex min-h-0 min-w-0 flex-1 items-center justify-center overflow-hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 key={currentPhoto.id}
                 src={buildEntryPhotoProxyUrl(currentPhoto.entryId, currentPhoto.id)}
                 alt={`Photo ${currentIndex + 1} of ${total}`}
-                className="h-screen w-screen object-cover"
+                className="absolute inset-0 h-full w-full object-contain"
               />
 
               {/* Top bar */}
-              <div className="absolute left-0 right-0 top-0 flex items-center justify-between gap-2 bg-gradient-to-b from-black/60 to-transparent px-4 py-3">
+              <div className="absolute left-0 right-0 top-0 flex items-center justify-between gap-2 bg-gradient-to-b from-black/60 to-transparent px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3">
                 <span className="text-sm font-medium text-white/80 tabular-nums">
                   {currentIndex + 1} / {total}
                 </span>
@@ -125,26 +125,26 @@ export function JournalSlideshow({ photos, trigger }: JournalSlideshowProps) {
                   <Button
                     type="button"
                     variant="outline"
-                    size="sm"
+                    size="icon"
                     aria-label={isPlaying ? 'Pause slideshow' : 'Play slideshow'}
                     onClick={() => setIsPlaying((p) => !p)}
-                    className="border-0 bg-transparent text-white hover:bg-white/20 hover:text-white"
+                    className="size-11 border-0 bg-black/60 text-white hover:bg-white/20 hover:text-white sm:size-9"
                   >
                     {isPlaying ? (
-                      <PauseIcon className="h-4 w-4" />
+                      <PauseIcon className="h-5 w-5 sm:h-4 sm:w-4" />
                     ) : (
-                      <PlayIcon className="h-4 w-4" />
+                      <PlayIcon className="h-5 w-5 sm:h-4 sm:w-4" />
                     )}
                   </Button>
                   <DialogClose asChild>
                     <Button
                       type="button"
                       variant="outline"
-                      size="sm"
+                      size="icon"
                       aria-label="Close slideshow"
-                      className="border-0 bg-transparent text-white hover:bg-white/20 hover:text-white"
+                      className="size-11 border-0 bg-black/60 text-white hover:bg-white/20 hover:text-white sm:size-9"
                     >
-                      <XIcon className="h-4 w-4" />
+                      <XIcon className="h-5 w-5 sm:h-4 sm:w-4" />
                     </Button>
                   </DialogClose>
                 </div>
