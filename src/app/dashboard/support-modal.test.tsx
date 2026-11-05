@@ -9,16 +9,13 @@ describe('SupportModal', () => {
   it('should render modal when open is true', () => {
     render(<SupportModal open={true} onDismiss={mockOnDismiss} />)
 
-    expect(screen.getByText('A little support keeps stories growing')).toBeInTheDocument()
+    expect(screen.getByText('A little support goes a long way')).toBeInTheDocument()
     expect(
-      screen.getByText(
-        'Every shared journal is a little home for the moments you want to remember.',
-      ),
+      screen.getByText('If you enjoy using SharedJournal, consider supporting its development.'),
     ).toBeInTheDocument()
     expect(
-      screen.getByText(/An optional, one-time coffee helps cover the hosting and storage/i),
+      screen.getByText(/This web app has been developed and maintained by one person/i),
     ).toBeInTheDocument()
-    expect(screen.getByText(/No subscription, no pressure/)).toBeInTheDocument()
   })
 
   it('should have a link to buy me coffee page', () => {
