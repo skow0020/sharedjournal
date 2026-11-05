@@ -37,7 +37,17 @@ describe('JournalSlideshow', () => {
     const user = userEvent.setup()
     render(<JournalSlideshow photos={photos} trigger={<button>Open Slideshow</button>} />)
     await user.click(screen.getByRole('button', { name: 'Open Slideshow' }))
+    expect(screen.getByRole('dialog')).toHaveClass(
+      'top-0',
+      'left-0',
+      'h-dvh',
+      'max-h-dvh',
+      'flex',
+      'flex-col',
+      'overflow-hidden',
+    )
     expect(screen.getByRole('img', { name: 'Photo 1 of 3' })).toHaveClass('object-contain')
+    expect(screen.getByRole('img', { name: 'Photo 1 of 3' })).toHaveClass('absolute', 'inset-0')
   })
 
   it('shows photo counter after opening', async () => {
