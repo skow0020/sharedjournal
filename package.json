@@ -31,7 +31,7 @@
     "@types/pg": "^8.23.1",
     "@vercel/analytics": "^2.0.1",
     "@vercel/blob": "^2.8.2",
-    "@vercel/speed-insights": "^2.0.0",
+    "@vercel/speed-insights": "^2.1.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
